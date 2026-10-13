@@ -72,7 +72,7 @@ main{max-width:1240px;margin:0 auto;padding-inline:20px;padding-block:20px 60px;
 /* Barre d'outils */
 .bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .bar .grow{flex:1}
-.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:7px 12px;font-weight:500;cursor:pointer;white-space:nowrap}
+.btn{text-decoration:none;color:inherit;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:7px 12px;font-weight:500;cursor:pointer;white-space:nowrap}
 .btn:hover{border-color:var(--muted)}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .btn.primary:hover{filter:brightness(1.07)}
@@ -217,7 +217,7 @@ legend{font:600 12px var(--f-label);letter-spacing:.08em;text-transform:uppercas
       <svg viewBox="0 0 100 100" role="img" aria-label="Anamnesis · CSC"><rect width="100" height="100" rx="24" fill="#1B1512"/><circle cx="50" cy="50" r="38" fill="none" stroke="#C9804F" stroke-width="4"/><path d="M35.16 62.29Q33.05 62.29 31.73 61.58Q30.41 60.870 29.74 59.72Q29.07 58.57 28.91 57.19Q28.75 55.81 28.99 54.44Q29.33 52.64 30.19 51.21Q31.06 49.78 32.31 48.79Q33.55 47.79 35.01 47.26Q36.46 46.74 37.95 46.74Q38.930 46.74 39.94 46.95Q40.95 47.17 41.5 47.48Q41.67 47.58 41.69 47.67Q41.71 47.77 41.69 48.03L41.35 51.06Q41.35 51.15 41.23 51.15Q41.11 51.15 41.09 51.06Q40.75 49.26 39.67 48.3Q38.59 47.34 36.99 47.34Q35.57 47.34 34.39 48.1Q33.22 48.87 32.44 50.3Q31.66 51.73 31.35 53.7Q31.08 55.35 31.25 56.83Q31.42 58.3 31.93 59.43Q32.45 60.56 33.3 61.21Q34.15 61.86 35.31 61.86Q36.55 61.86 37.83 60.97Q39.1 60.08 40.37 58.23Q40.44 58.14 40.55 58.2Q40.66 58.26 40.63 58.3L39.96 61.02Q39.87 61.3 39.81 61.41Q39.75 61.52 39.53 61.57Q38.35 61.98 37.23 62.13Q36.1 62.29 35.16 62.29Z M48.4 62.43Q47.14 62.43 45.86 62.16Q44.58 61.89 43.18 61.21Q43.03 61.1 42.96 60.94Q42.89 60.78 42.96 60.52L43.9 55.56Q43.9 55.38 44.1 55.38Q44.29 55.38 44.29 55.56Q44.62 57.46 45.27 58.83Q45.91 60.2 46.92 60.94Q47.93 61.68 49.33 61.68Q50.38 61.68 51.26 61.23Q52.14 60.78 52.75 59.93Q53.37 59.08 53.55 57.79Q53.83 56.2 53.31 55.05Q52.79 53.9 51.82 52.98Q50.85 52.06 49.73 51.27Q48.61 50.44 47.61 49.54Q46.6 48.64 46.08 47.47Q45.55 46.3 45.84 44.68Q46.24 42.78 47.43 41.55Q48.61 40.33 50.25 39.72Q51.89 39.1 53.62 39.1Q54.55 39.1 55.6 39.3Q56.64 39.5 57.72 39.97Q58.23 40.22 58.15 40.58L57.65 45.01Q57.61 45.15 57.43 45.15Q57.25 45.15 57.22 45.01Q56.97 43.5 56.37 42.33Q55.78 41.16 54.9 40.47Q54.01 39.79 52.79 39.79Q51.6 39.79 50.81 40.33Q50.02 40.87 49.57 41.68Q49.12 42.49 48.97 43.28Q48.72 44.72 49.23 45.75Q49.73 46.77 50.68 47.6Q51.64 48.43 52.68 49.26Q53.87 50.12 54.95 51.09Q56.03 52.06 56.62 53.32Q57.22 54.58 56.93 56.28Q56.61 57.97 55.53 59.37Q54.45 60.78 52.66 61.6Q50.88 62.43 48.4 62.43Z M66.06 62.29Q63.95 62.29 62.63 61.58Q61.31 60.87 60.64 59.72Q59.97 58.57 59.81 57.19Q59.65 55.81 59.89 54.44Q60.23 52.64 61.09 51.21Q61.96 49.78 63.21 48.79Q64.45 47.79 65.91 47.26Q67.36 46.74 68.85 46.74Q69.83 46.74 70.84 46.95Q71.85 47.17 72.4 47.48Q72.57 47.58 72.59 47.67Q72.61 47.77 72.59 48.03L72.25 51.06Q72.25 51.15 72.13 51.15Q72.01 51.15 71.99 51.06Q71.65 49.26 70.57 48.3Q69.49 47.34 67.89 47.34Q66.47 47.34 65.29 48.1Q64.12 48.87 63.34 50.3Q62.56 51.73 62.25 53.7Q61.98 55.35 62.15 56.83Q62.32 58.3 62.83 59.43Q63.35 60.56 64.2 61.21Q65.05 61.86 66.21 61.86Q67.45 61.86 68.73 60.97Q70 60.08 71.27 58.23Q71.34 58.14 71.45 58.2Q71.56 58.26 71.53 58.3L70.86 61.02Q70.77 61.3 70.71 61.41Q70.65 61.52 70.43 61.57Q69.25 61.98 68.13 62.13Q67 62.29 66.06 62.29Z" fill="#EAD9B8"/></svg>
       <div class="grow">
         <h1>PAC Prospection IDF</h1>
-        <p>SOCOTEC Diagnostic Île-de-France · suivi des cibles en attendant le module Athena · V1</p>
+        <p>SOCOTEC Diagnostic Île-de-France · suivi des cibles en attendant le module Athena · V1.2</p>
       </div>
       <span class="sync" id="sync" data-s="wait"><i></i><span id="syncTxt">Connexion…</span></span>
     </div>
@@ -234,7 +234,7 @@ legend{font:600 12px var(--f-label);letter-spacing:.08em;text-transform:uppercas
   <section id="view-cibles" style="display:flex;flex-direction:column;gap:14px">
     <div class="bar">
       <div class="chips grow" id="views" aria-label="Vues"></div>
-      <button class="btn ghost" id="btnExport" type="button" title="Exporter les cibles et les visites"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11"/></svg>Exporter</button>
+      <button class="btn ghost" id="btnExport" type="button" title="Exporter les cibles et les visites"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11"/></svg>Exporter / Excel</button>
       <button class="btn primary edit-only" id="btnNew" type="button"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3v10M3 8h10"/></svg>Nouvelle cible</button>
     </div>
     <div class="filters">
@@ -617,7 +617,11 @@ function exportMenu(){
   const d=$("#drawer");
   d.innerHTML='<div class="dh"><div class="grow"><span class="lbl">Exporter</span><h2 id="dTitle">Exporter et sauvegarder</h2></div><button class="btn ghost" type="button" data-act="close">Fermer</button></div>'+
   '<div class="db">'+
-  '<div style="display:flex;flex-direction:column;gap:8px"><span class="lbl">Pour Excel</span>'+
+  '<div style="display:flex;flex-direction:column;gap:8px"><span class="lbl">Fichier Excel</span>'+
+  (IN_FRAME?'<a class="btn primary" id="exX" href="'+xlsxHandoffURL()+'" target="_blank" rel="noopener">Exporter en Excel (.xlsx)</a><p class="hint">Notion bloque les téléchargements : un onglet s\'ouvre, produit le fichier et le télécharge. Il ne garde rien.</p>'
+   :'<button class="btn primary" type="button" id="exX">Exporter en Excel (.xlsx)</button>')+
+  '<p class="hint">Quatre onglets : Synthèse, Cibles, Visites, Coordonnées. Prêt à imprimer.</p></div>'+
+  '<div style="display:flex;flex-direction:column;gap:8px"><span class="lbl">Copier pour Excel</span>'+
   '<button class="btn" type="button" id="exC">Liste des cibles · '+S.cibles.length+' ligne'+(S.cibles.length>1?'s':'')+'</button>'+
   '<button class="btn" type="button" id="exV">Visites et comptes rendus · '+(vrows.length-1)+' ligne'+(vrows.length>2?'s':'')+'</button></div>'+
   '<div style="display:flex;flex-direction:column;gap:8px"><span class="lbl">Sauvegarde</span>'+
@@ -628,6 +632,7 @@ function exportMenu(){
   '</div>';
   $("#scrim").hidden=false;d.hidden=false;
   const stamp=todayISO();
+  if(!IN_FRAME)$("#exX").onclick=exportXlsxHere;
   $("#exC").onclick=()=>offer("PAC_cibles_"+stamp+".csv",csv(rows),tsv(rows));
   $("#exV").onclick=()=>offer("PAC_visites_"+stamp+".csv",csv(vrows),tsv(vrows));
   $("#exJ").onclick=()=>offer("PAC_sauvegarde_"+stamp+".json",backupJSON());
@@ -636,6 +641,171 @@ function exportMenu(){
     catch(e){try{if(document.execCommand("copy")){toast("Copié");return}}catch(_){}toast("Le texte est sélectionné : faites Ctrl+C.")}};
   const im=$("#imJ");if(im)im.onchange=()=>{const f=im.files[0];if(!f)return;const r=new FileReader();r.onload=()=>restore(r.result);r.readAsText(f)};
   const ib=$("#imBtn");if(ib)ib.onclick=()=>{const v=$("#imTxt").value.trim();if(!v){toast("Collez d'abord le texte de la sauvegarde.");return}restore(v)};
+}
+
+/* ---------- Export Excel (.xlsx) ---------- */
+const XL_SRC="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js";
+let xlP=null;
+function loadExcel(){if(window.ExcelJS)return Promise.resolve();if(xlP)return xlP;
+  xlP=new Promise((res,rej)=>{const sc=document.createElement("script");sc.src=XL_SRC;sc.onload=()=>res();sc.onerror=()=>{xlP=null;rej(new Error("load"))};document.head.appendChild(sc)});return xlP}
+const toDate=iso=>{if(!iso)return null;const [y,m,d]=iso.split("-").map(Number);return new Date(Date.UTC(y,m-1,d))};
+const colL=n=>{let s="";while(n>0){const m=(n-1)%26;s=String.fromCharCode(65+m)+s;n=Math.floor((n-1)/26)}return s};
+const INK="FF1B1512",COPPER="FFC9804F",PARCH="FFF3E9D6",GREYTXT="FF69625B",LINE="FFE0DDD7";
+const STAGE_FILL={a_qualifier:"FFECEAE6",cible:"FFE0EAF6",rdv:"FFFBEED3",visite:"FFF5E7DB",opportunite:"FFE6E0F3",gagne:"FFE2F0E6",sans_suite:"FFF7E1DA"};
+const EUR='#,##0 "€"',DFMT="dd/mm/yyyy",PCT="0%";
+function lastDone(c){const d=c.visites.filter(v=>v.statut==="Réalisée"&&v.date).map(v=>v.date).sort();return d.length?d[d.length-1]:""}
+const XCOLS=[
+ {h:"Priorité",w:9,v:c=>c.priorite,al:"center"},
+ {h:"Étape",w:17,v:c=>SL[c.etape]},
+ {h:"Client",w:30,v:c=>c.compte,bold:true},
+ {h:"BU d'origine",w:20,v:c=>c.bu.join(", "),wrap:true},
+ {h:"Apporteur SOCOTEC",w:20,v:c=>c.apporteur,wrap:true},
+ {h:"Diagnostics visés",w:28,v:c=>c.prestations.map(p=>PLABEL[p]||p).join(", "),wrap:true},
+ {h:"Potentiel annuel",w:14,v:c=>c.potentiel===""?null:Number(c.potentiel),fmt:EUR},
+ {h:"Prochaine action",w:13,v:c=>toDate(c.prochaineAction),fmt:DFMT,al:"center"},
+ {h:"Action à faire",w:34,v:c=>c.prochaineLibelle,wrap:true},
+ {h:"Visites réalisées",w:10,v:c=>c.visites.filter(v=>v.statut==="Réalisée").length,al:"center"},
+ {h:"Dernière visite",w:13,v:c=>toDate(lastDone(c)),fmt:DFMT,al:"center"},
+ {h:"Opportunité",w:12,v:c=>c.opp.creee?"Oui":"Non",al:"center"},
+ {h:"Montant opp.",w:13,v:c=>c.opp.creee&&c.opp.montant!==""?Number(c.opp.montant):null,fmt:EUR},
+ {h:"Statut opp.",w:11,v:c=>c.opp.creee?c.opp.statut:"",al:"center"},
+ {h:"N° devis Athena",w:15,v:c=>c.opp.devis},
+ {h:"Contact",w:22,v:c=>c.contact},
+ {h:"Fonction",w:20,v:c=>c.fonction},
+ {h:"Téléphone",w:15,v:c=>c.tel},
+ {h:"E-mail",w:28,v:c=>c.mail},
+ {h:"Segment",w:26,v:c=>c.segment,wrap:true},
+ {h:"Agence",w:15,v:c=>c.agence},
+ {h:"Source",w:17,v:c=>c.source},
+ {h:"Campagne",w:30,v:c=>c.campagne},
+ {h:"Motif sans suite",w:20,v:c=>c.etape==="sans_suite"?c.motif:""},
+ {h:"Notes",w:45,v:c=>c.notes,wrap:true}];
+const XMAIN=XCOLS.slice(0,15),XCOORD=[XCOLS[2],XCOLS[1]].concat(XCOLS.slice(15));
+const XI=Object.fromEntries(XMAIN.map((c,i)=>[c.h,colL(i+1)]));
+function pageSetup(ws,title){ws.pageSetup={orientation:"landscape",paperSize:9,fitToPage:true,fitToWidth:1,fitToHeight:0,margins:{left:.4,right:.4,top:.6,bottom:.6,header:.3,footer:.3},printTitlesRow:"1:1"};
+  ws.headerFooter={oddHeader:"&L&\"Calibri,Bold\"PAC Prospection IDF&R"+title,oddFooter:"&LExport du "+new Date().toLocaleDateString("fr-FR")+"&RPage &P / &N"}}
+function headStyle(ws,n){const r=ws.getRow(1);r.height=32;for(let i=1;i<=n;i++){const c=r.getCell(i);
+  c.font={bold:true,color:{argb:PARCH},name:"Calibri",size:11};c.fill={type:"pattern",pattern:"solid",fgColor:{argb:INK}};
+  c.alignment={vertical:"middle",horizontal:"center",wrapText:true};c.border={bottom:{style:"medium",color:{argb:COPPER}}}}
+  ws.views=[{state:"frozen",ySplit:1,xSplit:3,activeCell:"D2"}]}
+async function buildXlsx(cibles,settings){
+  await loadExcel();
+  const wb=new ExcelJS.Workbook();wb.creator="PAC Prospection IDF · CSC";wb.created=new Date();
+  const order=cibles.slice().sort((a,b)=>(a.priorite||"Z").localeCompare(b.priorite||"Z")||SIDX[a.etape]-SIDX[b.etape]||(a.prochaineAction||"9999").localeCompare(b.prochaineAction||"9999")||a.compte.localeCompare(b.compte,"fr"));
+  const sy=wb.addWorksheet("Synthèse",{properties:{tabColor:{argb:COPPER}},views:[{showGridLines:false}]});
+  /* ---- Cibles ---- */
+  const wc=wb.addWorksheet("Cibles",{properties:{tabColor:{argb:INK}}});
+  const nC=Math.max(order.length,1);
+  wc.addTable({name:"Cibles",ref:"A1",headerRow:true,style:{theme:"TableStyleLight1",showRowStripes:true},
+    columns:XMAIN.map(c=>({name:c.h,filterButton:true})),
+    rows:order.length?order.map(c=>XMAIN.map(x=>x.v(c))):[XMAIN.map(()=>null)]});
+  XMAIN.forEach((x,i)=>{const col=wc.getColumn(i+1);col.width=x.w});
+  for(let r=2;r<=nC+1;r++){const row=wc.getRow(r);const c=order[r-2];
+    XMAIN.forEach((x,i)=>{const cell=row.getCell(i+1);cell.font={name:"Calibri",size:10,bold:!!x.bold};
+      cell.alignment={vertical:"top",horizontal:x.al||"left",wrapText:!!x.wrap};if(x.fmt)cell.numFmt=x.fmt;
+      cell.border={bottom:{style:"thin",color:{argb:LINE}}}});
+    if(c){const st=row.getCell(2);st.fill={type:"pattern",pattern:"solid",fgColor:{argb:STAGE_FILL[c.etape]}};
+      const pr=row.getCell(1);pr.font={name:"Calibri",size:10,bold:true,color:{argb:c.priorite==="A"?"FFFFFFFF":INK}};
+      if(c.priorite==="A")pr.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FFA35C2A"}};
+      else if(c.priorite==="B")pr.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FFF5E7DB"}};
+      if(c.prochaineAction&&c.prochaineAction<todayISO()&&isActive(c))row.getCell(8).font={name:"Calibri",size:10,bold:true,color:{argb:"FFB0442D"}};}}
+  headStyle(wc,XMAIN.length);pageSetup(wc,"Cibles");
+  /* ---- Visites ---- */
+  const wv=wb.addWorksheet("Visites",{properties:{tabColor:{argb:"FF6E6862"}}});
+  const VC=[{h:"Date",w:12,fmt:DFMT,al:"center"},{h:"Client",w:28,bold:true},{h:"Statut",w:11,al:"center"},{h:"Accompagnant",w:20},{h:"Compte rendu",w:70,wrap:true},{h:"Suite à donner",w:34,wrap:true},{h:"Étape de la cible",w:17}];
+  const vis=[];order.forEach(c=>c.visites.forEach(v=>vis.push({c,v})));
+  vis.sort((a,b)=>(b.v.date||"").localeCompare(a.v.date||""));
+  wv.addTable({name:"Visites",ref:"A1",headerRow:true,style:{theme:"TableStyleLight1",showRowStripes:true},
+    columns:VC.map(c=>({name:c.h,filterButton:true})),
+    rows:vis.length?vis.map(({c,v})=>[toDate(v.date),c.compte,v.statut,v.accompagnant,v.cr,v.suite,SL[c.etape]]):[VC.map(()=>null)]});
+  VC.forEach((x,i)=>wv.getColumn(i+1).width=x.w);
+  const vfill={"Planifiée":"FFFBEED3","Réalisée":"FFE2F0E6","Annulée":"FFECEAE6"};
+  for(let r=2;r<=Math.max(vis.length,1)+1;r++){const row=wv.getRow(r);
+    VC.forEach((x,i)=>{const cell=row.getCell(i+1);cell.font={name:"Calibri",size:10,bold:!!x.bold};cell.alignment={vertical:"top",horizontal:x.al||"left",wrapText:!!x.wrap};if(x.fmt)cell.numFmt=x.fmt;cell.border={bottom:{style:"thin",color:{argb:LINE}}}});
+    const it=vis[r-2];if(it)row.getCell(3).fill={type:"pattern",pattern:"solid",fgColor:{argb:vfill[it.v.statut]||"FFFFFFFF"}};}
+  headStyle(wv,VC.length);wv.views=[{state:"frozen",ySplit:1,activeCell:"A2"}];pageSetup(wv,"Visites");
+  /* ---- Coordonnées ---- */
+  const wk=wb.addWorksheet("Coordonnées",{properties:{tabColor:{argb:"FFA49B91"}}});
+  const byName=order.slice().sort((a,b)=>a.compte.localeCompare(b.compte,"fr"));
+  wk.addTable({name:"Coordonnees",ref:"A1",headerRow:true,style:{theme:"TableStyleLight1",showRowStripes:true},
+    columns:XCOORD.map(c=>({name:c.h,filterButton:true})),
+    rows:byName.length?byName.map(c=>XCOORD.map(x=>x.v(c))):[XCOORD.map(()=>null)]});
+  XCOORD.forEach((x,i)=>wk.getColumn(i+1).width=x.w);
+  for(let r=2;r<=Math.max(byName.length,1)+1;r++){const row=wk.getRow(r);const c=byName[r-2];
+    XCOORD.forEach((x,i)=>{const cell=row.getCell(i+1);cell.font={name:"Calibri",size:10,bold:!!x.bold};cell.alignment={vertical:"top",horizontal:x.al||"left",wrapText:!!x.wrap};cell.border={bottom:{style:"thin",color:{argb:LINE}}}});
+    if(c)row.getCell(2).fill={type:"pattern",pattern:"solid",fgColor:{argb:STAGE_FILL[c.etape]}}}
+  headStyle(wk,XCOORD.length);wk.views=[{state:"frozen",ySplit:1,xSplit:1,activeCell:"B2"}];pageSetup(wk,"Coordonnées");
+  /* ---- Synthèse ---- */
+  const N=order.length,CR="Cibles!",col=h=>CR+"$"+XI[h]+"$2:$"+XI[h]+"$"+(N+1);
+  const act=order.filter(isActive),done=vis.filter(x=>x.v.statut==="Réalisée"),mk=todayISO().slice(0,7);
+  const doneM=done.filter(x=>(x.v.date||"").slice(0,7)===mk).length,obj=Number(settings&&settings.objectif)||0;
+  const opps=order.filter(c=>c.opp.creee),sumOpp=st=>opps.filter(c=>c.opp.statut===st).reduce((s,c)=>s+(Number(c.opp.montant)||0),0);
+  const visited=order.filter(c=>c.visites.some(v=>v.statut==="Réalisée"));
+  sy.columns=[{width:3},{width:40},{width:16},{width:18},{width:18},{width:3}];
+  const T=sy.getCell("B2");T.value="PAC Prospection IDF";T.font={name:"Calibri",size:18,bold:true,color:{argb:INK}};
+  const ST=sy.getCell("B3");ST.value="SOCOTEC Diagnostic Île-de-France · export du "+new Date().toLocaleDateString("fr-FR",{day:"2-digit",month:"long",year:"numeric"});ST.font={name:"Calibri",size:10,color:{argb:GREYTXT}};
+  sy.getRow(2).height=28;
+  let r=5;
+  const section=(title,heads)=>{const row=sy.getRow(r);row.height=22;
+    const cells=[title].concat(heads||[]);cells.forEach((t,i)=>{const c=row.getCell(2+i);c.value=t;c.font={name:"Calibri",size:11,bold:true,color:{argb:i?GREYTXT:"FFA35C2A"}};
+      c.alignment={vertical:"bottom",horizontal:i?"right":"left"};c.border={bottom:{style:"medium",color:{argb:COPPER}}}});
+    for(let i=cells.length;i<4;i++){sy.getRow(r).getCell(2+i).border={bottom:{style:"medium",color:{argb:COPPER}}}}
+    r++};
+  const line=(label,vals,fmts,bold)=>{const row=sy.getRow(r);row.getCell(2).value=label;row.getCell(2).font={name:"Calibri",size:11,bold:!!bold};
+    vals.forEach((v,i)=>{const c=row.getCell(3+i);c.value=v;c.font={name:"Calibri",size:11,bold:!!bold};c.alignment={horizontal:"right"};if(fmts&&fmts[i])c.numFmt=fmts[i]});
+    for(let i=2;i<=5;i++)row.getCell(i).border={bottom:{style:"hair",color:{argb:LINE}}};r++};
+  const F=(f,res)=>N?{formula:f,result:res}:res;
+  section("Indicateurs clés");
+  line("Cibles actives",[F('COUNTIFS('+col("Étape")+',"<>Gagné",'+col("Étape")+',"<>Sans suite")',act.length)]);
+  line("dont priorité A",[F('COUNTIFS('+col("Priorité")+',"A",'+col("Étape")+',"<>Gagné",'+col("Étape")+',"<>Sans suite")',act.filter(c=>c.priorite==="A").length)]);
+  line("Potentiel annuel des cibles actives",[F('SUMIFS('+col("Potentiel annuel")+','+col("Étape")+',"<>Gagné",'+col("Étape")+',"<>Sans suite")',act.reduce((s,c)=>s+(Number(c.potentiel)||0),0))],[EUR]);
+  line("Visites réalisées ce mois",[doneM,obj?"objectif "+obj:""]);
+  line("Visites réalisées depuis le début",[done.length]);
+  line("Opportunités créées",[F('COUNTIF('+col("Opportunité")+',"Oui")',opps.length)]);
+  line("Montant des opportunités en cours",[F('SUMIFS('+col("Montant opp.")+','+col("Statut opp.")+',"Ouvert")',sumOpp("Ouvert"))],[EUR]);
+  line("CA conclu",[F('SUMIFS('+col("Montant opp.")+','+col("Statut opp.")+',"Conclue")',sumOpp("Conclue"))],[EUR],true);
+  line("Taux cibles visitées → opportunité",[visited.length?visited.filter(c=>c.opp.creee).length/visited.length:"—"],[PCT]);
+  line("Taux de transformation des opportunités",[opps.length?opps.filter(c=>c.opp.statut==="Conclue").length/opps.length:"—"],[PCT]);
+  r++;section("Pipeline par étape",["Cibles","Potentiel annuel"]);
+  STAGES.forEach(st=>{const ofS=order.filter(c=>c.etape===st.k);
+    line(st.l,[F('COUNTIF('+col("Étape")+',"'+st.l+'")',ofS.length),F('SUMIFS('+col("Potentiel annuel")+','+col("Étape")+',"'+st.l+'")',ofS.reduce((s,c)=>s+(Number(c.potentiel)||0),0))],[null,EUR]);
+    sy.getRow(r-1).getCell(2).fill={type:"pattern",pattern:"solid",fgColor:{argb:STAGE_FILL[st.k]}}});
+  line("Total",[F('COUNTA('+col("Client")+')',N),F('SUM('+col("Potentiel annuel")+')',order.reduce((s,c)=>s+(Number(c.potentiel)||0),0))],[null,EUR],true);
+  r++;section("Par BU d'origine",["Cibles","Visites réalisées","Opportunités"]);
+  BUS.forEach(bu=>{const ofB=order.filter(c=>c.bu.includes(bu));if(!ofB.length)return;
+    line(bu,[F('COUNTIF('+col("BU d'origine")+',"*'+bu+'*")',ofB.length),done.filter(x=>x.c.bu.includes(bu)).length,F('COUNTIFS('+col("BU d'origine")+',"*'+bu+'*",'+col("Opportunité")+',"Oui")',ofB.filter(c=>c.opp.creee).length)])});
+  if(!order.some(c=>c.bu.length))line("Aucune BU renseignée",[]);
+  r++;section("Opportunités issues du PAC",["Nombre","Montant estimé"]);
+  OSTAT.forEach(o=>line(o==="Ouvert"?"Ouvert(e)":o,[F('COUNTIFS('+col("Opportunité")+',"Oui",'+col("Statut opp.")+',"'+o+'")',opps.filter(c=>c.opp.statut===o).length),F('SUMIFS('+col("Montant opp.")+','+col("Opportunité")+',"Oui",'+col("Statut opp.")+',"'+o+'")',sumOpp(o))],[null,EUR]));
+  line("Total",[opps.length,opps.reduce((s,c)=>s+(Number(c.opp.montant)||0),0)],[null,EUR],true);
+  r++;const note=sy.getRow(r).getCell(2);note.value="Les chiffres se recalculent si vous modifiez l'onglet Cibles. Onglets : Cibles (suivi), Visites (comptes rendus), Coordonnées (contacts).";note.font={name:"Calibri",size:9,italic:true,color:{argb:GREYTXT}};
+  sy.pageSetup={orientation:"portrait",paperSize:9,fitToPage:true,fitToWidth:1,fitToHeight:1,margins:{left:.5,right:.5,top:.6,bottom:.6,header:.3,footer:.3}};
+  sy.headerFooter={oddFooter:"&LPAC Prospection IDF · CSC&RExport du "+new Date().toLocaleDateString("fr-FR")};
+  const buf=await wb.xlsx.writeBuffer();
+  return new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+}
+function saveBlob(blob,filename){const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000)}
+const b64enc=str=>{const bytes=new TextEncoder().encode(str);let bin="";for(let i=0;i<bytes.length;i+=0x8000)bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));return btoa(bin).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")};
+const b64dec=s=>{s=s.replace(/-/g,"+").replace(/_/g,"/");while(s.length%4)s+="=";const bin=atob(s);const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new TextDecoder().decode(u)};
+const xlName=()=>"PAC_Prospection_IDF_"+todayISO()+".xlsx";
+function xlsxHandoffURL(){return location.href.split("#")[0]+"#xlsx="+b64enc(JSON.stringify({settings:S.settings,cibles:S.cibles}))}
+async function exportXlsxHere(){
+  try{toast("Préparation du fichier Excel…");saveBlob(await buildXlsx(S.cibles,S.settings),xlName());toast("Fichier Excel téléchargé")}
+  catch(e){toast("Export Excel impossible : vérifiez la connexion internet, puis réessayez.")}
+}
+/* Onglet ouvert depuis le cadre Notion pour produire le fichier */
+async function handoffMode(){
+  if(!location.hash.startsWith("#xlsx="))return false;
+  const raw=location.hash.slice(6);history.replaceState(null,"",location.pathname+location.search);
+  const main=$("#app");$("nav.tabs").hidden=true;$("#sync").hidden=true;
+  main.innerHTML='<div class="empty" style="padding:60px 20px"><h3 id="hoT">Préparation du fichier Excel…</h3><p id="hoP">Le téléchargement démarre dans un instant.</p><button class="btn primary" type="button" id="hoBtn" hidden>Télécharger à nouveau</button></div>';
+  try{const d=JSON.parse(b64dec(raw));const cib=(d.cibles||[]).map(norm);
+    const blob=await buildXlsx(cib,d.settings||{});const go=()=>saveBlob(blob,xlName());go();
+    $("#hoT").textContent="Fichier Excel téléchargé";
+    $("#hoP").textContent=cib.length+" cible"+(cib.length>1?"s":"")+" exportée"+(cib.length>1?"s":"")+". Vous pouvez fermer cet onglet et revenir dans Notion. Rien n'a été enregistré ici.";
+    const b=$("#hoBtn");b.hidden=false;b.onclick=go;
+  }catch(e){$("#hoT").textContent="Export impossible";$("#hoP").textContent="Le lien d'export est incomplet ou la connexion internet est indisponible. Revenez dans Notion et cliquez à nouveau sur Export Excel."}
+  return true;
 }
 
 /* ---------- Événements ---------- */
@@ -682,7 +852,7 @@ document.addEventListener("keydown",e=>{
 $("#scrim").addEventListener("click",closeDrawer);
 ["#q","#fBu","#fAg","#fPr"].forEach(s=>$(s).addEventListener("input",renderList));
 
-init();
+handoffMode().then(h=>{if(!h)init()});
 })();
 </script>
 
