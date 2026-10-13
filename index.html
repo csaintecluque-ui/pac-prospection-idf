@@ -89,7 +89,7 @@ main{max-width:1240px;margin:0 auto;padding-inline:20px;padding-block:20px 60px;
 .chip[aria-pressed="true"]{background:var(--fg);border-color:var(--fg);color:var(--bg)}
 .chip[aria-pressed="true"] .n{background:rgba(127,127,127,.3);color:inherit}
 
-.filters{display:grid;grid-template-columns:minmax(0,2fr) repeat(3,minmax(0,1fr));gap:8px}
+.filters{display:grid;grid-template-columns:minmax(0,2fr) repeat(4,minmax(0,1fr));gap:8px}
 .field-s{display:flex;flex-direction:column;gap:3px;min-width:0}
 .field-s label,.lbl{font:600 11px var(--f-label);letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
 input[type=text],input[type=search],input[type=date],input[type=number],input[type=email],input[type=tel],select,textarea{
@@ -126,6 +126,14 @@ td.r,th.r{text-align:right}
 .prio-B{background:var(--accent-soft);color:var(--accent)}
 .prio-C{background:var(--surface-2);color:var(--muted)}
 .late{color:var(--bad);font-weight:600}
+.ty{font:600 10.5px var(--f-label);letter-spacing:.04em;text-transform:uppercase;border-radius:4px;padding:1px 5px;margin-right:4px;background:var(--surface-2);color:var(--muted)}
+.ty-pres{background:var(--info-soft);color:var(--info)}.ty-clie{background:var(--ok-soft);color:var(--ok)}
+.imp-sum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.imp-sum div{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:8px 10px}
+.imp-sum b{display:block;font:500 20px var(--f-num)}
+.imp-prev{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.imp-prev table{min-width:520px}.imp-prev td,.imp-prev th{padding:6px 8px;font-size:12.5px}
+.radio{display:flex;flex-direction:column;gap:6px}.radio label{display:flex;gap:8px;align-items:flex-start;cursor:pointer}.radio input{accent-color:var(--accent);margin-top:3px}
 .empty{padding:40px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;color:var(--muted)}
 .empty h3{margin:0;color:var(--fg);font:600 16px var(--f-label)}
 .empty p{margin:0;max-width:52ch}
@@ -217,7 +225,7 @@ legend{font:600 12px var(--f-label);letter-spacing:.08em;text-transform:uppercas
       <svg viewBox="0 0 100 100" role="img" aria-label="Anamnesis · CSC"><rect width="100" height="100" rx="24" fill="#1B1512"/><circle cx="50" cy="50" r="38" fill="none" stroke="#C9804F" stroke-width="4"/><path d="M35.16 62.29Q33.05 62.29 31.73 61.58Q30.41 60.870 29.74 59.72Q29.07 58.57 28.91 57.19Q28.75 55.81 28.99 54.44Q29.33 52.64 30.19 51.21Q31.06 49.78 32.31 48.79Q33.55 47.79 35.01 47.26Q36.46 46.74 37.95 46.74Q38.930 46.74 39.94 46.95Q40.95 47.17 41.5 47.48Q41.67 47.58 41.69 47.67Q41.71 47.77 41.69 48.03L41.35 51.06Q41.35 51.15 41.23 51.15Q41.11 51.15 41.09 51.06Q40.75 49.26 39.67 48.3Q38.59 47.34 36.99 47.34Q35.57 47.34 34.39 48.1Q33.22 48.87 32.44 50.3Q31.66 51.73 31.35 53.7Q31.08 55.35 31.25 56.83Q31.42 58.3 31.93 59.43Q32.45 60.56 33.3 61.21Q34.15 61.86 35.31 61.86Q36.55 61.86 37.83 60.97Q39.1 60.08 40.37 58.23Q40.44 58.14 40.55 58.2Q40.66 58.26 40.63 58.3L39.96 61.02Q39.87 61.3 39.81 61.41Q39.75 61.52 39.53 61.57Q38.35 61.98 37.23 62.13Q36.1 62.29 35.16 62.29Z M48.4 62.43Q47.14 62.43 45.86 62.16Q44.58 61.89 43.18 61.21Q43.03 61.1 42.96 60.94Q42.89 60.78 42.96 60.52L43.9 55.56Q43.9 55.38 44.1 55.38Q44.29 55.38 44.29 55.56Q44.62 57.46 45.27 58.83Q45.91 60.2 46.92 60.94Q47.93 61.68 49.33 61.68Q50.38 61.68 51.26 61.23Q52.14 60.78 52.75 59.93Q53.37 59.08 53.55 57.79Q53.83 56.2 53.31 55.05Q52.79 53.9 51.82 52.98Q50.85 52.06 49.73 51.27Q48.61 50.44 47.61 49.54Q46.6 48.64 46.08 47.47Q45.55 46.3 45.84 44.68Q46.24 42.78 47.43 41.55Q48.61 40.33 50.25 39.72Q51.89 39.1 53.62 39.1Q54.55 39.1 55.6 39.3Q56.64 39.5 57.72 39.97Q58.23 40.22 58.15 40.58L57.65 45.01Q57.61 45.15 57.43 45.15Q57.25 45.15 57.22 45.01Q56.97 43.5 56.37 42.33Q55.78 41.16 54.9 40.47Q54.01 39.79 52.79 39.79Q51.6 39.79 50.81 40.33Q50.02 40.87 49.57 41.68Q49.12 42.49 48.97 43.28Q48.72 44.72 49.23 45.75Q49.73 46.77 50.68 47.6Q51.64 48.43 52.68 49.26Q53.87 50.12 54.95 51.09Q56.03 52.06 56.62 53.32Q57.22 54.58 56.93 56.28Q56.61 57.97 55.53 59.37Q54.45 60.78 52.66 61.6Q50.88 62.43 48.4 62.43Z M66.06 62.29Q63.95 62.29 62.63 61.58Q61.31 60.87 60.64 59.72Q59.97 58.57 59.81 57.19Q59.65 55.81 59.89 54.44Q60.23 52.64 61.09 51.21Q61.96 49.78 63.21 48.79Q64.45 47.79 65.91 47.26Q67.36 46.74 68.85 46.74Q69.83 46.74 70.84 46.95Q71.85 47.17 72.4 47.48Q72.57 47.58 72.59 47.67Q72.61 47.77 72.59 48.03L72.25 51.06Q72.25 51.15 72.13 51.15Q72.01 51.15 71.99 51.06Q71.65 49.26 70.57 48.3Q69.49 47.34 67.89 47.34Q66.47 47.34 65.29 48.1Q64.12 48.87 63.34 50.3Q62.56 51.73 62.25 53.7Q61.98 55.35 62.15 56.83Q62.32 58.3 62.83 59.43Q63.35 60.56 64.2 61.21Q65.05 61.86 66.21 61.86Q67.45 61.86 68.73 60.97Q70 60.08 71.27 58.23Q71.34 58.14 71.45 58.2Q71.56 58.26 71.53 58.3L70.86 61.02Q70.77 61.3 70.71 61.41Q70.65 61.52 70.43 61.57Q69.25 61.98 68.13 62.13Q67 62.29 66.06 62.29Z" fill="#EAD9B8"/></svg>
       <div class="grow">
         <h1>PAC Prospection IDF</h1>
-        <p>SOCOTEC Diagnostic Île-de-France · suivi des cibles en attendant le module Athena · V1.2</p>
+        <p>SOCOTEC Diagnostic Île-de-France · suivi des cibles en attendant le module Athena · V1.3</p>
       </div>
       <span class="sync" id="sync" data-s="wait"><i></i><span id="syncTxt">Connexion…</span></span>
     </div>
@@ -234,6 +242,7 @@ legend{font:600 12px var(--f-label);letter-spacing:.08em;text-transform:uppercas
   <section id="view-cibles" style="display:flex;flex-direction:column;gap:14px">
     <div class="bar">
       <div class="chips grow" id="views" aria-label="Vues"></div>
+      <button class="btn ghost edit-only" id="btnImport" type="button" title="Importer des clients ou prospects depuis Excel"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 10V2M4.5 5.5 8 2l3.5 3.5M2.5 13.5h11"/></svg>Importer</button>
       <button class="btn ghost" id="btnExport" type="button" title="Exporter les cibles et les visites"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11"/></svg>Exporter / Excel</button>
       <button class="btn primary edit-only" id="btnNew" type="button"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3v10M3 8h10"/></svg>Nouvelle cible</button>
     </div>
@@ -241,6 +250,7 @@ legend{font:600 12px var(--f-label);letter-spacing:.08em;text-transform:uppercas
       <div class="field-s"><label for="q">Rechercher</label><input type="search" id="q" placeholder="Client, contact, apporteur, campagne…"></div>
       <div class="field-s"><label for="fBu">BU d'origine</label><select id="fBu"></select></div>
       <div class="field-s"><label for="fAg">Agence</label><select id="fAg"></select></div>
+      <div class="field-s"><label for="fTy">Type</label><select id="fTy"><option value="">Tous</option><option>Client existant</option><option>Prospect</option><option>Prescripteur</option></select></div>
       <div class="field-s"><label for="fPr">Priorité</label><select id="fPr"><option value="">Toutes</option><option>A</option><option>B</option><option>C</option></select></div>
     </div>
     <div id="exNote" class="notice" hidden></div>
@@ -265,13 +275,14 @@ const STAGES=[
 const SL=Object.fromEntries(STAGES.map(s=>[s.k,s.l]));
 const SIDX=Object.fromEntries(STAGES.map((s,i)=>[s.k,i]));
 const BUS=["Construction","Équipements","Environnement","Infrastructures","Autre BU"];
-const SEGMENTS=["Bailleur social","Foncière / investisseur","Promoteur","Syndic / administrateur de biens","Collectivité / établissement public","Entreprise de travaux (prescripteur)","Industriel / tertiaire","Autre"];
-const PRESTA=[["AMI","Amiante"],["CREP","Plomb"],["DPE","DPE / audit énergétique"],["GAZ","Gaz"],["ÉLEC","Électricité"],["TERM","Termites"],["VENTE","Avant vente / relocation"],["AUTRE","Autre"]];
+const SEGMENTS=["Industriel","Logistique / entrepôts","Tertiaire / bureaux","Bailleur social","Foncière / investisseur","Promoteur","Syndic / administrateur de biens","Property / facility management","Collectivité / établissement public","Maîtrise d'œuvre / architecte / BET","Entreprise de travaux (prescripteur)","Expert d'assurance / après sinistre","Autre"];
+const PRESTA=[["AMI","Amiante"],["CREP","Plomb"],["DPE","DPE / audit énergétique"],["GAZ","Gaz"],["ÉLEC","Électricité"],["TERM","Termites"],["PEMD","PEMD (avant démolition)"],["VENTE","Avant vente / relocation"],["AUTRE","Autre"]];
 const PLABEL=Object.fromEntries(PRESTA);
 const SOURCES=["Autre BU","Café Commerce","Réunion inter-BU","Événement client","Prospection directe"];
 const MOTIFS=["Accord-cadre concurrent","Pas de besoin","Prix","Pas de réponse","Autre"];
 const VSTAT=["Planifiée","Réalisée","Annulée"];
 const OSTAT=["Ouvert","Conclue","Perdu"];
+const TYPES=["Client existant","Prospect","Prescripteur"];
 const CAMPAGNE_DEF="PAC IDF – Clients autres BU – T4 2026";
 
 /* ---------- Utilitaires ---------- */
@@ -294,7 +305,7 @@ const LS_KEY="pac-idf-v1";
 const IN_FRAME=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 
 function blank(){
-  return {compte:"",contact:"",fonction:"",tel:"",mail:"",campagne:CAMPAGNE_DEF,source:"Autre BU",bu:[],apporteur:"",
+  return {compte:"",type:"Prospect",contact:"",fonction:"",tel:"",mail:"",campagne:CAMPAGNE_DEF,source:"Autre BU",bu:[],apporteur:"",
     segment:"",prestations:[],potentiel:"",priorite:"B",etape:"a_qualifier",agence:"",accompagnant:"",
     prochaineAction:"",prochaineLibelle:"",motif:"",notes:"",visites:[],opp:{creee:false,montant:"",statut:"Ouvert",devis:"",date:""}};
 }
@@ -376,6 +387,7 @@ function filtered(){
     if(bu&&!c.bu.includes(bu))return false;
     if(ag&&c.agence!==ag)return false;
     if(pr&&c.priorite!==pr)return false;
+    const ty=$("#fTy").value;if(ty&&c.type!==ty)return false;
     if(q){const h=[c.compte,c.contact,c.apporteur,c.campagne,c.agence,c.notes].join(" ").toLowerCase();if(!h.includes(q))return false}
     return true;
   }).sort((a,b)=>(a.priorite||"Z").localeCompare(b.priorite||"Z")||((a.prochaineAction||"9999")).localeCompare(b.prochaineAction||"9999")||a.compte.localeCompare(b.compte,"fr"));
@@ -406,7 +418,7 @@ function renderList(){
   rows.map(c=>{
     const late=c.prochaineAction&&c.prochaineAction<t&&isActive(c);
     const nv=c.visites.filter(v=>v.statut==="Réalisée").length;
-    return '<tr data-id="'+esc(c.id)+'" tabindex="0"><td><div class="co">'+esc(c.compte||"Sans nom")+(c.exemple?'<span class="ex">Exemple</span>':'')+'</div><div class="sub">'+esc([c.contact,c.agence].filter(Boolean).join(" · "))+'</div></td>'+
+    return '<tr data-id="'+esc(c.id)+'" tabindex="0"><td><div class="co">'+esc(c.compte||"Sans nom")+(c.exemple?'<span class="ex">Exemple</span>':'')+'</div><div class="sub">'+(c.type?'<span class="ty ty-'+esc(c.type.slice(0,4).toLowerCase())+'">'+esc(c.type)+'</span> ':'')+esc([c.contact,c.agence].filter(Boolean).join(" · "))+'</div></td>'+
     '<td><div class="tags">'+c.bu.map(b=>'<span class="tag bu">'+esc(b)+'</span>').join("")+'</div>'+(c.apporteur?'<div class="sub">via '+esc(c.apporteur)+'</div>':'')+'</td>'+
     '<td><div class="tags">'+c.prestations.map(p=>'<span class="tag" title="'+esc(PLABEL[p]||p)+'">'+esc(p)+'</span>').join("")+'</div></td>'+
     '<td><span class="prio prio-'+esc(c.priorite)+'">'+esc(c.priorite)+'</span></td>'+
@@ -497,7 +509,7 @@ function openDrawer(id){
 }
 function closeDrawer(){$("#scrim").hidden=true;$("#drawer").hidden=true;D=null}
 
-function opts(list,cur,empty){return (empty!=null?'<option value="">'+esc(empty)+'</option>':'')+list.map(o=>'<option'+(o===cur?' selected':'')+'>'+esc(o)+'</option>').join("")}
+function opts(list,cur,empty){if(cur&&!list.includes(cur))list=list.concat([cur]);return (empty!=null?'<option value="">'+esc(empty)+'</option>':'')+list.map(o=>'<option'+(o===cur?' selected':'')+'>'+esc(o)+'</option>').join("")}
 function checks(name,list,sel,lab){return '<div class="checks">'+list.map(it=>{const v=Array.isArray(it)?it[0]:it,l=Array.isArray(it)?it[0]+" · "+it[1]:it;return '<label><input type="checkbox" data-arr="'+name+'" value="'+esc(v)+'"'+(sel.includes(v)?' checked':'')+'>'+esc(lab?lab(it):l)+'</label>'}).join("")+'</div>'}
 
 function drawDrawer(){
@@ -510,6 +522,7 @@ function drawDrawer(){
   '<div class="db"><form id="dForm" onsubmit="return false">'+
    '<fieldset'+dis+'><legend>Client</legend>'+
     '<div class="f"><label class="lbl" for="d-compte">Compte <span class="req">*</span></label><input type="text" id="d-compte" data-k="compte" value="'+esc(c.compte)+'" placeholder="Nom exact du compte dans Athena"></div>'+
+    '<div class="f"><span class="lbl">Type de cible</span><div class="seg" role="group" aria-label="Type de cible">'+TYPES.map(ty=>'<button type="button" data-type="'+esc(ty)+'" aria-pressed="'+(c.type===ty)+'"'+dis+'>'+esc(ty)+'</button>').join("")+'</div></div>'+
     '<div class="row"><div class="f"><label class="lbl" for="d-contact">Contact principal</label><input type="text" id="d-contact" data-k="contact" value="'+esc(c.contact)+'"></div><div class="f"><label class="lbl" for="d-fonction">Fonction</label><input type="text" id="d-fonction" data-k="fonction" value="'+esc(c.fonction)+'"></div></div>'+
     '<div class="row"><div class="f"><label class="lbl" for="d-tel">Téléphone</label><input type="tel" id="d-tel" data-k="tel" value="'+esc(c.tel)+'"></div><div class="f"><label class="lbl" for="d-mail">E-mail</label><input type="email" id="d-mail" data-k="mail" value="'+esc(c.mail)+'"></div></div>'+
     '<div class="row"><div class="f"><label class="lbl" for="d-segment">Segment</label><select id="d-segment" data-k="segment">'+opts(SEGMENTS,c.segment,"—")+'</select></div><div class="f"><label class="lbl" for="d-agence">Agence de rattachement</label><input type="text" id="d-agence" data-k="agence" list="agList" value="'+esc(c.agence)+'"><datalist id="agList">'+agences.map(a=>'<option value="'+esc(a)+'">').join("")+'</datalist></div></div>'+
@@ -610,8 +623,8 @@ async function restore(text){
   catch(e){toast("Sauvegarde illisible : collez le texte exporté par cette application, en entier.")}
 }
 function exportMenu(){
-  const head=["Compte","Contact","Fonction","Téléphone","E-mail","Segment","Agence","BU d'origine","Apporteur","Source","Campagne","Diagnostics visés","Potentiel annuel (€)","Priorité","Étape","Motif sans suite","Prochaine action","Quoi","Accompagnant","Visites réalisées","Opportunité","Montant opp. (€)","Statut opp.","N° devis","Notes"];
-  const rows=[head].concat(S.cibles.map(c=>[c.compte,c.contact,c.fonction,c.tel,c.mail,c.segment,c.agence,c.bu.join(", "),c.apporteur,c.source,c.campagne,c.prestations.map(p=>PLABEL[p]||p).join(", "),c.potentiel,c.priorite,SL[c.etape],c.motif,fdate(c.prochaineAction),c.prochaineLibelle,c.accompagnant,c.visites.filter(v=>v.statut==="Réalisée").length,c.opp.creee?"Oui":"Non",c.opp.creee?c.opp.montant:"",c.opp.creee?c.opp.statut:"",c.opp.devis,c.notes]));
+  const head=["Compte","Type","Contact","Fonction","Téléphone","E-mail","Segment","Agence","BU d'origine","Apporteur","Source","Campagne","Diagnostics visés","Potentiel annuel (€)","Priorité","Étape","Motif sans suite","Prochaine action","Quoi","Accompagnant","Visites réalisées","Opportunité","Montant opp. (€)","Statut opp.","N° devis","Notes"];
+  const rows=[head].concat(S.cibles.map(c=>[c.compte,c.type,c.contact,c.fonction,c.tel,c.mail,c.segment,c.agence,c.bu.join(", "),c.apporteur,c.source,c.campagne,c.prestations.map(p=>PLABEL[p]||p).join(", "),c.potentiel,c.priorite,SL[c.etape],c.motif,fdate(c.prochaineAction),c.prochaineLibelle,c.accompagnant,c.visites.filter(v=>v.statut==="Réalisée").length,c.opp.creee?"Oui":"Non",c.opp.creee?c.opp.montant:"",c.opp.creee?c.opp.statut:"",c.opp.devis,c.notes]));
   const vrows=[["Compte","Date","Statut","Accompagnant","Compte rendu","Suite"]];
   S.cibles.forEach(c=>c.visites.forEach(v=>vrows.push([c.compte,fdate(v.date),v.statut,v.accompagnant,v.cr,v.suite])));
   const d=$("#drawer");
@@ -658,6 +671,7 @@ const XCOLS=[
  {h:"Priorité",w:9,v:c=>c.priorite,al:"center"},
  {h:"Étape",w:17,v:c=>SL[c.etape]},
  {h:"Client",w:30,v:c=>c.compte,bold:true},
+ {h:"Type",w:14,v:c=>c.type},
  {h:"BU d'origine",w:20,v:c=>c.bu.join(", "),wrap:true},
  {h:"Apporteur SOCOTEC",w:20,v:c=>c.apporteur,wrap:true},
  {h:"Diagnostics visés",w:28,v:c=>c.prestations.map(p=>PLABEL[p]||p).join(", "),wrap:true},
@@ -680,7 +694,7 @@ const XCOLS=[
  {h:"Campagne",w:30,v:c=>c.campagne},
  {h:"Motif sans suite",w:20,v:c=>c.etape==="sans_suite"?c.motif:""},
  {h:"Notes",w:45,v:c=>c.notes,wrap:true}];
-const XMAIN=XCOLS.slice(0,15),XCOORD=[XCOLS[2],XCOLS[1]].concat(XCOLS.slice(15));
+const XMAIN=XCOLS.slice(0,16),XCOORD=[XCOLS[2],XCOLS[1]].concat(XCOLS.slice(16));
 const XI=Object.fromEntries(XMAIN.map((c,i)=>[c.h,colL(i+1)]));
 function pageSetup(ws,title){ws.pageSetup={orientation:"landscape",paperSize:9,fitToPage:true,fitToWidth:1,fitToHeight:0,margins:{left:.4,right:.4,top:.6,bottom:.6,header:.3,footer:.3},printTitlesRow:"1:1"};
   ws.headerFooter={oddHeader:"&L&\"Calibri,Bold\"PAC Prospection IDF&R"+title,oddFooter:"&LExport du "+new Date().toLocaleDateString("fr-FR")+"&RPage &P / &N"}}
@@ -708,7 +722,7 @@ async function buildXlsx(cibles,settings){
       const pr=row.getCell(1);pr.font={name:"Calibri",size:10,bold:true,color:{argb:c.priorite==="A"?"FFFFFFFF":INK}};
       if(c.priorite==="A")pr.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FFA35C2A"}};
       else if(c.priorite==="B")pr.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FFF5E7DB"}};
-      if(c.prochaineAction&&c.prochaineAction<todayISO()&&isActive(c))row.getCell(8).font={name:"Calibri",size:10,bold:true,color:{argb:"FFB0442D"}};}}
+      if(c.prochaineAction&&c.prochaineAction<todayISO()&&isActive(c))row.getCell(9).font={name:"Calibri",size:10,bold:true,color:{argb:"FFB0442D"}};}}
   headStyle(wc,XMAIN.length);pageSetup(wc,"Cibles");
   /* ---- Visites ---- */
   const wv=wb.addWorksheet("Visites",{properties:{tabColor:{argb:"FF6E6862"}}});
@@ -771,6 +785,8 @@ async function buildXlsx(cibles,settings){
     line(st.l,[F('COUNTIF('+col("Étape")+',"'+st.l+'")',ofS.length),F('SUMIFS('+col("Potentiel annuel")+','+col("Étape")+',"'+st.l+'")',ofS.reduce((s,c)=>s+(Number(c.potentiel)||0),0))],[null,EUR]);
     sy.getRow(r-1).getCell(2).fill={type:"pattern",pattern:"solid",fgColor:{argb:STAGE_FILL[st.k]}}});
   line("Total",[F('COUNTA('+col("Client")+')',N),F('SUM('+col("Potentiel annuel")+')',order.reduce((s,c)=>s+(Number(c.potentiel)||0),0))],[null,EUR],true);
+  r++;section("Par type de cible",["Cibles","Opportunités"]);
+  TYPES.forEach(ty=>{const ofT=order.filter(c=>c.type===ty);line(ty,[F('COUNTIF('+col("Type")+',"'+ty+'")',ofT.length),F('COUNTIFS('+col("Type")+',"'+ty+'",'+col("Opportunité")+',"Oui")',ofT.filter(c=>c.opp.creee).length)])});
   r++;section("Par BU d'origine",["Cibles","Visites réalisées","Opportunités"]);
   BUS.forEach(bu=>{const ofB=order.filter(c=>c.bu.includes(bu));if(!ofB.length)return;
     line(bu,[F('COUNTIF('+col("BU d'origine")+',"*'+bu+'*")',ofB.length),done.filter(x=>x.c.bu.includes(bu)).length,F('COUNTIFS('+col("BU d'origine")+',"*'+bu+'*",'+col("Opportunité")+',"Oui")',ofB.filter(c=>c.opp.creee).length)])});
@@ -795,6 +811,13 @@ async function exportXlsxHere(){
 }
 /* Onglet ouvert depuis le cadre Notion pour produire le fichier */
 async function handoffMode(){
+  if(location.hash==="#modele"){history.replaceState(null,"",location.pathname+location.search);
+    const main=$("#app");$("nav.tabs").hidden=true;$("#sync").hidden=true;
+    main.innerHTML='<div class="empty" style="padding:60px 20px"><h3 id="hoT">Préparation du modèle…</h3><p id="hoP"></p><button class="btn primary" type="button" id="hoBtn" hidden>Télécharger à nouveau</button></div>';
+    try{const blob=await buildTemplate();const go=()=>saveBlob(blob,"PAC_modele_import.xlsx");go();$("#hoT").textContent="Modèle d'import téléchargé";
+      $("#hoP").textContent="Remplissez l'onglet Import, puis revenez dans Notion : Importer, et choisissez le fichier. Vous pouvez fermer cet onglet.";const b=$("#hoBtn");b.hidden=false;b.onclick=go}
+    catch(e){$("#hoT").textContent="Modèle indisponible";$("#hoP").textContent="Vérifiez la connexion internet et réessayez."}
+    return true}
   if(!location.hash.startsWith("#xlsx="))return false;
   const raw=location.hash.slice(6);history.replaceState(null,"",location.pathname+location.search);
   const main=$("#app");$("nav.tabs").hidden=true;$("#sync").hidden=true;
@@ -808,6 +831,187 @@ async function handoffMode(){
   return true;
 }
 
+/* ---------- Import Excel / CSV ---------- */
+const nh=x=>String(x==null?"":x).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
+const FIELD_ALIASES={
+  compte:["client","compte","raison sociale","entreprise","societe","nom","nom du client","nom client","compte athena"],
+  type:["type","type de cible","categorie","nature"],
+  contact:["contact","interlocuteur","nom du contact","contact principal"],
+  fonction:["fonction","poste","titre"],
+  tel:["telephone","tel","portable","mobile","telephone contact"],
+  mail:["e mail","email","mail","courriel","adresse mail"],
+  segment:["segment","secteur","activite","secteur d activite"],
+  agence:["agence","agence de rattachement"],
+  bu:["bu d origine","bu","bu origine","business unit"],
+  apporteur:["apporteur socotec","apporteur"],
+  source:["source","origine"],
+  campagne:["campagne"],
+  prestations:["diagnostics vises","diagnostics","prestations","besoins","besoin"],
+  potentiel:["potentiel annuel","potentiel","potentiel annuel eur","ca potentiel","potentiel annuel e"],
+  priorite:["priorite","prio"],
+  etape:["etape","statut","stade"],
+  prochaineAction:["prochaine action","date de relance","relance","date prochaine action"],
+  prochaineLibelle:["action a faire","action","quoi","prochaine etape"],
+  accompagnant:["accompagnant","accompagnant visite"],
+  motif:["motif sans suite","motif"],
+  notes:["notes","note","commentaire","commentaires","observations","remarques"],
+  oppCreee:["opportunite"],oppMontant:["montant opp","montant opportunite","montant"],oppStatut:["statut opp","statut opportunite"],oppDevis:["n devis athena","n devis","numero de devis","devis"]};
+const ALIAS_IDX={};Object.entries(FIELD_ALIASES).forEach(([k,arr])=>arr.forEach(a=>ALIAS_IDX[a]=k));
+const FIELD_LABEL={compte:"Client",type:"Type",contact:"Contact",fonction:"Fonction",tel:"Téléphone",mail:"E-mail",segment:"Segment",agence:"Agence",bu:"BU d'origine",apporteur:"Apporteur",source:"Source",campagne:"Campagne",prestations:"Diagnostics visés",potentiel:"Potentiel annuel",priorite:"Priorité",etape:"Étape",prochaineAction:"Prochaine action",prochaineLibelle:"Action à faire",accompagnant:"Accompagnant",motif:"Motif sans suite",notes:"Notes",oppCreee:"Opportunité",oppMontant:"Montant opp.",oppStatut:"Statut opp.",oppDevis:"N° devis"};
+function cellVal(v){if(v==null)return "";if(v instanceof Date)return v;if(typeof v==="object"){if(v.richText)return v.richText.map(r=>r.text).join("");if(v.text!=null)return String(v.text);if(v.result!=null)return v.result;if(v.formula)return "";}return v}
+function toISO(v){if(v==null||v==="")return "";
+  if(v instanceof Date){if(isNaN(v))return "";return v.getUTCFullYear()+"-"+pad(v.getUTCMonth()+1)+"-"+pad(v.getUTCDate())}
+  if(typeof v==="number"&&v>20000&&v<80000){const d=new Date(Date.UTC(1899,11,30)+v*86400000);return toISO(d)}
+  const t=String(v).trim();let m=t.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})$/);
+  if(m){let y=+m[3];if(y<100)y+=2000;return y+"-"+pad(+m[2])+"-"+pad(+m[1])}
+  m=t.match(/^(\d{4})-(\d{2})-(\d{2})/);if(m)return m[1]+"-"+m[2]+"-"+m[3];return ""}
+function toNum(v){if(v==null||v==="")return "";if(typeof v==="number")return v;const n=parseFloat(String(v).replace(/[^\d,.\-]/g,"").replace(/\s/g,"").replace(",","."));return isNaN(n)?"":n}
+const splitList=v=>String(v||"").split(/[,;\/+\n]| et /).map(x=>x.trim()).filter(Boolean);
+function mapType(v){const n=nh(v);if(!n)return "";if(n.includes("prescri"))return "Prescripteur";if(n.includes("client"))return "Client existant";if(n.includes("prospect"))return "Prospect";return ""}
+function mapBU(v){const out=[];splitList(v).forEach(x=>{const n=nh(x);let b="Autre BU";if(n.startsWith("constr"))b="Construction";else if(n.startsWith("equip"))b="Équipements";else if(n.startsWith("envir"))b="Environnement";else if(n.startsWith("infra"))b="Infrastructures";if(!out.includes(b))out.push(b)});return out}
+function mapPresta(v){const out=[];splitList(v).forEach(x=>{const n=nh(x);let k="AUTRE";
+  if(n.includes("amiante")||n==="ami"||n.includes("dta")||n.includes("rat"))k="AMI";else if(n.includes("plomb")||n.includes("crep"))k="CREP";
+  else if(n.includes("dpe")||n.includes("audit")||n.includes("energ"))k="DPE";else if(n.includes("gaz"))k="GAZ";else if(n.includes("elec"))k="ÉLEC";
+  else if(n.includes("termite")||n==="term")k="TERM";else if(n.includes("pemd")||n.includes("dechet")||n.includes("demolition"))k="PEMD";else if(n.includes("vente")||n.includes("location")||n==="vente")k="VENTE";
+  if(!out.includes(k))out.push(k)});return out}
+function mapSegment(v){const n=nh(v);if(!n)return "";const hit=SEGMENTS.find(sg=>nh(sg)===n);if(hit)return hit;
+  if(n.includes("bailleur"))return "Bailleur social";if(n.includes("fonci")||n.includes("investiss"))return "Foncière / investisseur";if(n.includes("promot"))return "Promoteur";
+  if(n.includes("syndic")||n.includes("administrateur"))return "Syndic / administrateur de biens";if(n.includes("collectiv")||n.includes("public")||n.includes("mairie"))return "Collectivité / établissement public";
+  if(n.includes("moe")||n.includes("architect")||n.includes("maitre d oeuvre")||n.includes("maitrise d oeuvre")||n.includes("bet")||n.includes("bureau d etude")||n.includes("economiste")||n.includes("amo"))return "Maîtrise d'œuvre / architecte / BET";
+  if(n.includes("property")||n.includes("facility")||n.includes("gestionnaire"))return "Property / facility management";
+  if(n.includes("assur")||n.includes("sinistre")||n.includes("expert"))return "Expert d'assurance / après sinistre";
+  if(n.includes("travaux")||n.includes("prescri")||n.includes("etanch")||n.includes("demoli")||n.includes("desamiant")||n.includes("couvreur")||n.includes("couverture"))return "Entreprise de travaux (prescripteur)";
+  if(n.includes("logisti")||n.includes("entrepot"))return "Logistique / entrepôts";if(n.includes("tertiaire")||n.includes("bureau"))return "Tertiaire / bureaux";
+  if(n.includes("industri")||n.includes("usine")||n.includes("agro")||n.includes("pharma")||n.includes("chimi"))return "Industriel";return String(v).trim()}
+function mapEtape(v){const n=nh(v);if(!n)return "";const hit=STAGES.find(st=>nh(st.l)===n||st.k===n);return hit?hit.k:""}
+function mapSource(v){const n=nh(v);if(!n)return "";const hit=SOURCES.find(x=>nh(x)===n);return hit||String(v).trim()}
+function readRows(rows){ /* rows: array of arrays, first = headers */
+  if(!rows.length)return {cols:[],ignored:[],recs:[]};
+  const head=rows[0].map(h=>String(cellVal(h)||"").trim());
+  const map=head.map(h=>{const n=nh(h).replace(/ \*$/,"");return ALIAS_IDX[n]||ALIAS_IDX[n.replace(/ e$/,"")]||null});
+  const cols=[],ignored=[];head.forEach((h,i)=>{if(!h)return;if(map[i]&&!cols.includes(map[i]))cols.push(map[i]);else if(!map[i])ignored.push(h)});
+  const recs=[];
+  for(let r=1;r<rows.length;r++){const raw={};map.forEach((k,i)=>{if(k&&raw[k]==null){const v=cellVal(rows[r][i]);if(v!==""&&v!=null)raw[k]=v}});
+    if(!Object.keys(raw).length)continue;recs.push(raw)}
+  return {cols,ignored,recs};
+}
+function toCible(raw){const c={};
+  const str=k=>raw[k]!=null?String(raw[k] instanceof Date?toISO(raw[k]):raw[k]).trim():"";
+  ["compte","contact","fonction","tel","mail","agence","apporteur","campagne","prochaineLibelle","accompagnant","motif","notes"].forEach(k=>{const v=str(k);if(v)c[k]=v});
+  if(raw.type)c.type=mapType(raw.type)||"";if(!c.type)delete c.type;
+  if(raw.segment)c.segment=mapSegment(raw.segment);if(raw.source)c.source=mapSource(raw.source);
+  if(raw.bu)c.bu=mapBU(raw.bu);if(raw.prestations)c.prestations=mapPresta(raw.prestations);
+  if(raw.potentiel!=null){const n=toNum(raw.potentiel);if(n!=="")c.potentiel=n}
+  if(raw.priorite){const pz=String(raw.priorite).trim().toUpperCase().charAt(0);if("ABC".includes(pz))c.priorite=pz}
+  if(raw.etape){const e=mapEtape(raw.etape);if(e)c.etape=e}
+  if(raw.prochaineAction!=null){const d=toISO(raw.prochaineAction);if(d)c.prochaineAction=d}
+  const op={};if(raw.oppCreee!=null)op.creee=/^(oui|yes|x|1|vrai|true)$/i.test(String(raw.oppCreee).trim());
+  if(raw.oppMontant!=null){const n=toNum(raw.oppMontant);if(n!=="")op.montant=n}
+  if(raw.oppStatut){const n=nh(raw.oppStatut);op.statut=n.startsWith("concl")?"Conclue":n.startsWith("perd")?"Perdu":"Ouvert"}
+  if(raw.oppDevis)op.devis=String(raw.oppDevis).trim();
+  if(Object.keys(op).length)c.opp=op;
+  return c}
+function parseCSV(text){text=text.replace(/^﻿/,"");const first=text.split(/\r?\n/)[0]||"";
+  const d=[";","\t",","].map(x=>[x,first.split(x).length]).sort((a,b)=>b[1]-a[1])[0][0];
+  const rows=[];let row=[],f="",q=false;
+  for(let i=0;i<text.length;i++){const ch=text[i];
+    if(q){if(ch==='"'){if(text[i+1]==='"'){f+='"';i++}else q=false}else f+=ch}
+    else if(ch==='"')q=true;else if(ch===d){row.push(f);f=""}else if(ch==="\n"||ch==="\r"){if(ch==="\r"&&text[i+1]==="\n")i++;row.push(f);rows.push(row);row=[];f=""}else f+=ch}
+  if(f!==""||row.length){row.push(f);rows.push(row)}return rows.filter(r=>r.some(x=>String(x).trim()!==""))}
+async function parseImportFile(file){
+  const name=file.name.toLowerCase();
+  if(name.endsWith(".csv")||name.endsWith(".txt")){return {sheet:null,...readRows(parseCSV(await file.text()))}}
+  await loadExcel();const wb=new ExcelJS.Workbook();await wb.xlsx.load(await file.arrayBuffer());
+  const pick=["Import","Cibles","Prospects"].map(n=>wb.getWorksheet(n)).find(Boolean)||wb.worksheets.find(ws=>ws.state!=="hidden"&&ws.actualRowCount>0)||wb.worksheets[0];
+  const toRows=ws=>{const out=[];ws.eachRow({includeEmpty:false},r=>{const vals=r.values.slice(1);out.push(vals)});return out};
+  const res=readRows(toRows(pick));
+  const co=wb.getWorksheet("Coordonnées");
+  if(co&&co!==pick){const extra=readRows(toRows(co));const byN={};extra.recs.forEach(x=>{if(x.compte)byN[nh(x.compte)]=x});
+    res.recs.forEach(x=>{const e=x.compte&&byN[nh(x.compte)];if(e)Object.keys(e).forEach(k=>{if(x[k]==null)x[k]=e[k]})});
+    extra.cols.forEach(k=>{if(!res.cols.includes(k))res.cols.push(k)})}
+  return {sheet:pick.name,...res};
+}
+let IMP=null;
+function importMenu(){
+  const d=$("#drawer");IMP=null;
+  d.innerHTML='<div class="dh"><div class="grow"><span class="lbl">Importer</span><h2 id="dTitle">Importer des clients et prospects</h2></div><button class="btn ghost" type="button" data-act="close">Fermer</button></div>'+
+  '<div class="db">'+
+  '<div style="display:flex;flex-direction:column;gap:8px"><span class="lbl">1. Le fichier</span>'+
+  '<p class="hint">Un fichier Excel (.xlsx) ou CSV, une ligne par entreprise, avec au minimum une colonne « Client ». Les autres colonnes sont reconnues par leur titre : Type, Segment, BU d\'origine, Apporteur, Diagnostics visés, Potentiel, Priorité, Contact, Téléphone, E-mail… Un export de cette application se réimporte tel quel.</p>'+
+  (IN_FRAME?'<a class="btn" href="'+location.href.split("#")[0]+'#modele" target="_blank" rel="noopener">Télécharger le modèle d\'import (.xlsx)</a>':'<button class="btn" type="button" id="imModel">Télécharger le modèle d\'import (.xlsx)</button>')+
+  '</div>'+
+  '<div style="display:flex;flex-direction:column;gap:8px"><span class="lbl">2. Choisir le fichier</span><input type="file" id="imFile" accept=".xlsx,.csv,.txt,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv">'+
+  (IN_FRAME?'<p class="hint">Dans Notion, cliquez sur le bouton plutôt que de faire glisser le fichier : Notion intercepte les fichiers déposés.</p>':'')+'</div>'+
+  '<div id="imPrev" hidden></div>'+
+  '</div>';
+  $("#scrim").hidden=false;d.hidden=false;
+  const mb=$("#imModel");if(mb)mb.onclick=async()=>{try{saveBlob(await buildTemplate(),"PAC_modele_import.xlsx");toast("Modèle téléchargé")}catch(e){toast("Modèle indisponible : vérifiez la connexion internet.")}};
+  $("#imFile").onchange=async e=>{const f=e.target.files[0];if(!f)return;const pv=$("#imPrev");pv.hidden=false;pv.innerHTML='<p class="hint">Lecture du fichier…</p>';
+    try{IMP=await parseImportFile(f);drawImportPreview(f.name)}catch(err){pv.innerHTML='<div class="notice warn"><b>Fichier illisible.</b> Enregistrez-le au format .xlsx ou .csv et réessayez. Si le fichier est un .xlsx, vérifiez la connexion internet.</div>'}};
+}
+function drawImportPreview(fname){
+  const pv=$("#imPrev"),I=IMP;
+  if(!I.cols.includes("compte")){pv.innerHTML='<div class="notice warn"><b>Colonne « Client » introuvable.</b> La première ligne du fichier doit contenir les titres de colonnes, dont « Client » (ou « Compte », « Entreprise », « Raison sociale »).</div>';return}
+  const existing={};S.cibles.forEach(c=>existing[nh(c.compte)]=c);
+  const seen={};let nNew=0,nDup=0,nSkip=0;const items=[];
+  I.recs.forEach(raw=>{const c=toCible(raw);if(!c.compte){nSkip++;return}const k=nh(c.compte);if(seen[k]){nSkip++;return}seen[k]=1;
+    const ex=existing[k];if(ex)nDup++;else nNew++;items.push({c,ex})});
+  I.items=items;
+  const show=items.slice(0,8);
+  pv.innerHTML='<div style="display:flex;flex-direction:column;gap:12px"><span class="lbl">3. Vérifier</span>'+
+   '<p class="hint">'+esc(fname)+(I.sheet?' · onglet « '+esc(I.sheet)+' »':'')+'</p>'+
+   '<div class="imp-sum"><div><b>'+nNew+'</b><span class="sub">nouvelle'+(nNew>1?'s':'')+'</span></div><div><b>'+nDup+'</b><span class="sub">déjà présente'+(nDup>1?'s':'')+'</span></div><div><b>'+nSkip+'</b><span class="sub">ligne'+(nSkip>1?'s':'')+' ignorée'+(nSkip>1?'s':'')+'</span></div></div>'+
+   '<p class="hint"><b>Colonnes reconnues :</b> '+I.cols.map(k=>esc(FIELD_LABEL[k]||k)).join(", ")+(I.ignored.length?'<br><b>Colonnes non reprises :</b> '+I.ignored.map(esc).join(", "):'')+(nSkip?'<br>Lignes ignorées : sans nom de client, ou en double dans le fichier.':'')+'</p>'+
+   '<div class="imp-prev"><table><thead><tr><th>Client</th><th>Type</th><th>BU</th><th>Diagnostics</th><th>Prio.</th><th></th></tr></thead><tbody>'+
+   show.map(({c,ex})=>'<tr><td><b>'+esc(c.compte)+'</b></td><td>'+esc(c.type||"Prospect")+'</td><td>'+esc((c.bu||[]).join(", "))+'</td><td>'+esc((c.prestations||[]).join(", "))+'</td><td>'+esc(c.priorite||"B")+'</td><td>'+(ex?'<span class="pill st-rdv">Existe</span>':'<span class="pill st-gagne">Nouveau</span>')+'</td></tr>').join("")+
+   '</tbody></table></div>'+(items.length>show.length?'<p class="hint">… et '+(items.length-show.length)+' autre'+(items.length-show.length>1?'s':'')+'.</p>':'')+
+   (nDup?'<div class="radio"><span class="lbl">Pour les clients déjà présents</span><label><input type="radio" name="imDup" value="update" checked> Compléter la fiche avec les informations du fichier (les visites et l\'historique sont conservés)</label><label><input type="radio" name="imDup" value="skip"> Ne pas toucher aux fiches existantes</label></div>':'')+
+   '<div class="bar"><button class="btn primary" type="button" id="imGo"'+(items.length?'':' disabled')+'>Importer '+(nNew+(nDup?nDup:0))+' cible'+(nNew+nDup>1?'s':'')+'</button></div></div>';
+  const upd=()=>{const dupMode=(document.querySelector('input[name="imDup"]:checked')||{}).value||"update";const n=nNew+(dupMode==="update"?nDup:0);$("#imGo").textContent="Importer "+n+" cible"+(n>1?"s":"");$("#imGo").disabled=!n};
+  document.querySelectorAll('input[name="imDup"]').forEach(r=>r.onchange=upd);
+  $("#imGo").onclick=()=>runImport();
+}
+async function runImport(){
+  const dupMode=(document.querySelector('input[name="imDup"]:checked')||{}).value||"update";
+  const out=[];const now=new Date().toISOString();
+  IMP.items.forEach(({c,ex})=>{
+    if(ex){if(dupMode==="skip")return;const m=clone(ex);
+      Object.entries(c).forEach(([k,v])=>{if(k==="bu"||k==="prestations"){m[k]=[...new Set([...(m[k]||[]),...v])]}else if(k==="opp"){m.opp=Object.assign({},m.opp,v)}else if(v!==""&&v!=null)m[k]=v});
+      out.push(norm(m))}
+    else{const n=norm(Object.assign(blank(),{source:"Prospection directe"},c,{id:uid(),creeLe:now}));n.opp=Object.assign(blank().opp,c.opp||{});out.push(n)}});
+  const btn=$("#imGo");btn.disabled=true;btn.textContent="Import en cours…";
+  let ok=0;
+  if(S.mode==="db"){for(const c of out){if(await saveCible(c))ok++}}
+  else{out.forEach(c=>{c.majLe=now;const i=S.cibles.findIndex(x=>x.id===c.id);if(i>=0)S.cibles[i]=c;else S.cibles.push(c);ok++});lsSave();render()}
+  toast(ok+" cible"+(ok>1?"s":"")+" importée"+(ok>1?"s":""));closeDrawer();S.view="toutes";render();
+}
+async function buildTemplate(){
+  await loadExcel();const wb=new ExcelJS.Workbook();wb.creator="PAC Prospection IDF · CSC";
+  const ws=wb.addWorksheet("Import",{properties:{tabColor:{argb:COPPER}}});
+  const TC=[["Client *",32],["Type",16],["Segment",28],["Agence",15],["BU d'origine",22],["Apporteur SOCOTEC",22],["Source",18],["Diagnostics visés",30],["Potentiel annuel",15],["Priorité",9],["Étape",17],["Prochaine action",14],["Action à faire",32],["Contact",22],["Fonction",20],["Téléphone",15],["E-mail",28],["Campagne",30],["Notes",45]];
+  ws.columns=TC.map(([h,w])=>({header:h,width:w}));
+  headStyle(ws,TC.length);ws.views=[{state:"frozen",ySplit:1,xSplit:1,activeCell:"A2"}];
+  const li=wb.addWorksheet("Listes",{state:"hidden"});
+  const lists=[TYPES,SEGMENTS,SOURCES,["A","B","C"],STAGES.map(x=>x.l)];
+  lists.forEach((arr,ci)=>arr.forEach((v,ri)=>{li.getCell(ri+1,ci+1).value=v}));
+  const L=ci=>["Listes!$"+colL(ci+1)+"$1:$"+colL(ci+1)+"$"+lists[ci].length];
+  const dv={B:L(0),C:L(1),G:L(2),J:L(3),K:L(4)};
+  for(let r=2;r<=500;r++){Object.entries(dv).forEach(([col,f])=>{ws.getCell(col+r).dataValidation={type:"list",allowBlank:true,formulae:f,showErrorMessage:false}});
+    ws.getCell("I"+r).numFmt='#,##0 "€"';ws.getCell("L"+r).numFmt=DFMT}
+  const g=wb.addWorksheet("Mode d'emploi",{views:[{showGridLines:false}]});g.getColumn(1).width=3;g.getColumn(2).width=110;
+  const lines=[["Modèle d'import — PAC Prospection IDF",{size:16,bold:true}],["Une ligne par entreprise dans l'onglet Import. Seule la colonne Client est obligatoire.",{}],["",{}],
+   ["Client : le nom exact du compte dans Athena. Il sert à reconnaître une entreprise déjà présente dans l'application.",{}],
+   ["Type : Client existant, Prospect ou Prescripteur (liste déroulante). Vide = Prospect.",{}],
+   ["BU d'origine et Diagnostics visés : plusieurs valeurs possibles, séparées par des virgules (ex. Amiante, Plomb, DPE).",{}],
+   ["Diagnostics reconnus : Amiante, Plomb, DPE / audit énergétique, Gaz, Électricité, Termites, PEMD, Avant vente / relocation.",{}],
+   ["Priorité : A, B ou C. Vide = B.   Étape : vide = À qualifier.",{}],
+   ["Prochaine action : une date au format jj/mm/aaaa.",{}],["",{}],
+   ["Dans l'application : Importer, choisir ce fichier, vérifier l'aperçu puis valider.",{bold:true}],
+   ["Une entreprise déjà présente est complétée avec les informations du fichier : ses visites et son historique sont conservés.",{}]];
+  lines.forEach(([t,f],i)=>{const c=g.getCell("B"+(i+2));c.value=t;c.font=Object.assign({name:"Calibri",size:11},f);c.alignment={wrapText:true}});
+  const buf=await wb.xlsx.writeBuffer();return new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+}
+
 /* ---------- Événements ---------- */
 document.addEventListener("click",async e=>{
   const t=e.target.closest("button,tr[data-id]");if(!t)return;
@@ -817,12 +1021,14 @@ document.addEventListener("click",async e=>{
   if(t.matches("tr[data-id]")){openDrawer(t.dataset.id);return}
   if(t.id==="btnNew"||t.dataset.act==="new"){openDrawer(null);return}
   if(t.id==="btnExport"){exportMenu();return}
+  if(t.id==="btnImport"){importMenu();return}
   if(t.id==="btnDelEx"){
     if(!t.classList.contains("armed")){t.classList.add("armed","danger");t.textContent="Confirmer la suppression des exemples";return}
     for(const c of S.cibles.filter(c=>c.exemple))await deleteCible(c.id);toast("Exemples supprimés");return}
   if(t.dataset.act==="close"){closeDrawer();return}
   if(!D)return;
   if(t.dataset.prio){readForm();D.priorite=t.dataset.prio;drawDrawer();return}
+  if(t.dataset.type){readForm();D.type=t.dataset.type;drawDrawer();return}
   if(t.dataset.stage){readForm();D.etape=t.dataset.stage;drawDrawer();return}
   if(t.dataset.act==="save"){doSave();return}
   if(t.dataset.act==="del"){
@@ -850,7 +1056,7 @@ document.addEventListener("keydown",e=>{
   if(e.key==="Enter"&&e.target.matches("tr[data-id]"))openDrawer(e.target.dataset.id);
 });
 $("#scrim").addEventListener("click",closeDrawer);
-["#q","#fBu","#fAg","#fPr"].forEach(s=>$(s).addEventListener("input",renderList));
+["#q","#fBu","#fAg","#fPr","#fTy"].forEach(s=>$(s).addEventListener("input",renderList));
 
 handoffMode().then(h=>{if(!h)init()});
 })();
