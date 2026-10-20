@@ -264,6 +264,7 @@ table.pac tbody tr:hover td.cur{background:var(--accent-soft)}
 .pbar i{display:block;height:100%;background:var(--accent)}
 .pbar i.ok{background:var(--ok)}
 .pcamp{font-size:11.5px;color:var(--muted);margin-top:3px;white-space:normal}
+.ml{white-space:normal;padding-left:10px;text-indent:-10px;margin-bottom:4px}.ml::before{content:"• ";color:var(--accent)}
 .pacts{margin-top:6px;font-size:12px;color:var(--muted)}
 .pimp{margin:0;padding-left:20px;font-size:13px;display:flex;flex-direction:column;gap:3px}
 .pac-link{display:flex;justify-content:center;padding:4px 0}
@@ -336,7 +337,7 @@ table.pac tbody tr:hover td.cur{background:var(--accent-soft)}
       <svg viewBox="0 0 100 100" role="img" aria-label="Anamnesis · CSC"><rect width="100" height="100" rx="24" fill="#1B1512"/><circle cx="50" cy="50" r="38" fill="none" stroke="#C9804F" stroke-width="4"/><path d="M35.16 62.29Q33.05 62.29 31.73 61.58Q30.41 60.870 29.74 59.72Q29.07 58.57 28.91 57.19Q28.75 55.81 28.99 54.44Q29.33 52.64 30.19 51.21Q31.06 49.78 32.31 48.79Q33.55 47.79 35.01 47.26Q36.46 46.74 37.95 46.74Q38.930 46.74 39.94 46.95Q40.95 47.17 41.5 47.48Q41.67 47.58 41.69 47.67Q41.71 47.77 41.69 48.03L41.35 51.06Q41.35 51.15 41.23 51.15Q41.11 51.15 41.09 51.06Q40.75 49.26 39.67 48.3Q38.59 47.34 36.99 47.34Q35.57 47.34 34.39 48.1Q33.22 48.87 32.44 50.3Q31.66 51.73 31.35 53.7Q31.08 55.35 31.25 56.83Q31.42 58.3 31.93 59.43Q32.45 60.56 33.3 61.21Q34.15 61.86 35.31 61.86Q36.55 61.86 37.83 60.97Q39.1 60.08 40.37 58.23Q40.44 58.14 40.55 58.2Q40.66 58.26 40.63 58.3L39.96 61.02Q39.87 61.3 39.81 61.41Q39.75 61.52 39.53 61.57Q38.35 61.98 37.23 62.13Q36.1 62.29 35.16 62.29Z M48.4 62.43Q47.14 62.43 45.86 62.16Q44.58 61.89 43.18 61.21Q43.03 61.1 42.96 60.94Q42.89 60.78 42.96 60.52L43.9 55.56Q43.9 55.38 44.1 55.38Q44.29 55.38 44.29 55.56Q44.62 57.46 45.27 58.83Q45.91 60.2 46.92 60.94Q47.93 61.68 49.33 61.68Q50.38 61.68 51.26 61.23Q52.14 60.78 52.75 59.93Q53.37 59.08 53.55 57.79Q53.83 56.2 53.31 55.05Q52.79 53.9 51.82 52.98Q50.85 52.06 49.73 51.27Q48.61 50.44 47.61 49.54Q46.6 48.64 46.08 47.47Q45.55 46.3 45.84 44.68Q46.24 42.78 47.43 41.55Q48.61 40.33 50.25 39.72Q51.89 39.1 53.62 39.1Q54.55 39.1 55.6 39.3Q56.64 39.5 57.72 39.97Q58.23 40.22 58.15 40.58L57.65 45.01Q57.61 45.15 57.43 45.15Q57.25 45.15 57.22 45.01Q56.97 43.5 56.37 42.33Q55.78 41.16 54.9 40.47Q54.01 39.79 52.79 39.79Q51.6 39.79 50.81 40.33Q50.02 40.87 49.57 41.68Q49.12 42.49 48.97 43.28Q48.72 44.72 49.23 45.75Q49.73 46.77 50.68 47.6Q51.64 48.43 52.68 49.26Q53.87 50.12 54.95 51.09Q56.03 52.06 56.62 53.32Q57.22 54.58 56.93 56.28Q56.61 57.97 55.53 59.37Q54.45 60.78 52.66 61.6Q50.88 62.43 48.4 62.43Z M66.06 62.29Q63.95 62.29 62.63 61.58Q61.31 60.87 60.64 59.72Q59.97 58.57 59.81 57.19Q59.65 55.81 59.89 54.44Q60.23 52.64 61.09 51.21Q61.96 49.78 63.21 48.79Q64.45 47.79 65.91 47.26Q67.36 46.74 68.85 46.74Q69.83 46.74 70.84 46.95Q71.85 47.17 72.4 47.48Q72.57 47.58 72.59 47.67Q72.61 47.77 72.59 48.03L72.25 51.06Q72.25 51.15 72.13 51.15Q72.01 51.15 71.99 51.06Q71.65 49.26 70.57 48.3Q69.49 47.34 67.89 47.34Q66.47 47.34 65.29 48.1Q64.12 48.87 63.34 50.3Q62.56 51.73 62.25 53.7Q61.98 55.35 62.15 56.83Q62.32 58.3 62.83 59.43Q63.35 60.56 64.2 61.21Q65.05 61.86 66.21 61.86Q67.45 61.86 68.73 60.97Q70 60.08 71.27 58.23Q71.34 58.14 71.45 58.2Q71.56 58.26 71.53 58.3L70.86 61.02Q70.77 61.3 70.71 61.41Q70.65 61.52 70.43 61.57Q69.25 61.98 68.13 62.13Q67 62.29 66.06 62.29Z" fill="#EAD9B8"/></svg>
       <div class="grow">
         <h1>PAC Prospection IDF</h1>
-        <p>SOCOTEC Diagnostic Île-de-France · suivi des cibles en attendant le module Athena · V1.7</p>
+        <p>SOCOTEC Diagnostic Île-de-France · suivi des cibles en attendant le module Athena · V1.8</p>
       </div>
       <span class="sync" id="sync" data-s="wait"><i></i><span id="syncTxt">Connexion…</span></span>
     </div>
@@ -482,8 +483,8 @@ async function init(){
     db.collection("cibles").onSnapshot(snap=>{
       S.cibles=snap.docs.map(d=>Object.assign(norm(d.data()),{id:d.id}));render();
     },()=>{setSync("local","Hors ligne");toast("Connexion aux données perdue. Rechargez la page.")});
-    db.doc("config/settings").onSnapshot(s=>{if(s.exists){S.settings=Object.assign({objectif:8},s.data());if(S.tab==="tdb")renderTdb();if(S.tab==="pac")renderPac()}},()=>{});
-    db.collection("pac").onSnapshot(snap=>{S.pac=snap.docs.map(d=>Object.assign(pnorm(d.data()),{id:d.id}));if(S.tab==="pac")renderPac()},()=>{});
+    db.doc("config/settings").onSnapshot(s=>{if(s.exists){S.settings=Object.assign({objectif:8},s.data());if(S.tab==="tdb")renderTdb();if(S.tab==="pac")renderPac()}seedState.set=true;maybePacSeed()},()=>{});
+    db.collection("pac").onSnapshot(snap=>{S.pac=snap.docs.map(d=>Object.assign(pnorm(d.data()),{id:d.id}));if(S.tab==="pac")renderPac();seedState.pac=true;maybePacSeed()},()=>{});
   }else{
     lsLoad();
     let ok=true;try{localStorage.setItem("pac-idf-test","1");localStorage.removeItem("pac-idf-test")}catch(e){ok=false}
@@ -493,6 +494,7 @@ async function init(){
     else{setSync("local","Enregistré sur ce poste");b.className="notice";
       b.innerHTML=IN_FRAME?"<b>Vos cibles sont enregistrées sur ce poste, dans Notion.</b> Utilisez toujours l'application ici : un onglet séparé ne voit pas les mêmes données. Faites une sauvegarde chaque semaine (Exporter, puis Sauvegarde complète).":"<b>Vos cibles sont enregistrées sur ce poste, dans ce navigateur.</b> Faites une sauvegarde chaque semaine (Exporter, puis Sauvegarde complète).";}
     render();
+    maybePacSeed();
   }
 }
 
@@ -647,7 +649,8 @@ function pacTable(lines,statsOf,ro){
    '<thead><tr><th rowspan="2" class="stk">Élément</th><th rowspan="2">Objectif</th><th rowspan="2">Descriptif de l\'action</th><th colspan="4">Actions</th><th colspan="3">Suivi du plan d\'action</th><th colspan="2">Résultats</th><th rowspan="2">Plan d\'action correctif</th></tr>'+
    '<tr>'+[1,2,3,4].map(i=>'<th'+(i===q?' class="cur" title="Trimestre en cours"':'')+'>Trimestre '+i+'</th>').join("")+'<th>Qui ? Agence ?</th><th>Quand ?</th><th>Indicateurs clés</th><th>Attendus</th><th>Obtenus</th></tr></thead><tbody>'+
    lines.map(p=>{const st=statsOf(p),tq=[p.t1,p.t2,p.t3,p.t4],anyT=tq.some(Boolean);
-     const acts=anyT?tq.map((t,i)=>'<td'+(i+1===q?' class="cur"':'')+'>'+(t?esc(t):dash)+'</td>').join(""):'<td colspan="4">'+(p.actions?esc(p.actions):dash)+'</td>';
+     const ml=x=>{const L=String(x).split("\n").map(l=>l.trim()).filter(Boolean);return L.length>1?L.map(l=>'<div class="ml">'+esc(l)+'</div>').join(""):esc(x)};
+     const acts=anyT?tq.map((t,i)=>'<td'+(i+1===q?' class="cur"':'')+'>'+(t?ml(t):dash)+'</td>').join(""):'<td colspan="4">'+(p.actions?ml(p.actions):dash)+'</td>';
      const obt=pacKpis(p,st)+(p.obtenus?'<div>'+esc(p.obtenus)+'</div>':'')+(p.campagnes.length?'<div class="pcamp">'+esc(p.campagnes.map(c=>c.replace(/^PAC IDF – /,"")).join(" · "))+'</div>':'');
      return '<tr data-pid="'+esc(p.id)+'" tabindex="0"><td class="stk">'+esc(p.element)+'</td><td>'+(p.objectif?esc(p.objectif):dash)+'</td>'+
       '<td>'+(p.descriptif?esc(p.descriptif):(anyT&&p.actions?'':dash))+(anyT&&p.actions?'<div class="pacts">Actions : '+esc(p.actions)+'</div>':'')+'</td>'+acts+
@@ -670,14 +673,14 @@ function renderPac(){
   const lines=pacSorted(),ro=!S.writable;
   const camps=[...new Set(S.cibles.map(c=>c.campagne).filter(Boolean))];
   const linked=new Set(lines.flatMap(p=>p.campagnes)),free=camps.filter(c=>!linked.has(c)).sort((a,b)=>a.localeCompare(b,"fr"));
-  const tools='<div class="bar pac-tools">'+(ro?'':'<button class="btn ghost" type="button" data-act="phead">En-tête</button><button class="btn ghost" type="button" data-act="pimport">Importer un PAC Excel</button>')+
+  const tools='<div class="bar pac-tools">'+(ro?'':'<button class="btn ghost" type="button" data-act="phead">En-tête</button><button class="btn ghost" type="button" data-act="pmod">Lignes types</button><button class="btn ghost" type="button" data-act="pimport">Importer un PAC Excel</button>')+
     (lines.length?(IN_FRAME?'<a class="btn ghost" href="'+pacPrintURL()+'" target="_blank" rel="noopener" title="S\'ouvre dans un onglet pour imprimer ou enregistrer en PDF">Imprimer</a>':'<button class="btn ghost" type="button" data-act="pprint">Imprimer</button>'):'')+
     '<button class="btn ghost" type="button" data-act="pexport">Exporter / Excel</button>'+(ro?'':'<button class="btn primary" type="button" data-act="pnew"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3v10M3 8h10"/></svg>Nouvelle ligne</button>')+'</div>';
   let h=pacHead(pacTitre(),pacPeriode(),lines,tools);
   if(S.mode==="wait"){h+='<div class="list-wrap"><div class="empty"><h3>Chargement du PAC…</h3></div></div>'}
   else if(!lines.length){
     h+='<div class="list-wrap"><div class="empty"><h3>Le plan d\'action est vide</h3><p>Chaque ligne est un axe du plan : objectif, actions par trimestre, qui, quand, indicateurs clés, résultats et décision corrective. Reliez une ligne à une ou plusieurs campagnes : ses résultats se calculent à partir de vos cibles.</p>'+
-     (ro?'':'<div class="bar" style="justify-content:center">'+(camps.length?'<button class="btn" type="button" data-act="pfromcamps">Une ligne par campagne ('+camps.length+')</button>':'')+'<button class="btn" type="button" data-act="pimport">Importer un PAC Excel</button><button class="btn primary" type="button" data-act="pnew">Nouvelle ligne</button></div>')+'</div></div>';
+     (ro?'':'<div class="bar" style="justify-content:center">'+(camps.length?'<button class="btn" type="button" data-act="pfromcamps">Une ligne par campagne ('+camps.length+')</button>':'')+'<button class="btn" type="button" data-act="pmod">Lignes types</button><button class="btn" type="button" data-act="pimport">Importer un PAC Excel</button><button class="btn primary" type="button" data-act="pnew">Nouvelle ligne</button></div>')+'</div></div>';
   }else{
     if(free.length&&!ro)h+='<div class="notice">'+free.length+' campagne'+(free.length>1?'s':'')+' sans ligne dans le PAC : '+esc(free.map(x=>x.replace(/^PAC IDF – /,"")).join(", "))+'. <button class="btn ghost" type="button" data-act="pfromcamps">Créer '+(free.length>1?'les lignes':'la ligne')+'</button></div>';
     h+='<div class="pac-wrap">'+pacTable(lines,p=>pacStats(p),ro)+'</div><p class="hint pac-note">'+(ro?'':'Cliquez sur une ligne pour la modifier ; la décision corrective se coche directement dans le tableau. ')+'Résultats obtenus calculés à partir des cibles des campagnes reliées. Trimestre en cours surligné.</p>';
@@ -808,6 +811,86 @@ function pacPrint(){
   document.body.classList.add("print-pac");
   const off=()=>{document.body.classList.remove("print-pac");window.removeEventListener("afterprint",off)};
   window.addEventListener("afterprint",off);window.print();setTimeout(off,1500);
+}
+
+/* Lignes types du PAC IDF (axes de conquête) — reliées automatiquement aux campagnes dont le nom correspond */
+const PAC_SEED="axes-idf-1";
+const PAC_MODELES=[
+ {element:"Industrie",re:/industri/,
+  objectif:"Ouvrir des comptes industriels en gré à gré sur les diagnostics avant travaux et de maintenance",
+  descriptif:"Cibler les sites industriels d'Île-de-France, en priorité les clients des autres BU (Équipements, Environnement), sur l'amiante avant travaux et arrêts techniques, le DTA, le plomb et le PEMD avant démolition.",
+  t1:"Constituer la liste des sites industriels clients des autres BU, par département\nIdentifier les responsables travaux / maintenance / HSE",
+  t2:"Visites ciblées avec les chefs d'agence et les apporteurs BU\nPrésenter l'offre avant travaux et arrêts techniques",
+  t3:"Proposer un BPU ou un accord-cadre annuel aux sites visités\nAnticiper les arrêts techniques d'été",
+  t4:"Bilan des comptes ouverts, relance des sites sans suite\nCiblage de l'année suivante",
+  qui:"CSC + chefs d'agence + apporteurs BU Équipements / Environnement",quand:"T1 à T4, point mensuel",
+  kpi:"Sites ciblés et visités, opportunités créées, devis émis, CA signé, taux de transformation",
+  attendus:"Nouveaux comptes industriels récurrents, hausse du gré à gré"},
+ {element:"Prescripteurs",re:/prescri|architect|maitr\w* d oeuvre|\bmoe\b|\bbet\b/,
+  objectif:"Faire prescrire nos missions par les architectes, maîtres d'œuvre et BET",
+  descriptif:"Faire intégrer le repérage amiante avant travaux, le plomb et le PEMD dans les DCE et les programmes de réhabilitation, pour être consultés en amont des projets.",
+  t1:"Recenser les cabinets d'architectes, MOE, BET et économistes actifs en réhabilitation, par département",
+  t2:"Rendez-vous de présentation\nRemettre une fiche « missions à intégrer à votre DCE »",
+  t3:"Petit-déjeuner technique en agence (réglementation avant travaux, PEMD)\nSuivi des projets en cours",
+  t4:"Bilan des projets prescrits, relance des cabinets actifs",
+  qui:"CSC + chefs d'agence",quand:"T1 à T4, suivi mensuel",
+  kpi:"Prescripteurs rencontrés, DCE intégrant nos missions, consultations reçues, devis issus de prescription, CA",
+  attendus:"Consultation systématique sur les projets de réhabilitation des prescripteurs actifs"},
+ {element:"Promoteurs",re:/promot/,
+  objectif:"Devenir le diagnostiqueur de référence des promoteurs sur les opérations de démolition et de réhabilitation",
+  descriptif:"Accompagner les promoteurs dès l'acquisition foncière : diagnostics avant acquisition, amiante avant démolition, plomb, PEMD. S'appuyer sur les clients promoteurs de la BU Construction.",
+  t1:"Identifier les promoteurs actifs en IDF et leurs opérations en cours avec la BU Construction",
+  t2:"Rendez-vous avec les directions techniques et de programmes\nProposer un BPU promoteur",
+  t3:"Offre packagée « avant acquisition / avant démolition »\nRéponses aux consultations",
+  t4:"Bilan des référencements obtenus, préparation des renouvellements",
+  qui:"CSC + apporteurs BU Construction + chefs d'agence",quand:"T1 à T4",
+  kpi:"Promoteurs rencontrés, référencements / BPU obtenus, opportunités, devis, CA",
+  attendus:"Référencement chez plusieurs promoteurs, flux régulier d'opérations"},
+ {element:"Foncières",re:/fonci|investiss|asset/,
+  objectif:"Référencer SOCOTEC Diagnostic chez les foncières et gestionnaires d'actifs",
+  descriptif:"Couvrir le patrimoine tertiaire, logistique et résidentiel des foncières : DTA et mises à jour, repérages avant travaux preneurs, DPE tertiaire, diagnostics avant cession d'actifs ou de portefeuilles. Modèle : contrat-cadre GECINA.",
+  t1:"Cartographier les foncières, asset et property managers présents en IDF\nFinaliser le contrat-cadre GECINA",
+  t2:"Rendez-vous directions techniques et property managers\nInscriptions sur les plateformes prestataires",
+  t3:"Réponses aux consultations et BPU\nOffre data room pour les cessions de portefeuilles",
+  t4:"Bilan des référencements, revue annuelle avec les comptes signés",
+  qui:"CSC + chefs d'agence",quand:"T1 à T4, revue trimestrielle",
+  kpi:"Foncières rencontrées, référencements et contrats-cadres signés, volume de commandes, CA",
+  attendus:"Contrats-cadres récurrents sur les grands patrimoines tertiaires"},
+ {element:"Voirie",re:/voirie|enrob|\bvrd\b|route|chauss/,
+  objectif:"Développer le repérage amiante et HAP dans les enrobés auprès des gestionnaires de voirie",
+  descriptif:"Proposer le repérage amiante et HAP des enrobés avant travaux de voirie (carottages, analyses) aux communes, départements, EPT et concessionnaires de réseaux, en synergie avec la BU Infrastructures.",
+  t1:"Recenser les maîtres d'ouvrage voirie et leurs programmes de travaux\nVeille des appels d'offres",
+  t2:"Présentations aux services voirie\nProposer des marchés à bons de commande",
+  t3:"Réponses aux AO voirie\nCampagnes de carottage avant les chantiers d'été",
+  t4:"Bilan des marchés, préparation des programmes de l'année suivante",
+  qui:"CSC + BU Infrastructures + cellule AO + chefs d'agence",quand:"T1 à T4, pic au printemps",
+  kpi:"Maîtres d'ouvrage rencontrés, AO voirie répondus / gagnés, carottages réalisés, CA",
+  attendus:"Marchés à bons de commande voirie sur plusieurs départements"}];
+const pacHasModele=m=>S.pac.some(p=>nh(p.element)===nh(m.element));
+const pacModeleCamps=m=>[...new Set(S.cibles.map(c=>c.campagne).filter(Boolean))].filter(c=>m.re.test(nh(c)));
+async function pacAddModeles(list){
+  let o=pacNextOrdre()-1,n=0;
+  for(const m of list){if(pacHasModele(m))continue;const {re,...f}=m;
+    const p=Object.assign(pblank(),clone(f),{id:uid(),creeLe:new Date().toISOString(),ordre:++o,campagnes:pacModeleCamps(m)});
+    if(await savePac(p))n++;else break}
+  return n;
+}
+let seedState={pac:false,set:false,done:false};
+async function maybePacSeed(){
+  if(seedState.done||!S.writable)return;if(S.mode==="db"&&!(seedState.pac&&seedState.set))return;
+  seedState.done=true;if(S.settings.pacSeed===PAC_SEED)return;
+  const n=await pacAddModeles(PAC_MODELES);
+  S.settings.pacSeed=PAC_SEED;await saveSettings();
+  if(n)toast(n+" ligne"+(n>1?"s":"")+" ajoutée"+(n>1?"s":"")+" au PAC : "+PAC_MODELES.map(m=>m.element).join(", "));
+}
+function pacModelesMenu(){
+  const d=$("#drawer");
+  d.innerHTML='<div class="dh"><div class="grow"><span class="lbl">PAC</span><h2 id="dTitle">Lignes types</h2></div><button class="btn ghost" type="button" data-act="close">Fermer</button></div><div class="db">'+
+  '<p class="hint">Axes de conquête pré-remplis : objectif, descriptif, actions T1 à T4, qui, quand, indicateurs. Chaque ligne est reliée aux campagnes dont le nom correspond. Vous complétez ensuite les objectifs chiffrés.</p>'+
+  '<div class="cpl">'+PAC_MODELES.map((m,i)=>{const has=pacHasModele(m),cs=pacModeleCamps(m);
+    return '<label'+(has?' class="dis"':'')+'><input type="checkbox" data-pm="'+i+'"'+(has?' disabled':' checked')+'><span class="grow"><b>'+esc(m.element)+'</b><span class="sub" style="display:block">'+esc(m.objectif)+'</span>'+(cs.length&&!has?'<span class="sub" style="display:block">Reliée à : '+esc(cs.map(c=>c.replace(/^PAC IDF – /,"")).join(", "))+'</span>':'')+'</span>'+(has?'<span class="sub">déjà dans le PAC</span>':'')+'</label>'}).join("")+'</div></div>'+
+  '<div class="df"><span class="grow"></span><button class="btn" type="button" data-act="close">Annuler</button><button class="btn primary" type="button" data-act="pmgo">Ajouter</button></div>';
+  $("#scrim").hidden=false;d.hidden=false;
 }
 
 /* ---------- Tableau de bord ---------- */
@@ -1535,6 +1618,9 @@ document.addEventListener("click",async e=>{
   if(t.dataset.act==="pheadsave"){S.settings.pacTitre=$("#ph-t").value.trim();S.settings.pacPeriode=$("#ph-p").value.trim();await saveSettings();closeDrawer();renderPac();toast("En-tête du PAC enregistré");return}
   if(t.dataset.act==="pfromcamps"){await pacFromCamps();return}
   if(t.dataset.act==="pimport"){pacImportMenu();return}
+  if(t.dataset.act==="pmod"){pacModelesMenu();return}
+  if(t.dataset.act==="pmgo"){const sel=[...document.querySelectorAll("#drawer input[data-pm]:checked")].map(i=>PAC_MODELES[+i.dataset.pm]);
+    if(!sel.length){toast("Cochez au moins une ligne.");return}const n=await pacAddModeles(sel);closeDrawer();toast(n?n+" ligne"+(n>1?"s":"")+" ajoutée"+(n>1?"s":"")+" au PAC":"Ces lignes sont déjà dans le PAC");return}
   if(t.dataset.act==="pimpgo"){await pacImportGo();return}
   if(P){
     if(t.dataset.pdec){pReadForm();P.decision=P.decision===t.dataset.pdec?"":t.dataset.pdec;drawPac();return}
