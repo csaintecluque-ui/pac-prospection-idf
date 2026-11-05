@@ -434,6 +434,19 @@ body{min-height:100vh}
 .tl-i.open .tgb svg{transform:rotate(90deg)}
 .tl-sum{font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tl-i.open{background:color-mix(in srgb,var(--surface) 70%,var(--accent-soft))}
+.modal .dh{cursor:move;user-select:none;-webkit-user-select:none}
+.modal .dh button,.modal .dh a{cursor:pointer}
+.mgrip{color:var(--muted);font-size:17px;line-height:1;align-self:center;margin-right:-2px;opacity:.7}
+.modal.moved{transform:none}
+.modal.compact{width:min(780px,calc(100% - 24px));height:min(82vh,calc(100% - 24px));max-height:none}
+.modal.compact .db{flex:1;padding:16px 20px 22px}
+.modal.compact .am-grid,.modal.compact .rv-grid{grid-template-columns:minmax(0,1fr)}
+.modal [data-act="msize"] .l-cmp,.modal.compact [data-act="msize"] .l-big{display:none}
+.modal.compact [data-act="msize"] .l-cmp{display:inline}
+.modal:not(.big):not(.compact) [data-act="msize"]{display:none}
+.mscrim.light{background:rgba(15,12,10,.1)}
+body.dragging{cursor:move;user-select:none}
+@media (max-width:700px){.modal .dh{cursor:default}.mgrip,.modal [data-act="msize"]{display:none!important}}
 .kc{position:relative}
 .kc-list{position:absolute;left:0;right:0;top:calc(100% + 4px);background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);max-height:330px;overflow:auto;z-index:6;padding:4px}
 .kc-h{font:600 11px var(--f-label);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);padding:6px 9px 4px}
@@ -680,7 +693,7 @@ input[type=time]{width:100%;background:var(--surface);border:1px solid var(--lin
   <div class="side-f">
     <span class="sync" id="sync" data-s="wait"><i></i><span id="syncTxt">Chargement…</span></span>
     <button class="btn" type="button" data-act="export" title="Exporter, sauvegarder, restaurer"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11"/></svg><span>Exporter / sauvegarder</span></button>
-    <span class="ver">V3.4 · CSC</span>
+    <span class="ver">V3.5 · CSC</span>
   </div>
 </aside>
 
@@ -769,7 +782,7 @@ function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTi
 const nh=x=>String(x==null?"":x).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
 const now=()=>new Date().toISOString();
 const S={open:new Set(),mode:"wait",cibles:[],comptes:[],contacts:[],actions:[],plans:[],pac:[],mailing:[],settings:{objectif:8},writable:true,view:"actives",tab:"tdb",kid:"",db:null,downloads:null,ver:0};
-const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.4";
+const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.5";
 let STORE="ls"; /* "idb" dès que les données sont dans la base du navigateur */
 const IN_FRAME=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 const TYPE_RANK={"Client existant":3,"Prescripteur":2,"Prospect":1};
@@ -1068,8 +1081,13 @@ const relancesDues=(until)=>S.mailing.filter(m=>m.envoye&&m.relance&&!m.relanceF
 
 /* ---------- Fenêtre modale ---------- */
 let MODAL=null;
-function showModal(html,kind){MODAL=kind||"x";const m=$("#modal");m.classList.remove("big");m.innerHTML=html;m.hidden=false;$("#mscrim").hidden=false}
-function closeModal(){MODAL=null;AM=null;CM=null;KM=null;RV=null;$("#modal").classList.remove("big");$("#modal").hidden=true;$("#mscrim").hidden=true}
+let MSIZE="auto";
+function modalBig(){const m=$("#modal");if(MSIZE==="compact"){m.classList.remove("big");m.classList.add("compact")}else{m.classList.remove("compact");m.classList.add("big")}}
+function modalCtl(m){const dh=m.querySelector(".dh");if(!dh)return;dh.title="Glisser pour déplacer la fenêtre · double-clic pour la recentrer";
+  if(!dh.querySelector(".mgrip")){const g=document.createElement("span");g.className="mgrip";g.setAttribute("aria-hidden","true");g.textContent="⠿";dh.insertBefore(g,dh.firstChild)}
+  const cl=dh.querySelector('[data-act="mclose"]');if(cl&&!dh.querySelector('[data-act="msize"]')){const b=document.createElement("button");b.type="button";b.className="btn ghost";b.dataset.act="msize";b.innerHTML='<span class="l-big">Réduire</span><span class="l-cmp">Agrandir</span>';dh.insertBefore(b,cl)}}
+function showModal(html,kind){MODAL=kind||"x";const m=$("#modal");m.classList.remove("big","compact");m.innerHTML=html;modalCtl(m);m.hidden=false;$("#mscrim").hidden=false}
+function closeModal(){MODAL=null;AM=null;CM=null;KM=null;RV=null;const m=$("#modal");m.classList.remove("big","compact","moved");m.style.left=m.style.top="";$("#mscrim").classList.remove("light");$("#modal").hidden=true;$("#mscrim").hidden=true}
 const mHead=(lbl,title)=>'<div class="dh"><div class="grow"><span class="lbl">'+lbl+'</span><h2 id="mTitle">'+title+'</h2></div><button class="btn ghost" type="button" data-act="mclose">Fermer</button></div>';
 const fld=(id,lab,val,type,extra)=>'<div class="f"><label class="lbl" for="'+id+'">'+lab+'</label><input type="'+(type||"text")+'" id="'+id+'" value="'+esc(val==null?"":val)+'"'+(extra||"")+'></div>';
 const ta=(id,lab,val,rows,ph)=>'<div class="f"><label class="lbl" for="'+id+'">'+lab+'</label><textarea id="'+id+'" rows="'+(rows||3)+'"'+(ph?' placeholder="'+esc(ph)+'"':'')+'>'+esc(val||"")+'</textarea></div>';
@@ -1124,7 +1142,7 @@ function drawAction(){
    (crOK(a.type)?crSection(a):'')+
   '</div></form></div>'+
   '<div class="df">'+(amNew?'':'<button class="btn danger" type="button" data-act="amdel">Supprimer</button>')+(k?'<button class="btn ghost" type="button" data-kopen="'+esc(k.id)+'">Fiche compte</button>':'')+'<span class="grow"></span><button class="btn" type="button" data-act="mclose">Annuler</button><button class="btn primary" type="button" data-act="amsave">Enregistrer</button></div>',"action");
-  $("#modal").classList.add("big");
+  modalBig();
 }
 async function amSave(){
   amRead();const a=AM;
@@ -3439,7 +3457,7 @@ function viewAction(id){const a=S.actions.find(x=>x.id===id);if(!a)return;if(!vi
      (open.length?'<div class="rv-c"><h3>À venir sur ce compte</h3><div class="todo">'+open.map(x=>tItem(x,{noCompte:true,full:true})).join("")+'</div></div>':'')+
     '</aside></div></div>'+
    '<div class="df">'+(k?'<button class="btn ghost" type="button" data-kopen="'+esc(k.id)+'">Fiche compte</button>':'')+'<button class="btn ghost" type="button" data-act="crcopy">Copier</button><button class="btn ghost" type="button" data-act="crmail">Envoyer par mail</button><button class="btn ghost" type="button" data-act="crprint">Imprimer / PDF</button><span class="grow"></span><button class="btn" type="button" data-act="mclose">Fermer</button><button class="btn primary" type="button" data-act="rvedit">Modifier</button></div>',"view");
-  $("#modal").classList.add("big")}
+  modalBig()}
 
 /* ================= V3 · Événements ================= */
 document.addEventListener("click",async e=>{
@@ -3447,6 +3465,7 @@ document.addEventListener("click",async e=>{
   const d=t.dataset;
   /* Fenêtre modale ouverte : ses propres boutons d'abord */
   if(d.act==="mclose"){closeModal();return}
+  if(d.act==="msize"){const m=$("#modal");MSIZE=m.classList.contains("compact")?"auto":"compact";modalBig();if(m.classList.contains("moved")){const r=m.getBoundingClientRect();if(r.right<120||r.left>innerWidth-120){m.classList.remove("moved");m.style.left=m.style.top=""}}return}
   if(d.kpick){kPick(d.kpick);return}
   if(d.act==="crcopy"){crCopy();return}
   if(d.act==="crmail"){crMail();return}
@@ -3631,6 +3650,14 @@ document.addEventListener("keydown",e=>{
 function stayOpen(){toast(D||ME?"La fiche reste ouverte : Enregistrer, ou Fermer.":"Pour quitter ce panneau : Fermer.");
   const b=document.querySelector("#drawer .df .btn.primary")||document.querySelector('#drawer [data-act="close"]');if(b){b.classList.remove("nudge");void b.offsetWidth;b.classList.add("nudge")}}
 $("#scrim").addEventListener("click",stayOpen);
+/* Fenêtres déplaçables par l'en-tête ; double-clic pour recentrer */
+let MDRAG=null;
+document.addEventListener("pointerdown",e=>{const h=e.target.closest&&e.target.closest("#modal .dh");if(!h||e.button>0||e.target.closest("button,a,input,select,textarea,label")||window.innerWidth<700)return;
+  const m=$("#modal"),r=m.getBoundingClientRect();MDRAG={dx:e.clientX-r.left,dy:e.clientY-r.top};m.classList.add("moved");m.style.left=r.left+"px";m.style.top=r.top+"px";$("#mscrim").classList.add("light");document.body.classList.add("dragging");e.preventDefault()});
+document.addEventListener("pointermove",e=>{if(!MDRAG)return;const m=$("#modal"),w=m.offsetWidth;
+  const x=Math.min(Math.max(e.clientX-MDRAG.dx,120-w),innerWidth-120),y=Math.min(Math.max(e.clientY-MDRAG.dy,0),innerHeight-56);m.style.left=x+"px";m.style.top=y+"px"});
+document.addEventListener("pointerup",()=>{if(MDRAG){MDRAG=null;document.body.classList.remove("dragging")}});
+document.addEventListener("dblclick",e=>{const h=e.target.closest&&e.target.closest("#modal .dh");if(!h||e.target.closest("button,a,input,select,textarea"))return;const m=$("#modal");m.classList.remove("moved");m.style.left=m.style.top="";$("#mscrim").classList.remove("light")});
 document.addEventListener("mousedown",e=>{const o=e.target.closest&&e.target.closest(".kc-o");if(o){e.preventDefault();kPick(o.dataset.kpick)}});
 document.addEventListener("focusin",e=>{if(e.target.id==="am-k"){const el=e.target;if(AM&&AM.compteId&&el.value)setTimeout(()=>{if(document.activeElement===el)el.select()},0);renderKc()}});
 document.addEventListener("focusout",e=>{if(e.target.id==="am-k")setTimeout(()=>{if(document.activeElement&&document.activeElement.id==="am-k")return;kcHide()},120)});
