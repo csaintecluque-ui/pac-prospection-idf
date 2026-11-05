@@ -720,6 +720,40 @@ body.dsz,body.dsz *{cursor:nwse-resize!important}
 .nb-db{min-width:min(620px,86vw)}
 .qk-nb{grid-column:1/-1;flex-direction:row!important;justify-content:center;gap:7px!important;padding:8px 6px!important}
 .qk-nb b{background:#C9804F;color:#fff;border-radius:9px;padding:0 6px;font-size:11px;line-height:17px}
+
+/* V3.7 · bilan d'activité */
+.bl-ctl{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+.bl-line{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px}
+.bl-line .lbl{font:600 11px var(--f-label);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.bl-line .chips{flex:1;min-width:0}
+.bl-dep{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:13px}
+.bl-dep input{width:auto;padding:4px 8px}
+.bl-ck{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;margin-right:12px;cursor:pointer}
+.bl-k{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px}
+.bl-cols{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:16px;align-items:start}
+.bl-cols.one{grid-template-columns:minmax(0,1fr)}
+.bl-side{display:flex;flex-direction:column;gap:16px;position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto}
+@media (max-width:1250px){.bl-cols{grid-template-columns:minmax(0,1fr)}.bl-side{position:static;max-height:none}}
+.bl-wk{margin-top:12px}
+.bl-wh{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 6px;font:500 13px var(--f-ui);background:var(--surface-2);border-radius:6px;padding:6px 10px;margin-bottom:2px}
+.bl-wh b{color:var(--accent)}
+.bl-wh .n{margin-left:auto;color:var(--muted);font-size:12px}
+.bl-r{display:grid;grid-template-columns:86px 28px minmax(0,1fr);gap:4px 10px;align-items:start;padding:10px 6px;border-bottom:1px solid var(--line);cursor:pointer;border-radius:4px}
+.bl-r:hover{background:var(--surface-2)}
+.bl-r.nbk{cursor:default;background:var(--warn-soft)}
+.bl-r.late .bl-d b{color:var(--bad)}
+.bl-d b{display:block;font:600 13px var(--f-ui)}
+.bl-d span{font-size:12px;color:var(--muted)}
+.bl-o{font-size:14.5px;line-height:1.4}
+.bl-ty{font:600 11px var(--f-label);letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-right:7px}
+.bl-r .m{font-size:13px;color:var(--muted);margin-top:2px}
+.bl-n{margin-top:6px;border-left:3px solid var(--accent-soft);padding:2px 0 2px 10px;font-size:13.5px;color:var(--fg)}
+.bl-n p{margin:0;white-space:pre-wrap}
+.bl-n .crv{margin-top:6px}
+.bl-mail{display:flex;align-items:center;gap:6px;width:100%;background:none;border:0;border-bottom:1px solid var(--line);color:var(--muted);font:400 13px var(--f-ui);padding:9px 6px 9px 130px;cursor:pointer;text-align:left}
+.bl-mail:hover{color:var(--accent)}
+.bl-mail svg{width:14px;height:14px}
+@media (max-width:640px){.bl-r{grid-template-columns:64px minmax(0,1fr)}.bl-r .eic{display:none}.bl-mail{padding-left:6px}}
 </style>
 </head>
 <body>
@@ -739,7 +773,7 @@ body.dsz,body.dsz *{cursor:nwse-resize!important}
   <div class="side-f">
     <span class="sync" id="sync" data-s="wait"><i></i><span id="syncTxt">Chargement…</span></span>
     <button class="btn" type="button" data-act="export" title="Exporter, sauvegarder, restaurer"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11"/></svg><span>Exporter / sauvegarder</span></button>
-    <span class="ver">V3.6 · CSC</span>
+    <span class="ver">V3.7 · CSC</span>
   </div>
 </aside>
 
@@ -750,6 +784,7 @@ body.dsz,body.dsz *{cursor:nwse-resize!important}
   <section id="view-agenda" hidden></section>
   <section id="view-comptes" hidden></section>
   <section id="view-compte" hidden></section>
+  <section id="view-bilan" hidden></section>
 
   <section id="view-cibles" hidden>
     <div class="page-h"><div class="grow"><span class="crumb">Suivi de prospection</span><h2>Cibles &amp; campagnes</h2><p class="sub" id="cibSub"></p></div>
@@ -828,7 +863,7 @@ function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTi
 const nh=x=>String(x==null?"":x).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
 const now=()=>new Date().toISOString();
 const S={open:new Set(),mode:"wait",cibles:[],comptes:[],contacts:[],actions:[],plans:[],pac:[],mailing:[],settings:{objectif:8},writable:true,view:"actives",tab:"tdb",kid:"",db:null,downloads:null,ver:0};
-const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.6";
+const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.7";
 let STORE="ls"; /* "idb" dès que les données sont dans la base du navigateur */
 const IN_FRAME=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 const TYPE_RANK={"Client existant":3,"Prescripteur":2,"Prospect":1};
@@ -1077,7 +1112,8 @@ const NAV=[["tdb","Tableau de bord",SV+'<rect x="2" y="2" width="5" height="6" r
  ["cibles","Cibles & campagnes",SV+'<circle cx="8" cy="8" r="6"/><circle cx="8" cy="8" r="3.2"/><circle cx="8" cy="8" r=".6" fill="currentColor"/></svg>',""],
  ["agenda","Agenda & actions",SV+'<rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M2 6.5h12M5.5 1.8v2.4M10.5 1.8v2.4M5 9.5h2M9 9.5h2M5 12h2"/></svg>',"Actions commerciales"],
  ["mailing","Mailing",SV+'<path d="M14 2 7 9M14 2l-4.5 12L7 9 2 6.5z"/></svg>',""],
- ["pac","Plan d'action (PAC)",SV+'<path d="M3 14.5V2M3 2.5h8.5l-1.5 3 1.5 3H3"/></svg>',"Pilotage"]];
+ ["pac","Plan d'action (PAC)",SV+'<path d="M3 14.5V2M3 2.5h8.5l-1.5 3 1.5 3H3"/></svg>',"Pilotage"],
+ ["bilan","Bilan d'activité",SV+'<path d="M2 14h12M3.5 13.5V9M7 13.5V5M10.5 13.5V7.5M14 13.5V3"/></svg>',""]];
 function renderNav(){
   renderQk();
   const t=todayISO(),late=S.actions.filter(a=>isOpen(a)&&a.date&&a.date<t).length,tod=S.actions.filter(a=>isOpen(a)&&a.date===t).length;
@@ -1087,7 +1123,7 @@ function renderNav(){
   $("#nav").innerHTML=NAV.map(([k,l,ic,g])=>{const c=cnt[k],hot=Array.isArray(c)&&c[1],n=Array.isArray(c)?c[0]:c;
     return (g?'<div class="nav-g">'+esc(g)+'</div>':'')+'<button type="button" data-nav="'+k+'"'+(cur===k?' aria-current="page"':'')+' title="'+esc(l)+'">'+ic+'<span class="l">'+esc(l)+'</span>'+(n!==""&&n!=null?'<span class="nb'+(hot?' hot':'')+'">'+n+'</span>':'')+'</button>'}).join("");
 }
-const VIEWS_ALL=["tdb","agenda","comptes","compte","cibles","mailing","pac"];
+const VIEWS_ALL=["tdb","agenda","comptes","compte","cibles","mailing","pac","bilan"];
 function showTab(k,arg,noPush){
   if(!VIEWS_ALL.includes(k))k="tdb";
   S.tab=k;if(k==="compte")S.kid=arg||S.kid;
@@ -1105,7 +1141,7 @@ function render(){
   renderNav();
   const t=S.tab;
   if(t==="tdb")renderTdb();else if(t==="agenda")renderAgenda();else if(t==="comptes")renderComptes();else if(t==="compte")renderCompte();
-  else if(t==="cibles")renderCibles();else if(t==="mailing")renderMailing();else if(t==="pac")renderPac();
+  else if(t==="cibles")renderCibles();else if(t==="mailing")renderMailing();else if(t==="pac")renderPac();else if(t==="bilan")renderBilan();
 }
 const pageH=(crumb,title,sub,tools)=>'<div class="page-h"><div class="grow">'+(crumb?'<span class="crumb">'+crumb+'</span>':'')+'<h2>'+title+'</h2>'+(sub?'<p class="sub">'+sub+'</p>':'')+'</div>'+(tools?'<div class="bar">'+tools+'</div>':'')+'</div>';
 const qBtns=(kid,cid)=>{const d=(k)=>' data-anew="'+k+'"'+(kid?' data-k="'+esc(kid)+'"':'')+(cid?' data-c="'+esc(cid)+'"':'');
@@ -3614,6 +3650,114 @@ document.addEventListener("input",e=>{const t=e.target;if(!t||!t.dataset)return;
 document.addEventListener("focusout",e=>{const t=e.target;if(!t||!t.dataset||!t.dataset.nbt)return;const n=nbOf(t.dataset.nbt);
   if(n&&!n.t.trim()){clearTimeout(NBT);S.settings.notes=nbList().filter(x=>x!==n);lsSave();setTimeout(()=>nbRefresh(),0)}
   else{clearTimeout(NBT);lsSave()}});
+
+/* ================= V3.7 · Bilan d'activité : réalisé sur N semaines et à venir ================= */
+const BLK="pac-idf-bilan";
+const BL=(()=>{const d={past:2,next:2,depuis:"",types:[],q:"",det:true,mailing:false,notes:false,retard:true};
+  try{return Object.assign(d,JSON.parse(localStorage.getItem(BLK)||"{}"),{q:""})}catch(e){return d}})();
+const blSave=()=>{try{const o=Object.assign({},BL);delete o.q;localStorage.setItem(BLK,JSON.stringify(o))}catch(e){}};
+const BLT=[["rdv","RDV / visio",["visite","visio"]],["appel","Appels",["appel"]],["mail","Mails",["mail"]],["tache","Rappels / tâches",["tache"]],["note","Notes",["note"]],["autre","Événements / autres",["evenement","autre"]]];
+const blGrp=ty=>(BLT.find(g=>g[2].includes(ty))||BLT[5])[0];
+const blF=(d,o)=>dObj(d).toLocaleDateString("fr-FR",o||{day:"numeric",month:"long"}).replace(/(^|\D)1 (?=[a-zéû])/,"$11er ");
+const blCap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+function blRange(){const t=todayISO(),from=BL.depuis&&BL.depuis<=t?BL.depuis:addD(t,-7*BL.past+1);return {t,from,to:addD(t,7*BL.next)}}
+function blMatch(a){if(BL.types.length&&!BL.types.includes(blGrp(a.type)))return false;
+  if(BL.q){const k=kOf(a.compteId),c=ctById(a.contactId);if(!nh([k&&k.nom,k&&k.ville,a.objet,a.details,a.resultat,c&&c.nom,a.cr&&JSON.stringify(a.cr)].join(" ")).includes(nh(BL.q)))return false}return true}
+function blData(){const R=blRange(),A=S.actions;
+  const doneAll=A.filter(a=>a.statut==="fait"&&a.date&&a.date>=R.from&&a.date<=R.t);
+  const mail=doneAll.filter(a=>a.origine==="mailing"&&(!BL.types.length||BL.types.includes("mail")));
+  const real=doneAll.filter(a=>a.origine!=="mailing"&&blMatch(a));
+  let done=(BL.mailing?doneAll.filter(blMatch):real).slice();
+  if(BL.notes)nbList().forEach(n=>{const d=new Date(n.c);if(isNaN(d))return;const iso=isoOf(d);if(iso<R.from||iso>R.t||(BL.q&&!nh(n.t).includes(nh(BL.q)))||(BL.types.length&&!BL.types.includes("note")))return;
+    done.push({_nb:true,id:n.id,type:"note",date:iso,heure:pad(d.getHours())+":"+pad(d.getMinutes()),objet:"Bloc-notes personnel",details:n.t})});
+  done.sort((a,b)=>b.date.localeCompare(a.date)||(b.heure||"").localeCompare(a.heure||""));
+  const next=BL.next?A.filter(a=>isOpen(a)&&a.date&&a.date>=R.t&&a.date<=R.to&&blMatch(a)).sort(aSort):[];
+  const late=BL.retard?A.filter(a=>isOpen(a)&&a.date&&a.date<R.t&&blMatch(a)).sort(aSort):[];
+  return {R,done,real,next,late,mail}}
+function blWeeks(L,desc,mail){const m=new Map(),add=w=>{if(!m.has(w))m.set(w,{L:[],mail:0});return m.get(w)};
+  L.forEach(a=>add(mondayOf(a.date)).L.push(a));if(mail&&!BL.mailing)mail.forEach(a=>add(mondayOf(a.date)).mail++);
+  return [...m.entries()].sort((x,y)=>desc?y[0].localeCompare(x[0]):x[0].localeCompare(y[0]))}
+function blWk(w){const cw=mondayOf(todayISO()),f=d=>blF(d,{day:"numeric",month:"short"}).replace(".","");
+  return {tag:w===cw?"Cette semaine":w===addD(cw,-7)?"Semaine dernière":w===addD(cw,7)?"Semaine prochaine":"",per:"du "+f(w)+" au "+f(addD(w,6))}}
+function blNote(a){return [a.details,a.resultat?"Résultat : "+a.resultat:"",a.suite?"Suite prévue : "+a.suite:""].filter(Boolean).join("\n")}
+function blRow(a,fut){const k=kOf(a.compteId),ct=ctById(a.contactId),late=fut==="late",txt=blNote(a),crc=a.cr?crHTML(a):"";
+  const meta=[k?'<button type="button" class="lk strong" data-kopen="'+esc(k.id)+'">'+esc(k.nom)+'</button>'+(k.ville?' <span class="sub">'+esc(k.ville)+'</span>':''):'',ct?esc(ct.nom+(ct.fonction?" ("+ct.fonction+")":"")):'',a.accompagnant?"avec "+esc(a.accompagnant):'',a.lieu?esc(a.lieu):''].filter(Boolean).join(" · ");
+  return '<div class="bl-r'+(fut?' fut':'')+(late?' late':'')+(a._nb?' nbk':'')+'"'+(a._nb?'':' data-aid="'+esc(a.id)+'"')+'>'+
+    '<div class="bl-d"><b>'+esc(blCap(blF(a.date,{weekday:"short",day:"numeric",month:"short"}).replace(/\./g,"")))+'</b>'+(a.heure?'<span class="num">'+esc(a.heure.replace(":","h"))+'</span>':'')+'</div>'+
+    '<span class="eic eic-'+esc(a.type)+'" title="'+esc(ALBL[a.type]||"")+'">'+(I_EV[a.type]||I_EV.autre)+'</span>'+
+    '<div class="bl-b"><div class="bl-o"><span class="bl-ty">'+esc(ALBL[a.type]||"Action")+(a.cr?' · compte rendu':'')+(a.origine==="mailing"?' · mailing':'')+'</span>'+esc(a.objet&&a.objet!==ALBL[a.type]?a.objet:"")+'</div>'+
+    (meta?'<div class="m">'+meta+'</div>':'')+(BL.det&&(txt||crc)?'<div class="bl-n">'+(txt?'<p>'+esc(txt)+'</p>':'')+crc+'</div>':'')+'</div></div>'}
+function blSection(title,sub,weeks,fut,empty){
+  let h='<div class="panel bl-sec"><div class="ph"><h2>'+title+'</h2><span class="sub">'+sub+'</span></div>';
+  if(!weeks.length)return h+'<p class="hint">'+empty+'</p></div>';
+  weeks.forEach(([w,g])=>{const W=blWk(w);
+    h+='<div class="bl-wk"><div class="bl-wh">'+(W.tag?'<b>'+W.tag+'</b> · ':'')+'<span>'+esc(W.per)+'</span><span class="n num">'+pl(g.L.length,"action")+(g.mail?' · '+pl(g.mail,"mail")+' de mailing':'')+'</span></div>'+
+      g.L.map(a=>blRow(a,fut)).join("")+(g.mail&&!g.L.length?'':'')+(g.mail?'<button type="button" class="bl-mail" data-blo="mailing">'+I_MAIL+pl(g.mail,"mail envoyé","mails envoyés")+' par mailing cette semaine · afficher le détail</button>':'')+'</div>'});
+  return h+'</div>'}
+function blKpis(D){const by=g=>D.real.filter(a=>blGrp(a.type)===g).length,cr=D.real.filter(a=>a.cr).length,ks=new Set(D.real.map(a=>a.compteId).filter(Boolean)).size;
+  const t=(l,v,d,cls)=>'<div class="kpi'+(cls?' '+cls:'')+'"><span class="lbl">'+l+'</span><span class="v">'+v+'</span><span class="d">'+d+'</span></div>';
+  const nr=D.next.filter(a=>isRdv(a.type)).length;
+  return '<div class="bl-k">'+t("RDV / visio réalisés",by("rdv"),pl(cr,"compte rendu","comptes rendus"))+t("Appels",by("appel"),"passés sur la période")+
+    t("Mails",by("mail"),pl(D.mail.length,"envoi","envois")+" de mailing en plus")+t("Rappels traités",by("tache"),pl(by("note"),"note")+" · "+pl(by("autre"),"autre"))+
+    t("Comptes travaillés",ks,"au moins une action réalisée")+(BL.next?t("À venir",D.next.length,pl(nr,"RDV")+" planifié"+(nr>1?"s":"")):'')+(BL.retard?t("En retard",D.late.length,D.late.length?"actions à rattraper":"rien en retard",D.late.length?"bad":""):'')+'</div>'}
+function blPeriod(R){return "Du "+blF(R.from,{weekday:"long",day:"numeric",month:"long"})+" au "+blF(R.t,{weekday:"long",day:"numeric",month:"long",year:"numeric"})}
+function renderBilan(){const el=$("#view-bilan");if(!el)return;const R=blRange();
+  const seg=(attr,vals,cur,lbl)=>'<div class="seg" role="group" aria-label="'+lbl+'">'+vals.map(([v,l])=>'<button type="button" data-'+attr+'="'+v+'" aria-pressed="'+(cur===v)+'">'+l+'</button>').join("")+'</div>';
+  const ck=(k,l)=>'<label class="bl-ck"><input type="checkbox" data-blo="'+k+'"'+(BL[k]?' checked':'')+'>'+l+'</label>';
+  let h=pageH("Pilotage","Bilan d'activité",esc(blPeriod(R))+(BL.next?' · à venir jusqu\'au '+esc(blF(R.to,{day:"numeric",month:"long"})):''),
+    '<button class="btn" type="button" data-act="blcopy">Copier pour un mail</button><button class="btn primary" type="button" data-act="blprint">Imprimer / PDF</button>');
+  h+='<div class="panel bl-ctl"><div class="bl-line"><span class="lbl">Réalisé sur</span>'+seg("blp",[[1,"1 sem."],[2,"2 sem."],[3,"3 sem."],[4,"4 sem."],[6,"6 sem."],[8,"8 sem."],[12,"12 sem."]],BL.depuis?-1:BL.past,"Nombre de semaines passées")+
+    '<label class="bl-dep">ou depuis le <input type="date" id="blDep" value="'+esc(BL.depuis)+'" max="'+R.t+'"></label>'+(BL.depuis?'<button type="button" class="more" data-act="bldepx">effacer</button>':'')+
+    '<span class="lbl" style="margin-left:10px">À venir</span>'+seg("bln",[[0,"Non"],[1,"1 sem."],[2,"2 sem."],[4,"4 sem."],[8,"8 sem."]],BL.next,"Nombre de semaines à venir")+'</div>'+
+    '<div class="bl-line"><div class="chips"><button type="button" class="chip" data-blt="" aria-pressed="'+!BL.types.length+'">Tout</button>'+BLT.map(([k,l])=>'<button type="button" class="chip" data-blt="'+k+'" aria-pressed="'+BL.types.includes(k)+'">'+esc(l)+'</button>').join("")+'</div>'+
+    '<input type="search" id="blQ" value="'+esc(BL.q)+'" placeholder="Filtrer : compte, ville, contact, mot dans les notes…" style="width:280px"></div>'+
+    '<div class="bl-line">'+ck("det","Afficher le détail des notes et comptes rendus")+ck("retard","Actions en retard")+ck("mailing","Détailler les mails de mailing")+ck("notes","Inclure mon bloc-notes")+'</div></div>';
+  h+='<div id="blBody"></div>';el.innerHTML=h;blBody()}
+function blBody(){const b=$("#blBody");if(!b)return;const D=blData(),R=D.R;
+  let h=blKpis(D);
+  const past=blSection("Réalisé",esc(pl(D.done.length,"élément"))+(D.mail.length&&!BL.mailing?' · '+pl(D.mail.length,"mail")+' de mailing':''),blWeeks(D.done,true,D.mail),"","Aucune action réalisée sur la période"+(BL.types.length||BL.q?" avec ces filtres":"")+".");
+  let side="";
+  if(BL.next)side+=blSection("À venir",esc(pl(D.next.length,"action"))+' jusqu\'au '+esc(blF(R.to,{day:"numeric",month:"short"})),blWeeks(D.next,false),"fut","Rien de planifié sur cette période.");
+  if(BL.retard&&D.late.length)side+='<div class="panel bl-sec"><div class="ph"><h2>En retard</h2><span class="sub">'+pl(D.late.length,"action")+' non faite'+(D.late.length>1?'s':'')+'</span></div><div class="bl-wk">'+D.late.map(a=>blRow(a,"late")).join("")+'</div></div>';
+  h+='<div class="bl-cols'+(side?'':' one')+'"><div>'+past+'</div>'+(side?'<div class="bl-side">'+side+'</div>':'')+'</div>';
+  b.innerHTML=h}
+
+/* Copie texte (mail) et impression */
+function blTxtRow(a){const k=kOf(a.compteId),ct=ctById(a.contactId),n=BL.det?blNote(a):"",cr=BL.det&&a.cr?crRows(a).filter(r=>r[0]!=="Points abordés"&&r[0]!=="Lieu").map(([l,v])=>l+" : "+String(v).replace(/\n/g," / ")):[];
+  return "• "+blF(a.date,{weekday:"short",day:"numeric",month:"short"}).replace(/\./g,"")+(a.heure?" "+a.heure.replace(":","h"):"")+" – "+(ALBL[a.type]||"")+(a.cr?" (compte rendu)":"")+(k?" – "+k.nom:"")+(ct?" – "+ct.nom:"")+(a.objet&&a.objet!==ALBL[a.type]?" : "+a.objet:"")+
+    (n?"\n    "+n.replace(/\n/g,"\n    "):"")+(cr.length?"\n    "+cr.join("\n    "):"")}
+function blText(){const D=blData(),R=D.R,by=g=>D.real.filter(a=>blGrp(a.type)===g).length;
+  let s="Bilan d'activité – "+blPeriod(R).toLowerCase().replace(/^du/,"du")+"\n\nSynthèse : "+[pl(by("rdv"),"RDV / visio","RDV / visio"),pl(by("appel"),"appel"),pl(by("mail"),"mail"),pl(D.mail.length,"envoi")+" de mailing",pl(by("tache"),"rappel traité","rappels traités"),pl(new Set(D.real.map(a=>a.compteId).filter(Boolean)).size,"compte travaillé","comptes travaillés")].join(" · ")+"\n";
+  const sec=(t,W)=>{s+="\n"+t.toUpperCase()+"\n";if(!W.length){s+="(rien)\n";return}W.forEach(([w,g])=>{const x=blWk(w);s+="\n"+(x.tag?x.tag+" – ":"")+x.per.charAt(0).toUpperCase()+x.per.slice(1)+"\n"+g.L.map(blTxtRow).join("\n")+(g.mail?(g.L.length?"\n":"")+"• "+pl(g.mail,"mail envoyé","mails envoyés")+" par mailing":"")+"\n"})};
+  sec("Réalisé",blWeeks(D.done,true,D.mail));
+  if(BL.next)sec("À venir (jusqu'au "+blF(R.to)+")",blWeeks(D.next,false));
+  if(BL.retard&&D.late.length)s+="\nEN RETARD\n"+D.late.map(blTxtRow).join("\n")+"\n";
+  return s}
+async function blCopy(){const t=blText();try{await navigator.clipboard.writeText(t);toast("Bilan copié : collez-le dans votre mail")}catch(e){const ta=document.createElement("textarea");ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");toast("Bilan copié")}catch(x){toast("Copie impossible")}ta.remove()}}
+function blPrint(){const D=blData(),R=D.R,by=g=>D.real.filter(a=>blGrp(a.type)===g).length;
+  const row=a=>{const k=kOf(a.compteId),ct=ctById(a.contactId),n=BL.det?blNote(a):"",cr=BL.det&&a.cr?crRows(a).filter(r=>r[0]!=="Points abordés"&&r[0]!=="Lieu"):[];
+    return '<tr><td class="d">'+esc(blF(a.date,{weekday:"short",day:"numeric",month:"short"}).replace(/\./g,""))+(a.heure?'<br>'+esc(a.heure.replace(":","h")):'')+'</td><td class="t">'+esc(ALBL[a.type]||"")+(a.cr?'<br><i>compte rendu</i>':'')+'</td><td><b>'+esc(k?k.nom:a._nb?"Bloc-notes":"")+'</b>'+(ct?' · '+esc(ct.nom):'')+(a.objet&&a.objet!==ALBL[a.type]?'<div>'+esc(a.objet)+'</div>':'')+
+      (n?'<div class="n">'+esc(n)+'</div>':'')+(cr.length?'<div class="n">'+cr.map(([l,v])=>'<b>'+esc(l)+' :</b> '+esc(v)).join("<br>")+'</div>':'')+'</td></tr>'};
+  const sec=(t,W)=>'<h2>'+esc(t)+'</h2>'+(W.length?W.map(([w,g])=>{const x=blWk(w);return '<h3>'+(x.tag?esc(x.tag)+' · ':'')+esc(x.per)+' <span>'+pl(g.L.length,"action")+(g.mail?' · '+pl(g.mail,"mail")+' de mailing':'')+'</span></h3><table>'+g.L.map(row).join("")+'</table>'}).join(""):'<p>Rien sur la période.</p>');
+  const html='<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Bilan d\'activité</title><style>body{font:10pt/1.45 "IBM Plex Sans",Arial,sans-serif;color:#1E1B18;margin:14mm 13mm}h1{font-size:16pt;margin:0}p.s{color:#69625B;margin:1mm 0 5mm}.k{display:flex;flex-wrap:wrap;gap:3mm;margin-bottom:4mm}.k div{border:1px solid #E0DDD7;border-radius:2mm;padding:2mm 4mm;min-width:28mm}.k b{display:block;font-size:15pt}.k span{color:#69625B;font-size:8.5pt}h2{font-size:12.5pt;color:#A35C2A;border-bottom:1.5px solid #A35C2A;padding-bottom:1mm;margin:7mm 0 2mm}h3{font-size:10.5pt;margin:4mm 0 1mm;break-after:avoid}h3 span{font-weight:400;color:#69625B}table{width:100%;border-collapse:collapse}td{border-top:1px solid #E0DDD7;padding:1.6mm 2mm;vertical-align:top}td.d{width:22mm;white-space:nowrap}td.t{width:26mm;color:#69625B}tr{break-inside:avoid}.n{white-space:pre-wrap;color:#3A342E;margin-top:1mm;font-size:9.3pt}footer{margin-top:8mm;font-size:8.5pt;color:#69625B;border-top:1px solid #E0DDD7;padding-top:2mm}</style></head><body>'+
+    '<h1>Bilan d\'activité</h1><p class="s">'+esc(blPeriod(R))+(BL.next?' · à venir jusqu\'au '+esc(blF(R.to)):'')+(BL.types.length?' · '+esc(BL.types.map(k=>BLT.find(x=>x[0]===k)[1]).join(", ")):'')+(BL.q?' · filtre « '+esc(BL.q)+' »':'')+'</p>'+
+    '<div class="k">'+[["RDV / visio",by("rdv")],["Appels",by("appel")],["Mails",by("mail")],["Mailing",D.mail.length],["Rappels traités",by("tache")],["Comptes rendus",D.real.filter(a=>a.cr).length],["Comptes travaillés",new Set(D.real.map(a=>a.compteId).filter(Boolean)).size]].concat(BL.next?[["À venir",D.next.length]]:[]).map(([l,v])=>'<div><b>'+v+'</b><span>'+esc(l)+'</span></div>').join("")+'</div>'+
+    sec("Réalisé",blWeeks(D.done,true,D.mail))+(BL.next?sec("À venir",blWeeks(D.next,false)):'')+(BL.retard&&D.late.length?'<h2>En retard</h2><table>'+D.late.map(row).join("")+'</table>':'')+
+    '<footer>Édité le '+new Date().toLocaleDateString("fr-FR")+' · CSC</footer><script>setTimeout(()=>print(),300)<\/script></body></html>';
+  const w=window.open("","_blank");if(!w){toast("Fenêtre bloquée : autorisez les fenêtres, ou utilisez « Copier pour un mail ».");return}w.document.write(html);w.document.close()}
+
+document.addEventListener("click",e=>{if(S.tab!=="bilan")return;const t=e.target.closest&&e.target.closest("button");if(!t)return;const d=t.dataset;
+  if(d.blp!=null){BL.past=Number(d.blp);BL.depuis="";blSave();renderBilan();return}
+  if(d.bln!=null){BL.next=Number(d.bln);blSave();renderBilan();return}
+  if(d.blt!=null){if(!d.blt)BL.types=[];else BL.types=BL.types.includes(d.blt)?BL.types.filter(x=>x!==d.blt):BL.types.concat(d.blt);blSave();renderBilan();return}
+  if(d.blo==="mailing"&&t.classList.contains("bl-mail")){BL.mailing=true;blSave();renderBilan();return}
+  if(d.act==="bldepx"){BL.depuis="";blSave();renderBilan();return}
+  if(d.act==="blcopy"){blCopy();return}
+  if(d.act==="blprint"){blPrint();return}});
+document.addEventListener("change",e=>{const t=e.target;if(S.tab!=="bilan"||!t)return;
+  if(t.dataset&&t.dataset.blo){BL[t.dataset.blo]=t.checked;blSave();renderBilan();return}
+  if(t.id==="blDep"){BL.depuis=t.value&&t.value<=todayISO()?t.value:"";blSave();renderBilan()}});
+let BLQT=0;document.addEventListener("input",e=>{if(e.target&&e.target.id==="blQ"){BL.q=e.target.value;clearTimeout(BLQT);BLQT=setTimeout(blBody,180)}});
 
 /* ================= V3 · Événements ================= */
 document.addEventListener("click",async e=>{
