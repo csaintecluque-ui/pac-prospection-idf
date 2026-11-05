@@ -674,6 +674,52 @@ input[type=time]{width:100%;background:var(--surface);border:1px solid var(--lin
   body.print-pac main#app>#view-pac{display:flex!important}
   body.print-pac .plans,body.print-pac #view-pac>.page-h,body.print-pac #view-pac>.notice{display:none!important}
 }
+
+/* V3.6 · tableau de bord personnalisable */
+.dgrid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-auto-rows:4px;column-gap:16px;row-gap:0;grid-auto-flow:row dense;align-items:start}
+.dw{min-width:0;position:relative}
+.dw-in{position:relative;min-width:0}
+.dw-c{min-width:0}
+.dw-c>.panel{margin:0}
+.dw-c.fix{display:flex;flex-direction:column;overflow:hidden}
+.dw-c.fix>*{flex:1 1 auto;min-height:0;overflow:auto}
+.dw .kpis6{grid-template-columns:repeat(auto-fit,minmax(165px,1fr))}
+.dedit-bar{display:flex;flex-wrap:wrap;align-items:flex-start;gap:10px 12px;background:var(--accent-soft);border:1px dashed var(--accent);border-radius:10px;padding:12px 14px;margin-bottom:14px}
+.dedit-bar .sub{display:block;margin-top:2px}
+.dadd{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:9px}
+.dadd .lbl{font:600 11px var(--f-label);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-right:2px}
+.dadd .chip svg{width:12px;height:12px;margin-right:4px;vertical-align:-1px}
+.dgrid.edit .dw-in{outline:1.5px dashed var(--accent);outline-offset:3px;border-radius:10px}
+.dw-bar{display:flex;align-items:center;gap:4px;background:var(--ink);color:var(--parch);border-radius:8px 8px 0 0;padding:4px 6px 4px 10px;margin-bottom:6px;font:500 12.5px var(--f-ui)}
+.dw-grip{cursor:grab;user-select:none;-webkit-user-select:none;touch-action:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;padding:3px 0}
+.dw-b{background:#2A221D;border:1px solid #3A302A;color:#E8DCC6;border-radius:6px;padding:2px 8px;font:500 12px var(--f-ui);cursor:pointer;white-space:nowrap}
+.dw-b:hover:not(:disabled){border-color:#C9804F;color:#fff}
+.dw-b:disabled{opacity:.4;cursor:default}
+.dw-sz{font-size:11.5px;min-width:34px;text-align:center;color:#E8DCC6}
+.dw-rs{position:absolute;right:-6px;bottom:-6px;width:20px;height:20px;cursor:nwse-resize;touch-action:none;background:var(--accent);border:2px solid var(--surface);border-radius:5px 2px 5px 2px;box-shadow:var(--shadow);z-index:2}
+.dw.dmoving .dw-in{opacity:.45}
+.dw.dsizing .dw-in{outline-style:solid}
+.dghost{position:fixed;z-index:200;pointer-events:none;background:var(--ink);color:var(--parch);font:500 12.5px var(--f-ui);padding:6px 10px;border-radius:7px;box-shadow:var(--shadow)}
+body.dragging .dw-grip{cursor:grabbing}
+body.dsz,body.dsz *{cursor:nwse-resize!important}
+@media (max-width:700px){.dw-sz,.dw-b[data-dww]{display:none}}
+/* Bloc-notes */
+.nb-new{display:flex;gap:8px;align-items:flex-start;margin:4px 0 10px}
+.nb-new textarea{flex:1;min-height:58px;resize:none}
+.nb-new .btn svg{width:14px;height:14px}
+.nb-l{display:flex;flex-direction:column;gap:8px}
+.nb-i{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:6px 8px 5px}
+.nb-i.pin{border-color:var(--warn);background:var(--warn-soft)}
+.nb-t{width:100%;border:0;background:transparent;resize:none;padding:2px 0;font:400 14px/1.45 var(--f-ui);color:var(--fg);overflow:hidden;min-height:24px}
+.nb-t:focus{outline:none;box-shadow:inset 0 -1.5px 0 var(--accent)}
+.nb-m{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-top:2px}
+.nb-m .sub{font-size:11.5px}
+.nb-b{background:none;border:0;color:var(--muted);font:500 12px var(--f-ui);padding:2px 5px;border-radius:5px;cursor:pointer}
+.nb-b:hover{color:var(--accent);background:var(--surface-2)}
+.nb-b.del:hover,.nb-b.armed{color:var(--bad);background:var(--bad-soft)}
+.nb-db{min-width:min(620px,86vw)}
+.qk-nb{grid-column:1/-1;flex-direction:row!important;justify-content:center;gap:7px!important;padding:8px 6px!important}
+.qk-nb b{background:#C9804F;color:#fff;border-radius:9px;padding:0 6px;font-size:11px;line-height:17px}
 </style>
 </head>
 <body>
@@ -693,7 +739,7 @@ input[type=time]{width:100%;background:var(--surface);border:1px solid var(--lin
   <div class="side-f">
     <span class="sync" id="sync" data-s="wait"><i></i><span id="syncTxt">Chargement…</span></span>
     <button class="btn" type="button" data-act="export" title="Exporter, sauvegarder, restaurer"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11"/></svg><span>Exporter / sauvegarder</span></button>
-    <span class="ver">V3.5 · CSC</span>
+    <span class="ver">V3.6 · CSC</span>
   </div>
 </aside>
 
@@ -782,7 +828,7 @@ function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTi
 const nh=x=>String(x==null?"":x).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
 const now=()=>new Date().toISOString();
 const S={open:new Set(),mode:"wait",cibles:[],comptes:[],contacts:[],actions:[],plans:[],pac:[],mailing:[],settings:{objectif:8},writable:true,view:"actives",tab:"tdb",kid:"",db:null,downloads:null,ver:0};
-const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.5";
+const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.6";
 let STORE="ls"; /* "idb" dès que les données sont dans la base du navigateur */
 const IN_FRAME=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 const TYPE_RANK={"Client existant":3,"Prescripteur":2,"Prospect":1};
@@ -1087,7 +1133,7 @@ function modalCtl(m){const dh=m.querySelector(".dh");if(!dh)return;dh.title="Gli
   if(!dh.querySelector(".mgrip")){const g=document.createElement("span");g.className="mgrip";g.setAttribute("aria-hidden","true");g.textContent="⠿";dh.insertBefore(g,dh.firstChild)}
   const cl=dh.querySelector('[data-act="mclose"]');if(cl&&!dh.querySelector('[data-act="msize"]')){const b=document.createElement("button");b.type="button";b.className="btn ghost";b.dataset.act="msize";b.innerHTML='<span class="l-big">Réduire</span><span class="l-cmp">Agrandir</span>';dh.insertBefore(b,cl)}}
 function showModal(html,kind){MODAL=kind||"x";const m=$("#modal");m.classList.remove("big","compact");m.innerHTML=html;modalCtl(m);m.hidden=false;$("#mscrim").hidden=false}
-function closeModal(){MODAL=null;AM=null;CM=null;KM=null;RV=null;const m=$("#modal");m.classList.remove("big","compact","moved");m.style.left=m.style.top="";$("#mscrim").classList.remove("light");$("#modal").hidden=true;$("#mscrim").hidden=true}
+function closeModal(){if(MODAL==="nb")setTimeout(()=>{if(S.tab==="tdb")renderTdb()},0);NLINK=null;MODAL=null;AM=null;CM=null;KM=null;RV=null;const m=$("#modal");m.classList.remove("big","compact","moved");m.style.left=m.style.top="";$("#mscrim").classList.remove("light");$("#modal").hidden=true;$("#mscrim").hidden=true}
 const mHead=(lbl,title)=>'<div class="dh"><div class="grow"><span class="lbl">'+lbl+'</span><h2 id="mTitle">'+title+'</h2></div><button class="btn ghost" type="button" data-act="mclose">Fermer</button></div>';
 const fld=(id,lab,val,type,extra)=>'<div class="f"><label class="lbl" for="'+id+'">'+lab+'</label><input type="'+(type||"text")+'" id="'+id+'" value="'+esc(val==null?"":val)+'"'+(extra||"")+'></div>';
 const ta=(id,lab,val,rows,ph)=>'<div class="f"><label class="lbl" for="'+id+'">'+lab+'</label><textarea id="'+id+'" rows="'+(rows||3)+'"'+(ph?' placeholder="'+esc(ph)+'"':'')+'>'+esc(val||"")+'</textarea></div>';
@@ -1313,14 +1359,14 @@ function renderTdb(){
   const R=relancesDues();
   const dl=new Date().toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
   let h=pageH("Pilotage","Tableau de bord",esc(dl.charAt(0).toUpperCase()+dl.slice(1)),
-    '<button class="btn" type="button" data-knew="1">'+I_PLUS+'Compte</button><button class="btn" type="button" data-anew="tache">'+I_EV.tache+'Rappel</button><button class="btn primary" type="button" data-anew="visite">'+I_PLUS+'RDV</button>');
+    '<button class="btn'+(DEDIT?' primary':'')+'" type="button" data-act="dedit" aria-pressed="'+DEDIT+'">'+(DEDIT?'Terminer la personnalisation':'Personnaliser')+'</button><button class="btn" type="button" data-knew="1">'+I_PLUS+'Compte</button><button class="btn" type="button" data-anew="tache">'+I_EV.tache+'Rappel</button><button class="btn primary" type="button" data-anew="visite">'+I_PLUS+'RDV</button>');
   /* Messages : conversion V3, sauvegarde */
   const mg=S.settings.migrationV3;
   if(mg&&!mg.vu)h+='<div class="notice" style="display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center"><span class="grow" style="flex:1;min-width:280px"><b>Vos données sont passées en V3, rien n\'a été perdu.</b> '+pl(mg.cibles,"cible")+', '+pl(mg.mailing,"ligne")+' de mailing et '+pl(mg.pac,"ligne")+' de PAC sont conservées. Elles sont maintenant rattachées à '+pl(mg.comptes,"compte")+', '+pl(mg.contacts,"contact")+' et '+pl(mg.actions,"action")+' (visites et prochaines actions). '+(mg.copie?'Une copie intacte de l\'ancienne version reste sur ce poste.':'')+'</span><button class="btn" type="button" data-act="export">Faire une sauvegarde</button><button class="btn ghost" type="button" data-act="migok">OK</button></div>';
   const lb=S.settings.lastBackup,days=lb?Math.floor((Date.now()-new Date(lb).getTime())/864e5):null;
   if(!mg||mg.vu){if(days==null||days>=7)h+='<div class="notice warn" style="display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center"><span style="flex:1;min-width:240px"><b>'+(days==null?'Aucune sauvegarde faite depuis cet outil':'Dernière sauvegarde il y a '+days+' jours')+'.</b> Vos données ne sont que dans ce navigateur.</span><button class="btn primary" type="button" data-act="backup">Sauvegarder maintenant</button></div>'}
   const kpi=(cls,lbl,v,d,act)=>'<button type="button" class="kpi click '+cls+'"'+act+'><span class="lbl">'+lbl+'</span><span class="v">'+v+'</span><span class="d">'+d+'</span></button>';
-  h+='<div class="kpis6">'+
+  const W={};W.kpis='<div class="kpis6">'+
     kpi(late.length?'bad':'','En retard',late.length,late.length?'actions à rattraper':'aucune action en retard',' data-agf="retard"')+
     kpi(tod.length?'warn':'',"Aujourd'hui",tod.length,pl(tod.filter(a=>isRdv(a.type)).length,"RDV")+' · '+pl(tod.filter(a=>!isRdv(a.type)).length,"autre action","autres actions"),' data-agf="afaire"')+
     kpi('','RDV · 7 jours',rdv7.length,rdv7.length?'prochain : '+esc(whenLbl(rdv7.sort(aSort)[0])):'aucun RDV planifié',' data-agf="afaire"')+
@@ -1328,35 +1374,33 @@ function renderTdb(){
     kpi('','Opportunités en cours',oOpen.length,eur(oOpen.reduce((s,c)=>s+(Number(c.opp.montant)||0),0))+' · '+pl(won.length,"gagnée")+' ('+eur(won.reduce((s,c)=>s+(Number(c.opp.montant)||0),0))+')',' data-nav="cibles"')+
     kpi(R.length?'warn':'','Relances mailing',R.length,R.length?'à faire aujourd\'hui ou avant':S.mailing.filter(m=>m.envoye).length+' mails envoyés',' data-act="mrelview"')+
   '</div>';
-  const mainL='<div class="panel">'+calHTML("tdb")+'</div>',mainR='<div class="panel"><div class="ph"><h2>À faire</h2><button type="button" class="more" data-nav="agenda">Agenda complet</button></div>'+todoHTML(8)+'</div>';
+  W.cal='<div class="panel">'+calHTML("tdb")+'</div>';W.todo='<div class="panel"><div class="ph"><h2>À faire</h2><button type="button" class="more" data-nav="agenda">Agenda complet</button></div>'+todoHTML(8)+'</div>';
   /* Pipeline, activité, PAC */
   const C=S.cibles,byStage=STAGES.map(s=>({s,n:C.filter(c=>c.etape===s.k).length})),maxS=Math.max(1,...byStage.map(x=>x.n));
   const colorFor={a_qualifier:"var(--grey)",cible:"var(--info)",rdv:"var(--warn)",visite:"var(--accent)",opportunite:"var(--opp-open)",gagne:"var(--ok)",sans_suite:"var(--bad)"};
   const stageBars=byStage.map(x=>'<div class="hbar"><span>'+esc(x.s.l)+'</span><span class="t"><b style="width:'+(x.n/maxS*100)+'%;background:'+colorFor[x.s.k]+'"></b></span><span class="num" style="text-align:right">'+x.n+'</span></div>').join("");
   const p=curPlan(),pls=S.pac.filter(l=>l.planId===p.id).sort(byPrio);
   const pacL=pls.length?'<div class="pl-l">'+pls.slice(0,7).map(l=>{const st=pacStats(l);return '<div class="pi" data-pid="'+esc(l.id)+'"><span class="prio prio-'+(PCLS[l.prio]||'0')+'">'+(l.prio?'P'+l.prio:'–')+'</span><span style="min-width:0"><b>'+esc(l.element)+'</b><span class="sub" style="display:block">'+(l.campagnes.length||(l.secteurs||[]).length?pl(st.n,"cible")+' · '+pl(st.visites,"visite")+' · '+pl(st.opps,"opp."):esc((l.objectif||"").slice(0,70)))+'</span></span><span class="dpill d-'+(l.decision||'none')+'">'+esc(l.decision||"À décider")+'</span></div>'}).join("")+'</div>':'<p class="hint">Aucune ligne dans ce plan.</p>';
-  const g3='<div class="g3">'+
-    '<div class="panel"><div class="ph"><h2>Pipeline des cibles</h2><button type="button" class="more" data-nav="cibles">Cibles</button></div><div class="hbars">'+stageBars+'</div></div>'+
-    '<div class="panel"><div class="ph"><h2>Visites réalisées par mois</h2></div>'+chartVisits()+'</div>'+
-    '<div class="panel"><div class="ph"><h2>'+esc(p.nom)+'</h2><button type="button" class="more" data-nav="pac">Ouvrir le PAC</button></div>'+pacL+'</div></div>';
+  W.pipe='<div class="panel"><div class="ph"><h2>Pipeline des cibles</h2><button type="button" class="more" data-nav="cibles">Cibles</button></div><div class="hbars">'+stageBars+'</div></div>';W.visites=
+    '<div class="panel"><div class="ph"><h2>Visites réalisées par mois</h2></div>'+chartVisits()+'</div>';W.pac=
+    '<div class="panel"><div class="ph"><h2>'+esc(p.nom)+'</h2><button type="button" class="more" data-nav="pac">Ouvrir le PAC</button></div>'+pacL+'</div>';
   /* À traiter : priorité A sans prochaine action ; activité récente */
   const seen=new Set(),todo=C.filter(c=>isActive(c)&&c.priorite==="A"&&!nextFor(c)).filter(c=>{if(seen.has(c.compteId))return false;seen.add(c.compteId);return true});
   const recent=A.filter(a=>a.statut==="fait"&&a.origine!=="mailing").sort((a,b)=>String(b.faitLe||b.date).localeCompare(String(a.faitLe||a.date))||String(b.majLe).localeCompare(String(a.majLe))).slice(0,8);
-  const g2='<div class="g2">'+
-    '<div class="panel"><div class="ph"><h2>Priorité A sans prochaine action</h2><span class="sub num">'+todo.length+'</span></div>'+
-     (todo.length?'<div class="mini">'+todo.slice(0,8).map(c=>'<div class="mi"><div class="grow"><button type="button" class="lk strong" data-kopen="'+esc(c.compteId)+'">'+esc(c.compte)+'</button><div class="sub">'+esc(campShort(c))+' · <span class="pill st-'+c.etape+'" style="font-size:11px;padding:0 7px">'+esc(SL[c.etape])+'</span></div></div><button class="btn" type="button" data-anew="appel" data-k="'+esc(c.compteId)+'" data-c="'+esc(c.id)+'">'+I_EV.appel+'Appel</button><button class="btn" type="button" data-anew="visite" data-k="'+esc(c.compteId)+'" data-c="'+esc(c.id)+'">'+I_EV.visite+'RDV</button></div>').join("")+'</div>'+(todo.length>8?'<button type="button" class="more" data-nav="cibles">+ '+(todo.length-8)+' autres dans Cibles</button>':''):'<p class="hint">Toutes vos cibles de priorité A ont une prochaine action.</p>')+'</div>'+
+  W.prioA='<div class="panel"><div class="ph"><h2>Priorité A sans prochaine action</h2><span class="sub num">'+todo.length+'</span></div>'+
+     (todo.length?'<div class="mini">'+todo.slice(0,8).map(c=>'<div class="mi"><div class="grow"><button type="button" class="lk strong" data-kopen="'+esc(c.compteId)+'">'+esc(c.compte)+'</button><div class="sub">'+esc(campShort(c))+' · <span class="pill st-'+c.etape+'" style="font-size:11px;padding:0 7px">'+esc(SL[c.etape])+'</span></div></div><button class="btn" type="button" data-anew="appel" data-k="'+esc(c.compteId)+'" data-c="'+esc(c.id)+'">'+I_EV.appel+'Appel</button><button class="btn" type="button" data-anew="visite" data-k="'+esc(c.compteId)+'" data-c="'+esc(c.id)+'">'+I_EV.visite+'RDV</button></div>').join("")+'</div>'+(todo.length>8?'<button type="button" class="more" data-nav="cibles">+ '+(todo.length-8)+' autres dans Cibles</button>':''):'<p class="hint">Toutes vos cibles de priorité A ont une prochaine action.</p>')+'</div>';W.recent=
     '<div class="panel"><div class="ph"><h2>Dernières actions réalisées</h2><button type="button" class="more" data-agf="faites">Historique</button></div>'+
-     (recent.length?'<div class="todo">'+recent.map(a=>tItem(a,{full:true})).join("")+'</div>':'<p class="hint">Aucune action réalisée pour l\'instant.</p>')+'</div></div>';
+     (recent.length?'<div class="todo">'+recent.map(a=>tItem(a,{full:true})).join("")+'</div>':'<p class="hint">Aucune action réalisée pour l\'instant.</p>')+'</div>';
   /* Antécédents : devis en attente et clients perdus à reconquérir */
   let gH="";const KH=S.comptes.filter(k=>k.histo);
   if(KH.length){const yp=String(new Date().getFullYear()-1),dv=KH.filter(k=>k.histo.dv.n).sort((a,b)=>b.histo.dv.m-a.histo.dv.m),lost=KH.filter(k=>k.histo.st==="perdu"||k.histo.st==="relance").sort((a,b)=>hCA(b,yp)-hCA(a,yp));
     const row=(k,v,s,ob)=>'<div class="mi"><div class="grow"><button type="button" class="lk strong" data-kopen="'+esc(k.id)+'">'+esc(k.nom)+'</button><div class="sub">'+s+'</div></div><span class="num" style="white-space:nowrap">'+v+'</span><button class="btn" type="button" data-anew="appel" data-k="'+esc(k.id)+'" data-obj="'+esc(ob)+'">'+I_EV.appel+'Appel</button></div>';
-    gH='<div class="g2"><div class="panel"><div class="ph"><h2>Devis en attente</h2><span class="sub num">'+dv.length+' · '+eur(dv.reduce((s,k)=>s+k.histo.dv.m,0))+'</span><button type="button" class="more" data-famgo="" data-kvset="devis">Tous</button></div>'+
-      (dv.length?'<div class="mini">'+dv.slice(0,8).map(k=>row(k,eur(k.histo.dv.m),pl(k.histo.dv.n,"devis","devis")+(k.histo.dv.d?" · dernier le "+fdate(k.histo.dv.d):"")+(FNOM[famOf(k)]?" · "+esc(FNOM[famOf(k)]):""),"Relance devis en attente")).join("")+'</div>':'<p class="hint">Aucun devis en attente.</p>')+'</div>'+
+    W.devis='<div class="panel"><div class="ph"><h2>Devis en attente</h2><span class="sub num">'+dv.length+' · '+eur(dv.reduce((s,k)=>s+k.histo.dv.m,0))+'</span><button type="button" class="more" data-famgo="" data-kvset="devis">Tous</button></div>'+
+      (dv.length?'<div class="mini">'+dv.slice(0,8).map(k=>row(k,eur(k.histo.dv.m),pl(k.histo.dv.n,"devis","devis")+(k.histo.dv.d?" · dernier le "+fdate(k.histo.dv.d):"")+(FNOM[famOf(k)]?" · "+esc(FNOM[famOf(k)]):""),"Relance devis en attente")).join("")+'</div>':'<p class="hint">Aucun devis en attente.</p>')+'</div>';W.perdus=
       '<div class="panel"><div class="ph"><h2>Clients perdus à reconquérir</h2><span class="sub num">'+lost.length+' · '+eur(lost.reduce((s,k)=>s+hCA(k,yp),0))+' en '+yp+'</span><button type="button" class="more" data-famgo="" data-kvset="perdus">Tous</button></div>'+
-      (lost.length?'<div class="mini">'+lost.slice(0,8).map(k=>row(k,eur(hCA(k,yp)),"Dernière facture le "+fdate(k.histo.last)+(k.histo.st==="relance"?" · pièce "+k.histo.y1+" sans facture":"")+(FNOM[famOf(k)]?" · "+esc(FNOM[famOf(k)]):""),"Reconquête client")).join("")+'</div>':'<p class="hint">Aucun client perdu.</p>')+'</div></div>'}
-  h+='<div class="g-main"><div style="display:flex;flex-direction:column;gap:16px;min-width:0">'+mainL+g2+'</div>'+mainR+'</div>'+gH+g3;
-  el.innerHTML=h;
+      (lost.length?'<div class="mini">'+lost.slice(0,8).map(k=>row(k,eur(hCA(k,yp)),"Dernière facture le "+fdate(k.histo.last)+(k.histo.st==="relance"?" · pièce "+k.histo.y1+" sans facture":"")+(FNOM[famOf(k)]?" · "+esc(FNOM[famOf(k)]):""),"Reconquête client")).join("")+'</div>':'<p class="hint">Aucun client perdu.</p>')+'</div>'}
+  W.notes=nbPanel();h+=dashHTML(W);
+  el.innerHTML=h;dashFit();dashObs();nbGrowAll(el);nbBadge();
   const oi=$("#objIn");if(oi)oi.addEventListener("change",()=>{S.settings.objectif=Math.max(0,parseInt(oi.value,10)||0);saveSettings();renderTdb()});
 }
 
@@ -3344,8 +3388,8 @@ function renum(){S.plans.slice().sort(plSort).forEach((x,k)=>x.ordre=k+1);bump()
 /* Barre latérale : une action en un clic, rattachée au compte choisi */
 const QK=[["visite","RDV"],["appel","Appel"],["mail","Mail"],["tache","Rappel"],["note","Note"],["cr","Compte rendu"]];
 const I_CR=SV+'<path d="M4 1.8h6l2.5 2.5v9.9H4z"/><path d="M10 1.8v2.5h2.5M6 7h4.5M6 9.3h4.5M6 11.6h3"/></svg>';
-function renderQk(){const el=$("#qk");if(!el||el.dataset.done)return;el.dataset.done="1";
-  el.innerHTML=QK.map(([t,l])=>'<button type="button" data-anew="'+(t==="cr"?"visite":t)+'"'+(t==="cr"?' data-cr="1"':'')+' data-qk="1" title="'+esc(t==="cr"?"Rédiger un compte rendu":"Nouveau : "+l)+'">'+(t==="cr"?I_CR:I_EV[t])+'<span>'+esc(l)+'</span></button>').join("")}
+function renderQk(){const el=$("#qk");if(!el)return;if(el.dataset.done){nbBadge();return}el.dataset.done="1";
+  el.innerHTML=QK.map(([t,l])=>'<button type="button" data-anew="'+(t==="cr"?"visite":t)+'"'+(t==="cr"?' data-cr="1"':'')+' data-qk="1" title="'+esc(t==="cr"?"Rédiger un compte rendu":"Nouveau : "+l)+'">'+(t==="cr"?I_CR:I_EV[t])+'<span>'+esc(l)+'</span></button>').join("")+'<button type="button" class="qk-nb" data-act="nbopen" title="Bloc-notes personnel, sans compte">'+I_EV.note+'<span>Bloc-notes</span><b class="num" id="qkNb" hidden></b></button>';nbBadge()}
 
 /* ---------- Recherche de compte (nom, ville, contact, e-mail, typologie…) ---------- */
 let KSX=null,KSXV=-1,KC_I=0;
@@ -3459,6 +3503,118 @@ function viewAction(id){const a=S.actions.find(x=>x.id===id);if(!a)return;if(!vi
    '<div class="df">'+(k?'<button class="btn ghost" type="button" data-kopen="'+esc(k.id)+'">Fiche compte</button>':'')+'<button class="btn ghost" type="button" data-act="crcopy">Copier</button><button class="btn ghost" type="button" data-act="crmail">Envoyer par mail</button><button class="btn ghost" type="button" data-act="crprint">Imprimer / PDF</button><span class="grow"></span><button class="btn" type="button" data-act="mclose">Fermer</button><button class="btn primary" type="button" data-act="rvedit">Modifier</button></div>',"view");
   modalBig()}
 
+/* ================= V3.6 · Tableau de bord personnalisable et bloc-notes ================= */
+const DW=[["kpis","Indicateurs",12],["cal","Calendrier",8],["todo","À faire",4],["prioA","Priorité A sans prochaine action",4],["recent","Dernières actions réalisées",4],["notes","Bloc-notes",4],
+  ["devis","Devis en attente",6],["perdus","Clients perdus à reconquérir",6],["pipe","Pipeline des cibles",4],["visites","Visites réalisées par mois",4],["pac","Plan d'action (PAC)",4]];
+const DWT=Object.fromEntries(DW.map(x=>[x[0],x[1]]));
+let DEDIT=false,DRO=null,DMV=null,DRS=null;
+function dashCfg(){let c=Array.isArray(S.settings.dash)?S.settings.dash.filter(x=>x&&DWT[x.id]):[];const ids=new Set(c.map(x=>x.id));
+  DW.forEach(([id,,w])=>{if(!ids.has(id))c.push({id,w,h:0,on:true})});
+  c.forEach(x=>{x.w=Math.min(12,Math.max(2,parseInt(x.w,10)||4));x.h=Math.max(0,parseInt(x.h,10)||0);x.on=x.on!==false});
+  S.settings.dash=c;return c}
+const dwOf=id=>dashCfg().find(x=>x.id===id);
+function dwSpan(w){const vw=window.innerWidth;return vw<820?12:vw<1250?Math.max(w,6):w}
+function dashHTML(W){const c=dashCfg(),vis=c.filter(x=>x.on&&W[x.id]!=null),hid=c.filter(x=>!x.on&&W[x.id]!=null);let h='';
+  if(DEDIT)h+='<div class="dedit-bar"><div class="grow"><b>Personnalisation du tableau de bord</b><span class="sub">Glissez un bloc par sa barre pour le déplacer · tirez le coin en bas à droite pour changer sa largeur et sa hauteur · double-clic sur le coin : hauteur automatique.</span>'+
+    (hid.length?'<div class="dadd"><span class="lbl">Blocs masqués</span>'+hid.map(x=>'<button type="button" class="chip" data-dwon="'+x.id+'">'+I_PLUS+esc(DWT[x.id])+'</button>').join("")+'</div>':'')+'</div>'+
+    '<button class="btn" type="button" data-act="dreset">Disposition d\'origine</button><button class="btn primary" type="button" data-act="dedit">Terminer</button></div>';
+  h+='<div class="dgrid'+(DEDIT?' edit':'')+'" id="dgrid">'+vis.map(x=>'<div class="dw" data-dw="'+x.id+'" style="grid-column:span '+dwSpan(x.w)+'"><div class="dw-in">'+
+    (DEDIT?'<div class="dw-bar"><span class="dw-grip" title="Glisser pour déplacer ce bloc">⠿ '+esc(DWT[x.id])+'</span><span class="grow"></span>'+
+      '<button type="button" class="dw-b" data-dww="-1" title="Plus étroit" aria-label="Plus étroit">−</button><span class="dw-sz num" title="Largeur sur 12 colonnes">'+x.w+'/12</span><button type="button" class="dw-b" data-dww="1" title="Plus large" aria-label="Plus large">+</button>'+
+      '<button type="button" class="dw-b" data-dwh="0"'+(x.h?'':' disabled')+' title="Revenir à la hauteur automatique">Hauteur auto</button><button type="button" class="dw-b" data-dwoff="1" title="Masquer ce bloc (vous pourrez le remettre)">Masquer</button></div>':'')+
+    '<div class="dw-c'+(x.h?' fix':'')+'"'+(x.h?' style="height:'+x.h+'px"':'')+'>'+W[x.id]+'</div>'+(DEDIT?'<span class="dw-rs" title="Tirer pour redimensionner · double-clic : hauteur automatique"></span>':'')+'</div></div>').join("")+'</div>';
+  if(!vis.length)h+='<div class="panel"><p class="hint">Tous les blocs sont masqués. '+(DEDIT?'Ajoutez-en depuis la barre ci-dessus.':'<button type="button" class="more" data-act="dedit">Personnaliser le tableau de bord</button>')+'</p></div>';
+  return h}
+function dwRow(el){const i=el.firstElementChild;if(i)el.style.gridRowEnd="span "+Math.max(1,Math.ceil((i.offsetHeight+16)/4))}
+function dashFit(){const g=$("#dgrid");if(!g)return;g.querySelectorAll(".dw").forEach(el=>{const x=dwOf(el.dataset.dw);if(x)el.style.gridColumn="span "+dwSpan(x.w);dwRow(el)})}
+function dashObs(){if(DRO)DRO.disconnect();DRO=null;if(!window.ResizeObserver)return;DRO=new ResizeObserver(es=>es.forEach(e=>{const el=e.target.parentElement;if(el&&el.isConnected)dwRow(el)}));
+  document.querySelectorAll("#dgrid .dw-in").forEach(i=>DRO.observe(i))}
+let DFT=0;window.addEventListener("resize",()=>{clearTimeout(DFT);DFT=setTimeout(dashFit,120)});
+function dashOrder(){const ids=[...document.querySelectorAll("#dgrid .dw")].map(e=>e.dataset.dw),c=dashCfg();
+  S.settings.dash=ids.map(id=>c.find(x=>x.id===id)).filter(Boolean).concat(c.filter(x=>!ids.includes(x.id)));lsSave()}
+function dSzLbl(el,x){const s=el.querySelector(".dw-sz");if(s)s.textContent=x.w+"/12";const b=el.querySelector('[data-dwh]');if(b)b.disabled=!x.h}
+
+/* Déplacement et redimensionnement des blocs (mode Personnaliser) */
+document.addEventListener("pointerdown",e=>{if(e.button>0||!e.target.closest)return;
+  const g=e.target.closest("#dgrid.edit .dw-grip");
+  if(g){const el=g.closest(".dw"),gh=document.createElement("div");gh.className="dghost";gh.textContent=DWT[el.dataset.dw]||"";document.body.appendChild(gh);
+    DMV={el,last:null,gh};el.classList.add("dmoving");document.body.classList.add("dragging");gh.style.left=e.clientX+14+"px";gh.style.top=e.clientY+10+"px";e.preventDefault();return}
+  const r=e.target.closest("#dgrid.edit .dw-rs");
+  if(r){const el=r.closest(".dw"),c=el.querySelector(".dw-c"),grid=$("#dgrid"),x=dwOf(el.dataset.dw);if(!x||!c)return;
+    DRS={el,c,x,sx:e.clientX,sy:e.clientY,sw:el.getBoundingClientRect().width,sh:c.offsetHeight,colW:(grid.clientWidth-11*16)/12,w:x.w,h:x.h};
+    el.classList.add("dsizing");document.body.classList.add("dragging","dsz");e.preventDefault()}});
+document.addEventListener("pointermove",e=>{
+  if(DMV){DMV.gh.style.left=e.clientX+14+"px";DMV.gh.style.top=e.clientY+10+"px";
+    if(e.clientY<70)window.scrollBy(0,-18);else if(e.clientY>window.innerHeight-70)window.scrollBy(0,18);
+    const t=document.elementFromPoint(e.clientX,e.clientY),T=t&&t.closest?t.closest("#dgrid .dw"):null;
+    if(T&&T!==DMV.el&&T!==DMV.last){const L=[...T.parentNode.children],i=L.indexOf(DMV.el),j=L.indexOf(T);if(i<j)T.after(DMV.el);else T.before(DMV.el);DMV.last=T}
+    else if(!T)DMV.last=null;return}
+  if(DRS){const s=DRS,dx=e.clientX-s.sx,dy=e.clientY-s.sy;
+    if(window.innerWidth>=820){s.w=Math.min(12,Math.max(2,Math.round((s.sw+dx+16)/(s.colW+16))));s.el.style.gridColumn="span "+dwSpan(s.w)}
+    s.h=Math.max(140,Math.round((s.sh+dy)/10)*10);s.c.style.height=s.h+"px";s.c.classList.add("fix");dwRow(s.el);dSzLbl(s.el,{w:s.w,h:s.h})}});
+document.addEventListener("pointerup",()=>{
+  if(DMV){DMV.gh.remove();DMV.el.classList.remove("dmoving");document.body.classList.remove("dragging");DMV=null;dashOrder();dashFit();return}
+  if(DRS){const s=DRS;DRS=null;s.el.classList.remove("dsizing");document.body.classList.remove("dragging","dsz");s.x.w=s.w;s.x.h=s.h;lsSave();dashFit()}});
+document.addEventListener("dblclick",e=>{const r=e.target.closest&&e.target.closest("#dgrid.edit .dw-rs");if(!r)return;const x=dwOf(r.closest(".dw").dataset.dw);if(x){x.h=0;lsSave();renderTdb()}});
+
+/* ---------- Bloc-notes personnel (sans compte) ---------- */
+let NLINK=null,NBT=0;
+function nbList(){if(!Array.isArray(S.settings.notes))S.settings.notes=[];return S.settings.notes}
+const nbOf=id=>nbList().find(n=>n.id===id);
+function nbSorted(){return nbList().slice().sort((a,b)=>(b.p?1:0)-(a.p?1:0)||String(b.c).localeCompare(String(a.c)))}
+function nbWhen(n){const f=iso=>{const d=new Date(iso);return isNaN(d)?"":d.toLocaleDateString("fr-FR",{day:"numeric",month:"short"})+" à "+d.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}).replace(":","h")};
+  return "Le "+f(n.c)+(n.m&&n.m.slice(0,16)!==String(n.c).slice(0,16)?" · modifiée le "+f(n.m):"")}
+function nbHTML(ctx){const L=nbSorted();
+  let h='<div class="nb-new"><textarea class="nb-in" data-nbin="'+ctx+'" rows="2" placeholder="Noter une idée, un numéro, un rappel… Entrée pour ajouter · Maj+Entrée pour aller à la ligne" aria-label="Nouvelle note"></textarea><button class="btn primary" type="button" data-act="nbadd" data-ctx="'+ctx+'">'+I_PLUS+'Ajouter</button></div>';
+  h+=L.length?'<div class="nb-l">'+L.map(n=>{const id=esc(n.id);return '<div class="nb-i'+(n.p?' pin':'')+'" data-nid="'+id+'"><textarea class="nb-t" data-nbt="'+id+'" rows="1" aria-label="Note">'+esc(n.t)+'</textarea>'+
+    '<div class="nb-m"><span class="sub">'+(n.p?'Épinglée · ':'')+esc(nbWhen(n))+'</span><span class="grow"></span><button type="button" class="nb-b" data-nbpin="'+id+'" aria-pressed="'+!!n.p+'">'+(n.p?'Désépingler':'Épingler')+'</button>'+
+    '<button type="button" class="nb-b" data-nbk="'+id+'" title="Enregistrer cette note dans un compte (elle quitte alors le bloc-notes)">Verser dans un compte</button><button type="button" class="nb-b del" data-nbdel="'+id+'">Supprimer</button></div></div>'}).join("")+'</div>'
+    :'<p class="hint">Aucune note. Écrivez ci-dessus : la note reste ici, sans compte. Vous pourrez la verser dans un compte plus tard.</p>';
+  return h}
+function nbPanel(){const n=nbList().length;return '<div class="panel nb"><div class="ph"><h2>Bloc-notes</h2><span class="sub num">'+(n||"")+'</span><button type="button" class="more" data-act="nbopen">Ouvrir en fenêtre</button></div>'+nbHTML("d")+'</div>'}
+function nbGrow(t){t.style.height="auto";t.style.height=Math.min(t.scrollHeight+2,420)+"px"}
+function nbGrowAll(root){(root||document).querySelectorAll(".nb-t").forEach(nbGrow)}
+function nbBadge(){const b=$("#qkNb");if(b){const n=nbList().length;b.textContent=n||"";b.hidden=!n}}
+function nbRefresh(focusCtx){
+  if(MODAL==="nb"){const db=$("#modal .db");if(db)db.innerHTML=nbHTML("m")}
+  const w=document.querySelector('#dgrid [data-dw="notes"] .dw-c');if(w&&S.tab==="tdb")w.innerHTML=nbPanel();
+  nbGrowAll();nbBadge();
+  if(focusCtx){const i=document.querySelector('[data-nbin="'+focusCtx+'"]');if(i)i.focus()}}
+function nbAdd(ctx){const i=document.querySelector('[data-nbin="'+ctx+'"]');if(!i)return;const t=i.value.replace(/\s+$/,"");
+  if(!t.trim()){i.focus();return}
+  nbList().push({id:uid(),t,c:now(),m:now(),p:false});lsSave();nbRefresh(ctx)}
+function nbDel(id){S.settings.notes=nbList().filter(n=>n.id!==id);lsSave();nbRefresh()}
+function nbOpen(){showModal('<div class="dh"><div class="grow"><span class="lbl">Notes personnelles · sans compte</span><h2 id="mTitle">Bloc-notes</h2></div><button class="btn ghost" type="button" data-act="mclose">Fermer</button></div><div class="db nb-db">'+nbHTML("m")+'</div>',"nb");
+  nbGrowAll($("#modal"));const i=$('#modal [data-nbin="m"]');if(i)i.focus()}
+function nbToCompte(id){const n=nbOf(id);if(!n)return;
+  openAction({type:"note"});NLINK=id;const d=$("#am-det");if(d){d.value=n.t}
+  const k=$("#am-k");if(k)k.focus();toast("Choisissez le compte, puis enregistrez : la note quittera le bloc-notes.")}
+function nbDone(id){if(!nbOf(id))return;S.settings.notes=nbList().filter(n=>n.id!==id);lsSave();nbBadge();if(S.tab==="tdb")renderTdb();toast("Note versée dans le compte")}
+
+document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("button");if(!t)return;const d=t.dataset;
+  if(d.act==="dedit"){DEDIT=!DEDIT;renderTdb();if(DEDIT){const b=$(".dedit-bar");if(b)b.scrollIntoView({block:"nearest"})}return}
+  if(d.act==="dreset"){S.settings.dash=null;dashCfg();lsSave();renderTdb();toast("Disposition d'origine rétablie");return}
+  if(d.dwon){const x=dwOf(d.dwon);if(x){x.on=true;lsSave();renderTdb()}return}
+  const el=t.closest("#dgrid .dw");
+  if(el&&(d.dww||d.dwh!=null||d.dwoff)){const x=dwOf(el.dataset.dw);if(!x)return;
+    if(d.dww){x.w=Math.min(12,Math.max(2,x.w+Number(d.dww)));el.style.gridColumn="span "+dwSpan(x.w);dSzLbl(el,x);lsSave();dashFit();return}
+    if(d.dwh!=null){x.h=0;lsSave();renderTdb();return}
+    if(d.dwoff){x.on=false;lsSave();renderTdb();toast("Bloc « "+DWT[x.id]+" » masqué · Personnaliser pour le remettre");return}}
+  if(d.act==="nbopen"){nbOpen();return}
+  if(d.act==="nbadd"){nbAdd(d.ctx);return}
+  if(d.nbpin){const n=nbOf(d.nbpin);if(n){n.p=!n.p;lsSave();nbRefresh()}return}
+  if(d.nbk){nbToCompte(d.nbk);return}
+  if(d.nbdel){if(t.dataset.armed){nbDel(d.nbdel);return}t.dataset.armed="1";t.textContent="Confirmer la suppression";t.classList.add("armed");
+    setTimeout(()=>{if(t.isConnected){delete t.dataset.armed;t.textContent="Supprimer";t.classList.remove("armed")}},3500);return}});
+document.addEventListener("keydown",e=>{const t=e.target;if(!t||!t.dataset)return;
+  if(t.dataset.nbin&&e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();e.stopPropagation();nbAdd(t.dataset.nbin)}},true);
+document.addEventListener("input",e=>{const t=e.target;if(!t||!t.dataset)return;
+  if(t.dataset.nbt){const n=nbOf(t.dataset.nbt);if(!n)return;n.t=t.value;n.m=now();nbGrow(t);clearTimeout(NBT);NBT=setTimeout(lsSave,500)}
+  else if(t.dataset.nbin){t.style.height="auto";t.style.height=Math.min(t.scrollHeight+2,260)+"px"}});
+document.addEventListener("focusout",e=>{const t=e.target;if(!t||!t.dataset||!t.dataset.nbt)return;const n=nbOf(t.dataset.nbt);
+  if(n&&!n.t.trim()){clearTimeout(NBT);S.settings.notes=nbList().filter(x=>x!==n);lsSave();setTimeout(()=>nbRefresh(),0)}
+  else{clearTimeout(NBT);lsSave()}});
+
 /* ================= V3 · Événements ================= */
 document.addEventListener("click",async e=>{
   const t=e.target.closest("button,a[data-kopen],[data-aid],[data-mopen],[data-cday],[data-cib],[data-pid],tr[data-id],tr[data-kid],[data-act]");if(!t)return;
@@ -3472,7 +3628,7 @@ document.addEventListener("click",async e=>{
   if(d.act==="crprint"){crPrint();return}
   if(d.atype&&AM){amRead();AM.type=d.atype;if(AM.type==="note")AM.statut="fait";drawAction();return}
   if(d.ast&&AM){amRead();AM.statut=d.ast;drawAction();return}
-  if(d.act==="amsave"){await amSave();return}
+  if(d.act==="amsave"){const nl=NLINK;await amSave();if(nl&&!AM)nbDone(nl);return}
   if(d.act==="amdel"){await amDelete(t);return}
   if(d.act==="ctsave"){ctSave();return}
   if(d.act==="ctdel"){ctDelete(t);return}
