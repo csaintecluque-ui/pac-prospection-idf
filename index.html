@@ -409,6 +409,31 @@ body{min-height:100vh}
 .qk button{display:flex;flex-direction:column;align-items:center;gap:4px;background:#2A221D;border:1px solid #3A302A;border-radius:8px;padding:8px 2px 7px;color:#E8DCC6;font:500 11.5px/1.15 var(--f-ui);cursor:pointer;text-align:center}
 .qk button:hover{border-color:#C9804F;color:#fff;background:#3A2C22}
 .qk button svg{width:17px;height:17px}
+.modal.big{width:min(1320px,calc(100% - 32px));height:calc(100% - 32px);max-height:none}
+.modal.big .db{flex:1;padding:20px 26px 26px}
+.modal.big .dh{padding:18px 26px}.modal.big .df{padding:12px 26px}
+.am-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:16px 28px;align-items:start}
+.am-col{display:flex;flex-direction:column;gap:14px;min-width:0}
+.modal.big #am-det{min-height:220px}
+@media (max-width:1000px){.am-grid{grid-template-columns:minmax(0,1fr)}}
+.rv-h h2{font-size:24px}
+.rv-meta{margin:6px 0 0;display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;color:var(--muted);font-size:13.5px}
+.rv-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,360px);gap:24px;align-items:start;max-width:1240px;margin:0 auto}
+@media (max-width:1000px){.rv-grid{grid-template-columns:minmax(0,1fr)}}
+.rv-main{display:flex;flex-direction:column;gap:14px;min-width:0}
+.rv-s{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 20px}
+.rv-s h3,.rv-c h3{margin:0 0 8px;font:600 12px var(--f-label);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.rv-t{white-space:pre-wrap;overflow-wrap:anywhere;font-size:15px;line-height:1.6}
+.rv-s.big{border-left:4px solid var(--accent)}.rv-s.big .rv-t{font-size:15.5px}
+.rv-side{display:flex;flex-direction:column;gap:14px;min-width:0}
+.rv-c{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.rv-kv{display:flex;flex-direction:column;gap:1px;padding:6px 0;border-top:1px solid var(--line);font-size:13.5px}
+.rv-kv:first-of-type{border-top:0;padding-top:0}
+.rv-kv span{font-size:12px;color:var(--muted)}.rv-kv b{font-weight:500;overflow-wrap:anywhere}
+.tl-i .tgb{margin-left:auto;flex:none}
+.tl-i.open .tgb svg{transform:rotate(90deg)}
+.tl-sum{font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tl-i.open{background:color-mix(in srgb,var(--surface) 70%,var(--accent-soft))}
 .kc{position:relative}
 .kc-list{position:absolute;left:0;right:0;top:calc(100% + 4px);background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);max-height:330px;overflow:auto;z-index:6;padding:4px}
 .kc-h{font:600 11px var(--f-label);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);padding:6px 9px 4px}
@@ -655,7 +680,7 @@ input[type=time]{width:100%;background:var(--surface);border:1px solid var(--lin
   <div class="side-f">
     <span class="sync" id="sync" data-s="wait"><i></i><span id="syncTxt">Chargement…</span></span>
     <button class="btn" type="button" data-act="export" title="Exporter, sauvegarder, restaurer"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11"/></svg><span>Exporter / sauvegarder</span></button>
-    <span class="ver">V3.3 · CSC</span>
+    <span class="ver">V3.4 · CSC</span>
   </div>
 </aside>
 
@@ -744,7 +769,7 @@ function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTi
 const nh=x=>String(x==null?"":x).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
 const now=()=>new Date().toISOString();
 const S={open:new Set(),mode:"wait",cibles:[],comptes:[],contacts:[],actions:[],plans:[],pac:[],mailing:[],settings:{objectif:8},writable:true,view:"actives",tab:"tdb",kid:"",db:null,downloads:null,ver:0};
-const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.3";
+const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.4";
 let STORE="ls"; /* "idb" dès que les données sont dans la base du navigateur */
 const IN_FRAME=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 const TYPE_RANK={"Client existant":3,"Prescripteur":2,"Prospect":1};
@@ -1043,8 +1068,8 @@ const relancesDues=(until)=>S.mailing.filter(m=>m.envoye&&m.relance&&!m.relanceF
 
 /* ---------- Fenêtre modale ---------- */
 let MODAL=null;
-function showModal(html,kind){MODAL=kind||"x";const m=$("#modal");m.innerHTML=html;m.hidden=false;$("#mscrim").hidden=false}
-function closeModal(){MODAL=null;AM=null;CM=null;KM=null;$("#modal").hidden=true;$("#mscrim").hidden=true}
+function showModal(html,kind){MODAL=kind||"x";const m=$("#modal");m.classList.remove("big");m.innerHTML=html;m.hidden=false;$("#mscrim").hidden=false}
+function closeModal(){MODAL=null;AM=null;CM=null;KM=null;RV=null;$("#modal").classList.remove("big");$("#modal").hidden=true;$("#mscrim").hidden=true}
 const mHead=(lbl,title)=>'<div class="dh"><div class="grow"><span class="lbl">'+lbl+'</span><h2 id="mTitle">'+title+'</h2></div><button class="btn ghost" type="button" data-act="mclose">Fermer</button></div>';
 const fld=(id,lab,val,type,extra)=>'<div class="f"><label class="lbl" for="'+id+'">'+lab+'</label><input type="'+(type||"text")+'" id="'+id+'" value="'+esc(val==null?"":val)+'"'+(extra||"")+'></div>';
 const ta=(id,lab,val,rows,ph)=>'<div class="f"><label class="lbl" for="'+id+'">'+lab+'</label><textarea id="'+id+'" rows="'+(rows||3)+'"'+(ph?' placeholder="'+esc(ph)+'"':'')+'>'+esc(val||"")+'</textarea></div>';
@@ -1080,7 +1105,7 @@ function drawAction(){
   const a=AM,k=kOf(a.compteId),cts=k?ctOf(k.id):[],cbs=k?cibOf(k.id):[],rdv=isRdv(a.type),res=ARES[a.type];
   const ST=[["afaire",rdv?"Planifié":"À faire"],["fait",rdv?"Réalisé":"Fait"],["annule","Annulé"]];
   showModal(mHead(amNew?"Nouvelle action":"Action",esc(ALBL[a.type]||"Action")+(a._k?' · '+esc(a._k):''))+
-  '<div class="db"><form id="amForm" onsubmit="return false" style="display:flex;flex-direction:column;gap:14px">'+
+  '<div class="db"><form id="amForm" class="am-grid" onsubmit="return false"><div class="am-col">'+
    '<div class="tpick" role="group" aria-label="Type d\'action">'+ATYPES.map(([t,l])=>'<button type="button" data-atype="'+t+'" aria-pressed="'+(a.type===t)+'">'+(I_EV[t]||"")+esc(l)+'</button>').join("")+'</div>'+
    kcHTML(a,k)+
    '<div class="row4"><div class="f"><label class="lbl" for="am-date">Date</label><input type="date" id="am-date" value="'+esc(a.date)+'"></div><div class="f"><label class="lbl" for="am-heure">Heure</label><input type="time" id="am-heure" value="'+esc(a.heure)+'"></div>'+
@@ -1090,14 +1115,16 @@ function drawAction(){
    '<div class="f"><label class="lbl" for="am-obj">Objet</label><input type="text" id="am-obj" value="'+esc(a.objet)+'" placeholder="'+esc(EOBJ[a.type]||"")+'"></div>'+
    (res?'<div class="f"><label class="lbl" for="am-res">Résultat</label><select id="am-res"><option value="">—</option>'+res.map(r=>'<option'+(r===a.resultat?' selected':'')+'>'+esc(r)+'</option>').join("")+'</select></div>':'')+
    (rdv?'<div class="row"><div class="f"><label class="lbl" for="am-acc">Accompagnant</label><input type="text" id="am-acc" value="'+esc(a.accompagnant)+'" placeholder="Chef d\'agence ou commercial de la BU"></div><div class="f"><label class="lbl" for="am-lieu">Lieu</label><input type="text" id="am-lieu" value="'+esc(a.lieu)+'" placeholder="Site, adresse, visio…"></div></div>':'')+
-   ta("am-det",a.type==="note"?"Note":(a.cr||a._crOpen)?"Points abordés":rdv||a.type==="evenement"?"Compte rendu":"Détails",a.details,a.type==="note"||rdv?6:4,EPH[a.type])+
-   (crOK(a.type)?crSection(a):'')+
    (a.suite?'<p class="hint">Suite notée : '+esc(a.suite)+'</p>':'')+
    '<div class="suite"><label class="toggle"><input type="checkbox" id="am-su"'+(a._suite?' checked':'')+'> Planifier une suite</label>'+
     '<div id="am-suw" class="row3"'+(a._suite?'':' hidden')+'><div class="f"><label class="lbl" for="am-sut">Type</label><select id="am-sut">'+ATYPES.filter(x=>x[0]!=="note").map(([t,l])=>'<option value="'+t+'"'+((a._suite?a._suite.type:"tache")===t?' selected':'')+'>'+esc(l)+'</option>').join("")+'</select></div>'+
     '<div class="f"><label class="lbl" for="am-sud">Le</label><input type="date" id="am-sud" value="'+esc(a._suite?a._suite.date:addD(todayISO(),7))+'"></div><div class="f"><label class="lbl" for="am-suo">Quoi</label><input type="text" id="am-suo" value="'+esc(a._suite?a._suite.objet:"")+'" placeholder="Relancer, envoyer le devis…"></div></div></div>'+
-  '</form></div>'+
+  '</div><div class="am-col">'+
+   ta("am-det",a.type==="note"?"Note":(a.cr||a._crOpen)?"Points abordés":rdv||a.type==="evenement"?"Compte rendu":"Détails",a.details,a.type==="note"||rdv||a.cr||a._crOpen?12:8,EPH[a.type])+
+   (crOK(a.type)?crSection(a):'')+
+  '</div></form></div>'+
   '<div class="df">'+(amNew?'':'<button class="btn danger" type="button" data-act="amdel">Supprimer</button>')+(k?'<button class="btn ghost" type="button" data-kopen="'+esc(k.id)+'">Fiche compte</button>':'')+'<span class="grow"></span><button class="btn" type="button" data-act="mclose">Annuler</button><button class="btn primary" type="button" data-act="amsave">Enregistrer</button></div>',"action");
+  $("#modal").classList.add("big");
 }
 async function amSave(){
   amRead();const a=AM;
@@ -1431,11 +1458,9 @@ function renderCompte(){
   const c2='<div class="panel"><div class="ph"><h2>À venir</h2><span class="sub num">'+open.length+'</span></div>'+qBtns(k.id,cs.length===1?cs[0].id:"")+
      (open.length||rel.length?'<div class="todo">'+open.map(a=>tItem(a,{noCompte:true,full:true})).join("")+rel.map(rItem).join("")+'</div>':'<p class="hint">Aucune action prévue : planifiez un RDV, un appel ou un rappel.</p>')+'</div>'+
    '<div class="panel"><div class="ph"><h2>Antécédents de facturation</h2>'+(k.histo?'<span class="sub">import du '+fdate(k.histo.imp)+' · '+pl(k.histo.nb,"pièce")+'</span>':'')+'</div>'+histoHead(k)+'<div id="histoList"></div></div>'+
-   '<div class="panel"><div class="ph"><h2>Historique</h2><span class="sub num">'+hist.length+'</span></div>'+
+   '<div class="panel"><div class="ph"><h2>Historique</h2><span class="sub num">'+hist.length+'</span>'+(H.some(x=>x.details||x.cr)?'<button type="button" class="more" data-act="tlall">'+(H.every(x=>!(x.details||x.cr||x.suite)||TLO.has((x.mailing?"m":"a")+x.id))?'Tout replier':'Tout déplier')+'</button>':'')+'</div>'+
     (hist.length?'<div class="chips echips">'+HF.filter(([f])=>!f||hist.some(x=>hm(x,f))).map(([f,l])=>'<button type="button" class="chip" data-hf="'+f+'" aria-pressed="'+(hf===f)+'">'+l+'<span class="n num">'+(f?hist.filter(x=>hm(x,f)).length:hist.length)+'</span></button>').join("")+'</div>':'')+
-    (H.length?'<div class="tl">'+H.map(x=>{const ct=ctById(x.contactId),who=[ct?ct.nom:"",x.interlocuteur&&(!ct||x.interlocuteur!==ct.nom)?x.interlocuteur:"",x.accompagnant?"avec "+x.accompagnant:""].filter(Boolean).join(" · "),cb=cibById(x.cibleId);
-      return '<div class="tl-i'+(x.statut==="annule"?' annule':'')+'" '+(x.mailing?'data-mopen="'+esc(x.id)+'"':'data-aid="'+esc(x.id)+'"')+'><span class="eic eic-'+esc(x.type)+'">'+(I_EV[x.type]||I_EV.autre)+'</span><div style="min-width:0;display:flex;flex-direction:column;gap:3px"><div class="eh"><span class="num">'+(x.date?fdate(x.date):"—")+'</span><b>'+esc(x.mailing?"Mailing":ESHORT[x.type]||x.type)+'</b>'+(x.statut==="annule"?'<span class="pill tone-grey">Annulé</span>':'')+(x.cr?'<span class="pill tone-info">Compte rendu</span>':'')+(x.resultat?'<span class="pill tone-'+(/^(Joint|Réponse|Appel reçu|Mail reçu|Rencontr|Relancé)/.test(x.resultat)?"ok":"info")+'">'+esc(x.resultat)+'</span>':'')+'<span class="sub grow">'+esc(who)+(cb&&cs.length>1?' · '+esc(campShort(cb)):'')+'</span></div>'+
-       (x.objet?'<div class="eobj">'+esc(x.objet)+'</div>':'')+(x.details?'<p class="edet">'+esc(x.details)+'</p>':'')+(x.cr?crHTML(x):'')+(x.suite?'<div class="sub">Suite : '+esc(x.suite)+'</div>':'')+'</div></div>'}).join("")+'</div>':'<p class="hint">'+(hist.length?'Rien pour ce filtre.':'Aucun échange enregistré. Les appels, RDV et mails faits apparaissent ici, avec les mails envoyés depuis le mailing.')+'</p>')+'</div>';
+    (H.length?'<div class="tl">'+H.map(x=>tlItem(x,cs)).join("")+'</div>':'<p class="hint">'+(hist.length?'Rien pour ce filtre.':'Aucun échange enregistré. Les appels, RDV et mails faits apparaissent ici, avec les mails envoyés depuis le mailing.')+'</p>')+'</div>';
   /* Colonne 3 : prospection, opportunités, mailing */
   const c3='<div class="panel"><div class="ph"><h2>Prospection</h2><button type="button" class="more" data-cibnew="'+esc(k.id)+'">+ Campagne</button></div>'+
     (cs.length?'<div class="cards">'+cs.map(c=>'<div class="cibc" data-cib="'+esc(c.id)+'"><div class="ctop"><span class="prio prio-'+esc(c.priorite)+'">'+esc(c.priorite)+'</span><span class="grow">'+esc(campShort(c))+'</span><span class="pill st-'+c.etape+'">'+esc(SL[c.etape])+'</span></div>'+
@@ -3362,7 +3387,7 @@ const crRows=(a)=>{const c=a.cr||{};return [["Participants (client)",c.client],[
 function crTitle(a){return "Compte rendu – "+(ALBL[a.type]||"Échange")+(a.date?" du "+dObj(a.date).toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"}):"")+(a.heure?" à "+a.heure.replace(":","h"):"")}
 function crText(a){const k=kOf(a.compteId);return crTitle(a)+"\n"+(k?"Compte : "+k.nom+"\n":"")+(a.objet?"Objet : "+a.objet+"\n":"")+"\n"+crRows(a).map(([l,v])=>l+" :\n"+v).join("\n\n")}
 function crHTML(a){const R=crRows(a).filter(r=>r[0]!=="Points abordés"&&r[0]!=="Lieu");if(!R.length)return "";return '<dl class="crv">'+R.map(([l,v])=>'<dt>'+esc(l)+'</dt><dd>'+esc(v)+'</dd>').join("")+'</dl>'}
-function crCurrent(){amRead();const a=Object.assign({},AM);if(!a.cr){toast("Cochez « Rédiger un compte rendu » et complétez-le.");return null}return a}
+function crCurrent(){if(MODAL==="view"&&RV)return Object.assign({},RV);amRead();const a=Object.assign({},AM);if(!a.cr){toast("Cochez « Rédiger un compte rendu » et complétez-le.");return null}return a}
 async function crCopy(){const a=crCurrent();if(!a)return;const t=crText(a);try{await navigator.clipboard.writeText(t);toast("Compte rendu copié")}catch(e){toast("Copie bloquée ici : utilisez Imprimer / PDF.")}}
 function crMail(){const a=crCurrent();if(!a)return;const ct=ctById(a.contactId),to=ct&&ct.mail?ct.mail:"",body=crText(a);
   const url="mailto:"+encodeURIComponent(to).replace(/%40/g,"@")+"?subject="+encodeURIComponent(crTitle(a)+(kOf(a.compteId)?" – "+kOf(a.compteId).nom:""))+"&body="+encodeURIComponent(body.length>1800?body.slice(0,1800)+"\n[…]":body);
@@ -3375,6 +3400,46 @@ function crPrint(){const a=crCurrent();if(!a)return;const k=kOf(a.compteId);
 function crToCible(a,k){const c=a.cr;if(!c||!(c.prestas.length||c.potentiel))return "";const cs=cibOf(k.id),cb=cs.find(x=>x.id===a.cibleId)||(cs.length===1?cs[0]:null);if(!cb)return "";
   const before=JSON.stringify([cb.prestations,cb.potentiel]);cb.prestations=PRESTA.map(p=>p[0]).filter(p=>cb.prestations.includes(p)||c.prestas.includes(p));
   if(c.potentiel&&!cb.potentiel)cb.potentiel=Number(c.potentiel);if(JSON.stringify([cb.prestations,cb.potentiel])===before)return "";cb.majLe=now();bump();return " · cible « "+campShort(cb)+" » complétée"}
+
+/* ================= V3.4 · Historique replié, lecture en grand, édition en grand ================= */
+/* Historique du compte : une ligne résumée par échange, flèche pour déployer */
+const TLO=new Set();
+function tlItem(x,cs){const ct=ctById(x.contactId),who=[ct?ct.nom:"",x.interlocuteur&&(!ct||x.interlocuteur!==ct.nom)?x.interlocuteur:"",x.accompagnant?"avec "+x.accompagnant:""].filter(Boolean).join(" · "),cb=cibById(x.cibleId);
+  const id=(x.mailing?"m":"a")+x.id,op=TLO.has(id),has=!!(x.details||x.cr||x.suite);
+  const first=String(x.details||(x.cr&&(x.cr.contexte||x.cr.besoins))||"").split("\n")[0];
+  return '<div class="tl-i'+(x.statut==="annule"?' annule':'')+(op?' open':'')+'" '+(x.mailing?'data-mopen="'+esc(x.id)+'"':'data-aid="'+esc(x.id)+'"')+'><span class="eic eic-'+esc(x.type)+'">'+(I_EV[x.type]||I_EV.autre)+'</span>'+
+   '<div style="min-width:0;display:flex;flex-direction:column;gap:3px"><div class="eh"><span class="num">'+(x.date?fdate(x.date):"—")+'</span><b>'+esc(x.mailing?"Mailing":ESHORT[x.type]||x.type)+'</b>'+
+    (x.statut==="annule"?'<span class="pill tone-grey">Annulé</span>':'')+(x.cr?'<span class="pill tone-info">Compte rendu</span>':'')+(x.resultat?'<span class="pill tone-'+(/^(Joint|Réponse|Appel reçu|Mail reçu|Rencontr|Relancé)/.test(x.resultat)?"ok":"info")+'">'+esc(x.resultat)+'</span>':'')+
+    '<span class="sub grow">'+esc(who)+(cb&&cs.length>1?' · '+esc(campShort(cb)):'')+'</span>'+
+    (has?'<button type="button" class="tgb'+(op?'':' has')+'" data-tlx="'+esc(id)+'" aria-expanded="'+op+'" title="'+(op?'Replier':'Déplier')+'" aria-label="'+(op?'Replier':'Déplier')+' le détail">'+CHEV+'</button>':'')+'</div>'+
+    (x.objet?'<div class="eobj">'+esc(x.objet)+'</div>':'')+
+    (op?(x.details?'<p class="edet">'+esc(x.details)+'</p>':'')+(x.cr?crHTML(x):'')+(x.suite?'<div class="sub">Suite : '+esc(x.suite)+'</div>':'')
+      :(first&&first!==x.objet?'<div class="tl-sum">'+esc(first.length>160?first.slice(0,160)+"…":first)+'</div>':''))+'</div></div>'}
+
+/* Lecture d'une action en grand : un compte rendu mis en page */
+let RV=null;
+const viewable=a=>!!(a&&(a.cr||(a.statut!=="afaire"&&a.details)));
+function viewAction(id){const a=S.actions.find(x=>x.id===id);if(!a)return;if(!viewable(a)){openAction({id});return}
+  RV=a;const k=kOf(a.compteId),ct=ctById(a.contactId),cb=cibById(a.cibleId),c=a.cr||{},t=todayISO();
+  const dl=a.date?dObj(a.date).toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"}):"";
+  const sec=(ti,v,big)=>v?'<section class="rv-s'+(big?' big':'')+'"><h3>'+ti+'</h3><div class="rv-t">'+esc(v)+'</div></section>':'';
+  const card=(ti,body)=>body?'<div class="rv-c"><h3>'+ti+'</h3>'+body+'</div>':'';
+  const kv=(l,v)=>v?'<div class="rv-kv"><span>'+l+'</span><b>'+v+'</b></div>':'';
+  const open=k?actOf(k.id).filter(isOpen).sort(aSort).slice(0,5):[];
+  showModal('<div class="dh rv-h"><div class="grow"><span class="lbl">'+(a.cr?'Compte rendu':'Échange')+' · '+esc(ALBL[a.type]||a.type)+'</span><h2 id="mTitle">'+esc(a.objet||ALBL[a.type])+'</h2>'+
+    '<p class="rv-meta"><span>'+esc(dl.charAt(0).toUpperCase()+dl.slice(1))+(a.heure?' à '+esc(a.heure.replace(":","h")):'')+'</span>'+(k?'<button type="button" class="lk strong" data-kopen="'+esc(k.id)+'">'+esc(k.nom)+'</button>':'')+(a.lieu?'<span>'+esc(a.lieu)+'</span>':'')+
+    '<span class="pill tone-'+stTone(a)+'">'+esc(stLbl(a))+'</span>'+(a.resultat?'<span class="pill tone-info">'+esc(a.resultat)+'</span>':'')+'</p></div><button class="btn ghost" type="button" data-act="mclose">Fermer</button></div>'+
+   '<div class="db"><div class="rv-grid"><div class="rv-main">'+
+     sec("Contexte",c.contexte)+sec("Besoins exprimés",c.besoins)+sec(a.cr?"Points abordés":"Compte rendu",a.details,true)+sec("Décisions et engagements",c.decisions)+sec("Prochaines étapes",c.suites)+(a.suite?sec("Suite notée",a.suite):'')+
+     (!a.details&&!a.cr?'<p class="hint">Aucun contenu.</p>':'')+'</div>'+
+    '<aside class="rv-side">'+
+     card("Participants",kv("Client",esc(c.client||(ct?ct.nom:"")))+kv("Interne",esc(c.interne||""))+kv("Accompagnant",esc(a.accompagnant||""))+
+       (ct&&(ct.tel||ct.mail)?'<div class="rv-kv"><span>Contact</span><b>'+(ct.tel?'<a class="dl num" href="tel:'+esc(ct.tel.replace(/[^\d+]/g,""))+'">'+esc(ct.tel)+'</a> ':'')+(ct.mail?'<a class="dl" href="mailto:'+esc(ct.mail)+'">'+esc(ct.mail)+'</a>':'')+'</b></div>':''))+
+     card("Opportunité",((c.prestas||[]).length?'<div class="tags" style="margin-bottom:6px">'+c.prestas.map(p=>'<span class="tag" title="'+esc(PLABEL[p]||p)+'">'+esc(PLABEL[p]||p)+'</span>').join("")+'</div>':'')+kv("Potentiel",c.potentiel?eur(c.potentiel)+" / an":"")+kv("Concurrence",esc(c.concurrence||""))+kv("Campagne",cb?esc(campShort(cb))+' · <span class="pill st-'+cb.etape+'" style="font-size:11px">'+esc(SL[cb.etape])+'</span>':""))+
+     (open.length?'<div class="rv-c"><h3>À venir sur ce compte</h3><div class="todo">'+open.map(x=>tItem(x,{noCompte:true,full:true})).join("")+'</div></div>':'')+
+    '</aside></div></div>'+
+   '<div class="df">'+(k?'<button class="btn ghost" type="button" data-kopen="'+esc(k.id)+'">Fiche compte</button>':'')+'<button class="btn ghost" type="button" data-act="crcopy">Copier</button><button class="btn ghost" type="button" data-act="crmail">Envoyer par mail</button><button class="btn ghost" type="button" data-act="crprint">Imprimer / PDF</button><span class="grow"></span><button class="btn" type="button" data-act="mclose">Fermer</button><button class="btn primary" type="button" data-act="rvedit">Modifier</button></div>',"view");
+  $("#modal").classList.add("big")}
 
 /* ================= V3 · Événements ================= */
 document.addEventListener("click",async e=>{
@@ -3419,7 +3484,10 @@ document.addEventListener("click",async e=>{
     if(D&&t.closest("#drawer")){if(!(await doSave(true)))return;kid=D.compteId;cid=D.id}
     else if(!kid&&S.tab==="compte")kid=S.kid;
     closeModal();openAction({type:d.anew,compteId:kid,cibleId:cid,objet:d.obj||"",cr:!!d.cr});return}
-  if(d.aid&&!t.matches("button.ck")){openAction({id:d.aid});return}
+  if(d.tlx){TLO.has(d.tlx)?TLO.delete(d.tlx):TLO.add(d.tlx);renderCompte();return}
+  if(d.act==="tlall"){const k=kOf(S.kid);if(!k)return;const ids=actOf(k.id).filter(a=>a.statut!=="afaire"&&(a.details||a.cr||a.suite)).map(a=>"a"+a.id);const all=ids.every(x=>TLO.has(x));ids.forEach(x=>all?TLO.delete(x):TLO.add(x));renderCompte();return}
+  if(d.act==="rvedit"&&RV){const id=RV.id;openAction({id});return}
+  if(d.aid&&!t.matches("button.ck")){closeModal();viewAction(d.aid);return}
   if(d.mopen){mEditMenu(d.mopen);return}
   if(d.relday){MUI.view="rel";showTab("mailing");return}
   if(d.mailday){MUI.view="env";MUI.lim=200;showTab("mailing");return}
