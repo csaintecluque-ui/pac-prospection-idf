@@ -503,6 +503,7 @@ main#app>section{display:flex;flex-direction:column;gap:16px;min-width:0}
 .mini .mi:first-child{border-top:0}
 .mini .mi .grow{flex:1;min-width:0}
 .mini .mi .sub{font-size:12px}
+.panel .btn svg{width:15px;height:15px;display:inline-block}
 .qa{display:flex;flex-wrap:wrap;gap:6px}
 .qa .btn{padding:5px 10px;font-size:13px}
 .qa .btn svg{width:14px;height:14px}
@@ -633,7 +634,7 @@ input[type=time]{width:100%;background:var(--surface);border:1px solid var(--lin
   <div class="side-f">
     <span class="sync" id="sync" data-s="wait"><i></i><span id="syncTxt">Chargement…</span></span>
     <button class="btn" type="button" data-act="export" title="Exporter, sauvegarder, restaurer"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11"/></svg><span>Exporter / sauvegarder</span></button>
-    <span class="ver">V3.0 · CSC</span>
+    <span class="ver">V3.1 · CSC</span>
   </div>
 </aside>
 
@@ -722,7 +723,7 @@ function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTi
 const nh=x=>String(x==null?"":x).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
 const now=()=>new Date().toISOString();
 const S={open:new Set(),mode:"wait",cibles:[],comptes:[],contacts:[],actions:[],plans:[],pac:[],mailing:[],settings:{objectif:8},writable:true,view:"actives",tab:"tdb",kid:"",db:null,downloads:null,ver:0};
-const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.0";
+const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.1";
 const IN_FRAME=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 const TYPE_RANK={"Client existant":3,"Prescripteur":2,"Prospect":1};
 
@@ -741,7 +742,7 @@ function norm(c){const b=blank();const o=Object.assign(b,c||{});o.opp=Object.ass
   o.bu=Array.isArray(o.bu)?o.bu:[];o.prestations=Array.isArray(o.prestations)?o.prestations:[];o.leadIds=Array.isArray(o.leadIds)?o.leadIds:[];
   if(!SIDX.hasOwnProperty(o.etape))o.etape="a_qualifier";if(!o.dept)o.dept=guessDept(o);return o}
 /* Compte, contact, action */
-function kblank(){return {nom:"",type:"Prospect",segment:"",typologie:"",dept:"",adresse:"",ville:"",web:"",tel:"",agence:"",apporteur:"",notes:"",origine:""}}
+function kblank(){return {nom:"",type:"Prospect",segment:"",typologie:"",dept:"",adresse:"",ville:"",web:"",tel:"",agence:"",apporteur:"",notes:"",origine:"",contrat:false,sousTypo:"",fiab:"",histo:null}}
 const knorm=x=>Object.assign(kblank(),x||{});
 function ctblank(){return {compteId:"",nom:"",fonction:"",tel:"",mail:"",notes:"",principal:false}}
 const ctnorm=x=>{const o=Object.assign(ctblank(),x||{});o.principal=!!o.principal;return o};
@@ -798,13 +799,15 @@ function restage(kid){cibOf(kid).forEach(c=>{const b=c.etape;autoStage(c);if(c.e
 
 /* ---------- Création / rapprochement ---------- */
 function ensureCompte(name,init){const n=String(name||"").trim()||"Sans nom";let k=findCompte(n);if(k)return k;
-  k=Object.assign(kblank(),init||{},{id:uid(),nom:n,creeLe:now(),majLe:now()});S.comptes.push(k);bump();return k}
+  k=Object.assign(kblank(),init||{},{id:uid(),nom:n,creeLe:now(),majLe:now()});S.comptes.push(k);
+  if(IXC&&IXV===S.ver){IXC.compte.set(k.id,k);const m=nh(k.nom);if(m&&!IXC.byName.has(m))IXC.byName.set(m,k)}else bump();return k}
 function findContact(kid,d){const L=ctOf(kid),mail=String(d.mail||"").trim().toLowerCase(),n=nh(d.nom);
   return (mail&&L.find(x=>String(x.mail||"").toLowerCase()===mail))||(n&&L.find(x=>nh(x.nom)===n))||null}
 function ensureContact(kid,d){let ct=findContact(kid,d);
   if(ct){["nom","fonction","tel","mail"].forEach(f=>{if(!ct[f]&&d[f])ct[f]=String(d[f]).trim()});return ct}
   ct=Object.assign(ctblank(),{id:uid(),compteId:kid,nom:String(d.nom||"").trim(),fonction:String(d.fonction||"").trim(),tel:String(d.tel||"").trim(),mail:String(d.mail||"").trim(),principal:!ctOf(kid).length,creeLe:now(),majLe:now()});
-  S.contacts.push(ct);bump();return ct}
+  S.contacts.push(ct);
+  if(IXC&&IXV===S.ver){IXC.contact.set(ct.id,ct);let l=IXC.ct.get(kid);if(!l)IXC.ct.set(kid,l=[]);l.push(ct)}else bump();return ct}
 /* Statut d'un ancien échange ou d'une ancienne visite */
 const legStat=r=>/^(Planifi|À faire|A faire)/i.test(r||"")?"afaire":/^Annul/i.test(r||"")?"annule":"fait";
 function addLegacyAction(x,k,c,ctId){
@@ -836,7 +839,7 @@ function absorbCible(raw){
       S.actions.push(anorm({id:uid(),compteId:k.id,cibleId:"",contactId:ctId,type:"tache",date:d,objet:ob,statut:"afaire",creeLe:c.majLe||c.creeLe||now(),majLe:now(),origine:"prochaine action"}));bump()}}
   return c}
 /* Ligne de mailing : rattachée à un compte (créé si besoin) et à un contact */
-const mType=m=>/prescri/i.test(m.typologie||"")?"Prescripteur":/client/i.test(m.liste||"")?"Client existant":"Prospect";
+const mType=()=>"Client existant"; /* toutes les listes de mailing sont des clients déjà facturés */
 function absorbMailing(m){
   if(!(m.compteId&&kOf(m.compteId))){
     const name=String(m.client||m.mail||"").trim()||"Sans nom";let k=findCompte(name);
@@ -847,7 +850,7 @@ function absorbMailing(m){
   return m}
 
 /* ---------- Plans du PAC ---------- */
-const PAXES=[["secteur","Par secteur d'activité"],["theme","Par plan d'action"],["autre","Autre"]];
+const PAXES=[["secteur","Par secteur d'activité"],["theme","Par plan d'action"],["famille","Par famille de clients"],["autre","Autre"]];
 function ensurePlans(){
   if(!S.plans.length){S.plans.push({id:uid(),nom:"PAC IDF "+(S.settings.pacPeriode||new Date().getFullYear()),axe:"theme",titre:S.settings.pacTitre||PAC_TITRE_DEF,periode:S.settings.pacPeriode||String(new Date().getFullYear()),ordre:1,creeLe:now()})}
   const ids=new Set(S.plans.map(p=>p.id));S.pac.forEach(l=>{if(!ids.has(l.planId))l.planId=S.plans[0].id});
@@ -861,7 +864,7 @@ function migrateV2(r){
   (r.cibles||[]).forEach(x=>{S.cibles.push(absorbCible(Object.assign({},x,{id:x.id||uid()})));bump()});
   (r.mailing||[]).forEach(x=>{S.mailing.push(absorbMailing(mnorm(Object.assign({},x,{id:x.id||uid()}))));bump()});
   S.pac=(r.pac||[]).map(pnorm);ensurePlans();
-  S.cibles.forEach(autoStage);bump();
+  S.cibles.forEach(autoStage);bump();upgrade31();
 }
 /* Réparation légère au chargement : tout lien cassé est recréé */
 function repairLinks(){
@@ -904,7 +907,7 @@ function lsLoad(){
   if(r&&r.schema===SCHEMA){
     S.cibles=(r.cibles||[]).map(norm);S.comptes=(r.comptes||[]).map(knorm);S.contacts=(r.contacts||[]).map(ctnorm);S.actions=(r.actions||[]).map(anorm);
     S.plans=Array.isArray(r.plans)?r.plans:[];S.pac=(r.pac||[]).map(pnorm);S.mailing=(r.mailing||[]).map(mnorm);S.settings=Object.assign({objectif:8},r.settings||{});
-    bump();ensurePlans();repairLinks();return {}}
+    bump();ensurePlans();repairLinks();if(upgrade31())lsSave();return {}}
   /* Données de la V2 : copie de sécurité conservée telle quelle, puis conversion */
   let copie=false;try{if(!localStorage.getItem(BK_KEY))localStorage.setItem(BK_KEY,raw);copie=true}catch(e){}
   migrateV2(r||{});
@@ -1032,7 +1035,7 @@ function openAction(o){o=o||{};
   const src=o.id?S.actions.find(a=>a.id===o.id):null;amNew=!src;amDel=false;
   if(src)AM=clone(src);
   else{const ty=o.type||"appel",d=o.date||todayISO(),k=kOf(o.compteId);
-    AM=Object.assign(ablank(),{id:uid(),creeLe:now(),type:ty,compteId:o.compteId||"",cibleId:o.cibleId||"",date:ty==="tache"&&!o.date?addD(todayISO(),1):d,heure:o.heure||"",
+    AM=Object.assign(ablank(),{id:uid(),creeLe:now(),type:ty,objet:o.objet||"",compteId:o.compteId||"",cibleId:o.cibleId||"",date:ty==="tache"&&!o.date?addD(todayISO(),1):d,heure:o.heure||"",
       statut:ty==="note"?"fait":(isRdv(ty)||ty==="tache")?"afaire":(d>todayISO()?"afaire":"fait")});
     if(k){const p=principal(k.id);if(p)AM.contactId=p.id;const cs=cibOf(k.id);if(!AM.cibleId&&cs.length===1)AM.cibleId=cs[0].id}}
   AM._k=(kOf(AM.compteId)||{}).nom||"";AM._suite=null;
@@ -1150,7 +1153,7 @@ function kSave(){kmRead();const k=KM;
 function kDelete(btn){const k=KM,nc=cibOf(k.id).length,nm=mlOf(k.id).length;
   if(nc||nm){toast("Ce compte a "+[nc?pl(nc,"cible"):"",nm?pl(nm,"ligne")+" de mailing":""].filter(Boolean).join(" et ")+" : supprimez-les ou fusionnez le compte.");return}
   if(!kmDel){kmDel=true;btn.classList.add("armed");btn.textContent="Supprimer le compte, ses contacts et ses actions";return}
-  const id=k.id;S.contacts=S.contacts.filter(c=>c.compteId!==id);S.actions=S.actions.filter(a=>a.compteId!==id);drop("comptes",id);
+  const id=k.id;hDel(id);S.contacts=S.contacts.filter(c=>c.compteId!==id);S.actions=S.actions.filter(a=>a.compteId!==id);drop("comptes",id);
   closeModal();lsSave();showTab("comptes");toast("Compte supprimé")}
 function kMergeMenu(){kmRead();const k=KM;
   showModal(mHead("Fusionner","Fusionner « "+esc(k.nom)+" » dans un autre compte")+
@@ -1160,7 +1163,7 @@ function kMergeMenu(){kmRead();const k=KM;
   setTimeout(()=>{const f=$("#km-to");if(f)f.focus()},40)}
 function mergeComptes(srcId,dstId){const a=kOf(srcId),b=kOf(dstId);if(!a||!b||a.id===b.id)return false;
   Object.keys(kblank()).forEach(f=>{if(f==="notes"){if(a.notes&&!String(b.notes).includes(a.notes))b.notes=[b.notes,a.notes].filter(Boolean).join("\n")}else if(!b[f]&&a[f])b[f]=a[f]});
-  if((TYPE_RANK[a.type]||0)>(TYPE_RANK[b.type]||0))b.type=a.type;
+  if((TYPE_RANK[a.type]||0)>(TYPE_RANK[b.type]||0))b.type=a.type;if(a.contrat)b.contrat=true;
   const map={};ctOf(a.id).slice().forEach(c=>{const ex=findContact(b.id,c);if(ex){["fonction","tel","mail","notes"].forEach(f=>{if(!ex[f]&&c[f])ex[f]=c[f]});map[c.id]=ex.id;S.contacts=S.contacts.filter(x=>x.id!==c.id)}else{c.compteId=b.id;if(ctOf(b.id).some(x=>x.principal))c.principal=false}});
   S.actions.forEach(x=>{if(x.compteId===a.id){x.compteId=b.id;if(map[x.contactId])x.contactId=map[x.contactId]}});
   S.mailing.forEach(m=>{if(m.compteId===a.id){m.compteId=b.id;if(map[m.contactId])m.contactId=map[m.contactId]}});
@@ -1170,16 +1173,17 @@ function kMergeGo(toId){const dst=toId?kOf(toId):findCompte(vOf("km-to"));const 
   if(!dst){toast("Choisissez un compte existant dans la liste.");return}
   if(dst.id===src.id){toast("Choisissez un autre compte.");return}
   if(!kOf(src.id)){toast("Enregistrez d'abord ce compte.");return}
-  mergeComptes(src.id,dst.id);closeModal();lsSave();showTab("compte",dst.id);toast("Comptes fusionnés dans « "+dst.nom+" »")}
+  mergeComptes(src.id,dst.id);hMove(src.id,dst.id);closeModal();lsSave();showTab("compte",dst.id);toast("Comptes fusionnés dans « "+dst.nom+" »")}
 
 /* ================= V3 · Calendrier, tableau de bord, agenda ================= */
 const UIK="pac-idf-ui3";
-const UI=(()=>{const d={cal:{tdb:{mode:"semaine",ref:""},agenda:{mode:"mois",ref:""}},ag:{vue:"liste",f:"afaire",type:"",q:"",lim:250},kv:{v:"prosp",q:"",sec:"",dp:"",ag:"",sort:"next",lim:150},histF:""};
+const UI=(()=>{const d={cal:{tdb:{mode:"semaine",ref:""},agenda:{mode:"mois",ref:""}},ag:{vue:"liste",f:"afaire",type:"",q:"",lim:250},kv:{v:"prosp",q:"",sec:"",fam:"",dp:"",ag:"",sort:"next",lim:150},histF:""};
   try{const r=JSON.parse(localStorage.getItem(UIK)||"{}");return Object.assign(d,r,{cal:Object.assign(d.cal,r.cal||{}),ag:Object.assign(d.ag,r.ag||{},{q:"",lim:250}),kv:Object.assign(d.kv,r.kv||{},{q:"",lim:150})})}catch(e){return d}})();
-const uiSave=()=>{try{localStorage.setItem(UIK,JSON.stringify({cal:UI.cal,ag:{vue:UI.ag.vue,f:UI.ag.f,type:UI.ag.type},kv:{v:UI.kv.v,sec:UI.kv.sec,dp:UI.kv.dp,ag:UI.kv.ag,sort:UI.kv.sort}}))}catch(e){}};
+const uiSave=()=>{try{localStorage.setItem(UIK,JSON.stringify({cal:UI.cal,ag:{vue:UI.ag.vue,f:UI.ag.f,type:UI.ag.type},kv:{v:UI.kv.v,sec:UI.kv.sec,fam:UI.kv.fam,dp:UI.kv.dp,ag:UI.kv.ag,sort:UI.kv.sort}}))}catch(e){}};
 
 /* Événements d'une journée : actions datées (sauf annulées) + relances de mailing regroupées */
-function dayItems(iso){return S.actions.filter(a=>a.date===iso&&a.statut!=="annule").sort((a,b)=>(a.heure||"00").localeCompare(b.heure||"00")||(a.statut==="fait")-(b.statut==="fait"))}
+function mailsOn(iso){return S.actions.filter(a=>a.date===iso&&a.origine==="mailing").length}
+function dayItems(iso){return S.actions.filter(a=>a.date===iso&&a.statut!=="annule"&&a.origine!=="mailing").sort((a,b)=>(a.heure||"00").localeCompare(b.heure||"00")||(a.statut==="fait")-(b.statut==="fait"))}
 function relOn(iso){return S.mailing.filter(m=>m.envoye&&m.relance===iso&&!m.relanceFaite).length}
 function evBtn(a,withK){const k=kOf(a.compteId),late=isOpen(a)&&a.date<todayISO();
   return '<button type="button" class="ev k-'+esc(a.type)+(a.statut==="fait"?' done':'')+(late?' late':'')+'" data-aid="'+esc(a.id)+'" title="'+esc((ALBL[a.type]||"")+" · "+(a.objet||"")+(k?" · "+k.nom:""))+'">'+(a.heure?'<span class="t">'+esc(a.heure.replace(":","h"))+'</span>':'')+'<span class="o">'+esc(a.objet||ALBL[a.type])+'</span>'+(withK&&k?'<span class="k">'+esc(k.nom)+'</span>':'')+'</button>'}
@@ -1196,7 +1200,7 @@ function calHTML(key){const st=UI.cal[key],t=todayISO();if(!st.ref)st.ref=t;
   for(let i=0;i<days;i++){const d=addD(start,i),dd=dObj(d),we=dd.getDay()===0||dd.getDay()===6,items=dayItems(d),nr=relOn(d),max=month?3:40;
     h+='<div class="cal-d'+(we?' we':'')+(d===t?' today':'')+(month&&dd.getMonth()!==mm?' out':'')+'" data-cday="'+d+'" title="Ajouter une action le '+fdate(d)+'"><div class="dn"><b>'+dd.getDate()+'</b>'+(!month?'<span>'+esc(dd.toLocaleDateString("fr-FR",{month:"short"}).replace(".",""))+'</span>':'')+'</div><span class="add" aria-hidden="true">+</span>'+
       items.slice(0,max).map(a=>evBtn(a,!month)).join("")+(items.length>max?'<span class="nmore">+ '+(items.length-max)+' autre'+(items.length-max>1?'s':'')+'</span>':'')+
-      (nr?'<button type="button" class="ev k-rel" data-relday="'+d+'">'+I_MAIL.replace('aria-hidden="true"','aria-hidden="true" style="width:11px;height:11px;vertical-align:-1px;margin-right:3px"')+pl(nr,"relance")+' mailing</button>':'')+'</div>'}
+      (mailsOn(d)?'<button type="button" class="ev k-rel" data-mailday="'+d+'">'+pl(mailsOn(d),"mail envoyé","mails envoyés")+' (mailing)</button>':'')+(nr?'<button type="button" class="ev k-rel" data-relday="'+d+'">'+I_MAIL.replace('aria-hidden="true"','aria-hidden="true" style="width:11px;height:11px;vertical-align:-1px;margin-right:3px"')+pl(nr,"relance")+' mailing</button>':'')+'</div>'}
   h+='</div><div class="cal-leg"><span><i style="background:var(--ok)"></i>RDV, visio</span><span><i style="background:var(--info)"></i>Appel</span><span><i style="background:var(--accent)"></i>Mail</span><span><i style="background:var(--warn)"></i>Rappel / tâche</span><span><i style="background:var(--bad)"></i>En retard</span><span>Cliquez sur un jour pour ajouter une action.</span></div>';
   return h}
 function calNav(key,dir){const st=UI.cal[key];if(dir===0)st.ref=todayISO();else if(st.mode==="mois"){const d=dObj(st.ref);st.ref=isoOf(new Date(d.getFullYear(),d.getMonth()+dir,1))}else st.ref=addD(st.ref,7*dir);uiSave();render()}
@@ -1262,13 +1266,21 @@ function renderTdb(){
     '<div class="panel"><div class="ph"><h2>'+esc(p.nom)+'</h2><button type="button" class="more" data-nav="pac">Ouvrir le PAC</button></div>'+pacL+'</div></div>';
   /* À traiter : priorité A sans prochaine action ; activité récente */
   const seen=new Set(),todo=C.filter(c=>isActive(c)&&c.priorite==="A"&&!nextFor(c)).filter(c=>{if(seen.has(c.compteId))return false;seen.add(c.compteId);return true});
-  const recent=A.filter(a=>a.statut==="fait").sort((a,b)=>String(b.faitLe||b.date).localeCompare(String(a.faitLe||a.date))||String(b.majLe).localeCompare(String(a.majLe))).slice(0,8);
+  const recent=A.filter(a=>a.statut==="fait"&&a.origine!=="mailing").sort((a,b)=>String(b.faitLe||b.date).localeCompare(String(a.faitLe||a.date))||String(b.majLe).localeCompare(String(a.majLe))).slice(0,8);
   const g2='<div class="g2">'+
     '<div class="panel"><div class="ph"><h2>Priorité A sans prochaine action</h2><span class="sub num">'+todo.length+'</span></div>'+
      (todo.length?'<div class="mini">'+todo.slice(0,8).map(c=>'<div class="mi"><div class="grow"><button type="button" class="lk strong" data-kopen="'+esc(c.compteId)+'">'+esc(c.compte)+'</button><div class="sub">'+esc(campShort(c))+' · <span class="pill st-'+c.etape+'" style="font-size:11px;padding:0 7px">'+esc(SL[c.etape])+'</span></div></div><button class="btn" type="button" data-anew="appel" data-k="'+esc(c.compteId)+'" data-c="'+esc(c.id)+'">'+I_EV.appel+'Appel</button><button class="btn" type="button" data-anew="visite" data-k="'+esc(c.compteId)+'" data-c="'+esc(c.id)+'">'+I_EV.visite+'RDV</button></div>').join("")+'</div>'+(todo.length>8?'<button type="button" class="more" data-nav="cibles">+ '+(todo.length-8)+' autres dans Cibles</button>':''):'<p class="hint">Toutes vos cibles de priorité A ont une prochaine action.</p>')+'</div>'+
     '<div class="panel"><div class="ph"><h2>Dernières actions réalisées</h2><button type="button" class="more" data-agf="faites">Historique</button></div>'+
      (recent.length?'<div class="todo">'+recent.map(a=>tItem(a,{full:true})).join("")+'</div>':'<p class="hint">Aucune action réalisée pour l\'instant.</p>')+'</div></div>';
-  h+='<div class="g-main"><div style="display:flex;flex-direction:column;gap:16px;min-width:0">'+mainL+g2+'</div>'+mainR+'</div>'+g3;
+  /* Antécédents : devis en attente et clients perdus à reconquérir */
+  let gH="";const KH=S.comptes.filter(k=>k.histo);
+  if(KH.length){const yp=String(new Date().getFullYear()-1),dv=KH.filter(k=>k.histo.dv.n).sort((a,b)=>b.histo.dv.m-a.histo.dv.m),lost=KH.filter(k=>k.histo.st==="perdu"||k.histo.st==="relance").sort((a,b)=>hCA(b,yp)-hCA(a,yp));
+    const row=(k,v,s,ob)=>'<div class="mi"><div class="grow"><button type="button" class="lk strong" data-kopen="'+esc(k.id)+'">'+esc(k.nom)+'</button><div class="sub">'+s+'</div></div><span class="num" style="white-space:nowrap">'+v+'</span><button class="btn" type="button" data-anew="appel" data-k="'+esc(k.id)+'" data-obj="'+esc(ob)+'">'+I_EV.appel+'Appel</button></div>';
+    gH='<div class="g2"><div class="panel"><div class="ph"><h2>Devis en attente</h2><span class="sub num">'+dv.length+' · '+eur(dv.reduce((s,k)=>s+k.histo.dv.m,0))+'</span><button type="button" class="more" data-famgo="" data-kvset="devis">Tous</button></div>'+
+      (dv.length?'<div class="mini">'+dv.slice(0,8).map(k=>row(k,eur(k.histo.dv.m),pl(k.histo.dv.n,"devis","devis")+(k.histo.dv.d?" · dernier le "+fdate(k.histo.dv.d):"")+(FNOM[famOf(k)]?" · "+esc(FNOM[famOf(k)]):""),"Relance devis en attente")).join("")+'</div>':'<p class="hint">Aucun devis en attente.</p>')+'</div>'+
+      '<div class="panel"><div class="ph"><h2>Clients perdus à reconquérir</h2><span class="sub num">'+lost.length+' · '+eur(lost.reduce((s,k)=>s+hCA(k,yp),0))+' en '+yp+'</span><button type="button" class="more" data-famgo="" data-kvset="perdus">Tous</button></div>'+
+      (lost.length?'<div class="mini">'+lost.slice(0,8).map(k=>row(k,eur(hCA(k,yp)),"Dernière facture le "+fdate(k.histo.last)+(k.histo.st==="relance"?" · pièce "+k.histo.y1+" sans facture":"")+(FNOM[famOf(k)]?" · "+esc(FNOM[famOf(k)]):""),"Reconquête client")).join("")+'</div>':'<p class="hint">Aucun client perdu.</p>')+'</div></div>'}
+  h+='<div class="g-main"><div style="display:flex;flex-direction:column;gap:16px;min-width:0">'+mainL+g2+'</div>'+mainR+'</div>'+gH+g3;
   el.innerHTML=h;
   const oi=$("#objIn");if(oi)oi.addEventListener("change",()=>{S.settings.objectif=Math.max(0,parseInt(oi.value,10)||0);saveSettings();renderTdb()});
 }
@@ -1314,9 +1326,9 @@ function renderAgenda(){
 
 /* ================= V3 · Comptes et fiche compte ================= */
 const KV=[["prosp","En prospection",k=>cibOf(k.id).length>0],["Client existant","Clients existants",k=>k.type==="Client existant"],["Prospect","Prospects",k=>k.type==="Prospect"],["Prescripteur","Prescripteurs",k=>k.type==="Prescripteur"],
-  ["retard","Action en retard",k=>{const n=nextOf(k.id);return !!(n&&n.date&&n.date<todayISO())}],["sans","Sans prochaine action",k=>!nextOf(k.id)&&cibOf(k.id).some(isActive)],["tous","Tous",()=>true]];
+  ["retard","Action en retard",k=>{const n=nextOf(k.id);return !!(n&&n.date&&n.date<todayISO())}],["sans","Sans prochaine action",k=>!nextOf(k.id)&&cibOf(k.id).some(isActive)],["perdus","Clients perdus",k=>!!k.histo&&(k.histo.st==="perdu"||k.histo.st==="relance")],["devis","Devis en attente",k=>!!k.histo&&k.histo.dv.n>0],["contrat","Contrat cadre",k=>!!k.contrat],["tous","Tous",()=>true]];
 function kBase(){const U=UI.kv,words=nh(U.q).split(" ").filter(Boolean);
-  return S.comptes.filter(k=>{if(U.sec&&secteurOf(k)!==U.sec)return false;if(U.dp&&k.dept!==U.dp)return false;if(U.ag&&k.agence!==U.ag)return false;
+  return S.comptes.filter(k=>{if(U.sec&&secteurOf(k)!==U.sec)return false;if(U.fam&&famOf(k)!==U.fam)return false;if(U.dp&&k.dept!==U.dp)return false;if(U.ag&&k.agence!==U.ag)return false;
     if(words.length){const hay=nh([k.nom,k.ville,k.notes,k.typologie,k.segment,k.agence,k.apporteur,...ctOf(k.id).map(c=>c.nom+" "+c.mail)].join(" "));if(!words.every(w=>hay.includes(w)))return false}
     return true})}
 function renderComptes(){
@@ -1325,29 +1337,31 @@ function renderComptes(){
   const so=U.sort;
   L.sort((a,b)=>{if(so==="name")return a.nom.localeCompare(b.nom,"fr");
     if(so==="last"){const x=lst.get(a.id),y=lst.get(b.id);return ((y&&y.date)||"").localeCompare((x&&x.date)||"")||a.nom.localeCompare(b.nom,"fr")}
-    if(so==="ca")return caOf(b.id)-caOf(a.id)||a.nom.localeCompare(b.nom,"fr");
+    if(so==="ca"){const yp=String(new Date().getFullYear()-1),sc=k=>k.histo?hCA(k)+hCA(k,yp):caOf(k.id);return sc(b)-sc(a)||a.nom.localeCompare(b.nom,"fr")}
+    if(so==="devis")return ((b.histo&&b.histo.dv.m)||0)-((a.histo&&a.histo.dv.m)||0)||a.nom.localeCompare(b.nom,"fr");
     const x=nxt.get(a.id),y=nxt.get(b.id);return ((x&&x.date)||(x?"9998":"9999")).localeCompare((y&&y.date)||(y?"9998":"9999"))||a.nom.localeCompare(b.nom,"fr")});
   const uniq=f=>[...new Set(S.comptes.map(f).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
   let h=pageH("Suivi de prospection","Comptes",pl(S.comptes.length,"compte")+" · "+pl(S.contacts.length,"contact")+" · "+pl(S.comptes.filter(k=>cibOf(k.id).length).length,"compte")+" en prospection",
     '<button class="btn ghost" type="button" data-act="kimport">Importer</button><button class="btn ghost" type="button" data-act="export">Exporter / Excel</button><button class="btn primary" type="button" data-knew="1">'+I_PLUS+'Nouveau compte</button>');
   h+='<div class="chips">'+KV.map(([k,l,fn])=>'<button type="button" class="chip" data-kv="'+esc(k)+'" aria-pressed="'+(U.v===k)+'">'+esc(l)+'<span class="n num">'+B.filter(fn).length+'</span></button>').join("")+'</div>';
-  h+='<div class="filters" style="grid-template-columns:minmax(0,2fr) repeat(4,minmax(0,1fr))"><div class="field-s"><label for="kQ">Rechercher</label><input type="search" id="kQ" value="'+esc(U.q)+'" placeholder="Compte, ville, contact, e-mail, notes…"></div>'+
+  h+='<div class="filters" style="grid-template-columns:minmax(0,2fr) repeat(5,minmax(0,1fr))"><div class="field-s"><label for="kQ">Rechercher</label><input type="search" id="kQ" value="'+esc(U.q)+'" placeholder="Compte, ville, contact, e-mail, notes…"></div>'+
     '<div class="field-s"><label for="kSec">Secteur</label><select id="kSec" data-kf="sec"><option value="">Tous</option>'+uniq(secteurOf).map(s=>'<option'+(U.sec===s?' selected':'')+'>'+esc(s)+'</option>').join("")+'</select></div>'+
+    '<div class="field-s"><label for="kFam">Famille</label><select id="kFam" data-kf="fam"><option value="">Toutes</option>'+FAMILLES.map(([c,n])=>'<option value="'+c+'"'+(U.fam===c?' selected':'')+'>'+esc(n)+'</option>').join("")+'</select></div>'+
     '<div class="field-s"><label for="kDp">Département</label><select id="kDp" data-kf="dp"><option value="">Tous</option>'+DEPTS.map(([d,n])=>'<option value="'+d+'"'+(U.dp===d?' selected':'')+'>'+esc(d+" · "+n)+'</option>').join("")+'</select></div>'+
     '<div class="field-s"><label for="kAg">Agence</label><select id="kAg" data-kf="ag"><option value="">Toutes</option>'+uniq(k=>k.agence).map(s=>'<option'+(U.ag===s?' selected':'')+'>'+esc(s)+'</option>').join("")+'</select></div>'+
-    '<div class="field-s"><label for="kSort">Trier par</label><select id="kSort" data-kf="sort"><option value="next"'+(so==="next"?' selected':'')+'>Prochaine action</option><option value="last"'+(so==="last"?' selected':'')+'>Dernière activité</option><option value="name"'+(so==="name"?' selected':'')+'>Nom</option><option value="ca"'+(so==="ca"?' selected':'')+'>CA connu</option></select></div></div>';
+    '<div class="field-s"><label for="kSort">Trier par</label><select id="kSort" data-kf="sort"><option value="next"'+(so==="next"?' selected':'')+'>Prochaine action</option><option value="last"'+(so==="last"?' selected':'')+'>Dernière activité</option><option value="name"'+(so==="name"?' selected':'')+'>Nom</option><option value="ca"'+(so==="ca"?' selected':'')+'>CA facturé</option><option value="devis"'+(so==="devis"?' selected':'')+'>Devis en attente</option></select></div></div>';
   if(!L.length){h+='<div class="list-wrap"><div class="empty"><h3>Aucun compte dans cette vue</h3><p>Changez de vue ou retirez un filtre.</p></div></div>';el.innerHTML=h;return}
   const t=todayISO(),shown=L.slice(0,U.lim);
-  h+='<div class="list-wrap"><table class="tbl"><thead><tr><th>Compte</th><th>Secteur</th><th>Contacts</th><th>Campagnes</th><th>Dernière activité</th><th>Prochaine action</th><th>Mailing</th><th class="r">CA connu</th></tr></thead><tbody>'+
+  h+='<div class="list-wrap"><table class="tbl"><thead><tr><th>Compte</th><th>Secteur</th><th>Contacts</th><th>Campagnes</th><th>Dernière activité</th><th>Prochaine action</th><th>Mailing</th><th class="r">CA facturé</th></tr></thead><tbody>'+
    shown.map(k=>{const cts=ctOf(k.id),p=principal(k.id),cs=cibOf(k.id),n=nxt.get(k.id),la=lst.get(k.id),ml=mlOf(k.id),sent=ml.filter(m=>m.envoye).sort((a,b)=>(b.dateEnvoi||"").localeCompare(a.dateEnvoi||""))[0],ca=caOf(k.id);
-    return '<tr data-kid="'+esc(k.id)+'" tabindex="0"><td><div class="co"><b>'+esc(k.nom)+'</b></div><div class="sub">'+tyTag(k.type)+(k.dept?'<span class="ty">'+esc(k.dept)+'</span>':'')+esc([k.ville,k.agence].filter(Boolean).join(" · "))+'</div></td>'+
+    return '<tr data-kid="'+esc(k.id)+'" tabindex="0"><td><div class="co"><b>'+esc(k.nom)+'</b></div><div class="sub">'+tyTag(k.type)+(k.contrat?'<span class="ty">Contrat cadre</span>':'')+(k.histo&&(k.histo.st==="perdu"||k.histo.st==="relance")?'<span class="ty" style="background:var(--bad-soft);color:var(--bad)">Perdu</span>':'')+(k.histo&&k.histo.dv.n?'<span class="ty" style="background:var(--warn-soft);color:var(--warn)">'+pl(k.histo.dv.n,"devis","devis")+'</span>':'')+(k.dept?'<span class="ty">'+esc(k.dept)+'</span>':'')+esc([k.ville,k.agence].filter(Boolean).join(" · "))+'</div></td>'+
      '<td class="sub" style="max-width:200px">'+esc(secteurOf(k)||"—")+'</td>'+
      '<td>'+(p?'<div style="font-size:13px">'+esc(p.nom||p.mail)+'</div>':'<span class="sub">—</span>')+(cts.length>1?'<div class="sub">+ '+(cts.length-1)+' autre'+(cts.length>2?'s':'')+'</div>':'')+'</td>'+
      '<td><div class="stp">'+(cs.length?cs.map(c=>'<span class="pill st-'+c.etape+'" title="'+esc(c.campagne)+'">'+esc(SL[c.etape])+'</span>').join(""):'<span class="sub">—</span>')+'</div></td>'+
      '<td>'+(la?'<div class="nx"><span class="d">'+fdate(la.date)+'</span><span class="l">'+esc(la.label)+'</span></div>':'<span class="sub">—</span>')+'</td>'+
      '<td>'+(n?'<div class="nx"><span class="d'+(n.date&&n.date<t?' late':'')+'">'+esc(n.date?fdate(n.date):"Sans date")+'</span><span class="l">'+esc(n.objet||ALBL[n.type])+'</span></div>':'<span class="sub">—</span>')+'</td>'+
      '<td>'+(ml.length?(sent?'<div class="nx"><span class="d">'+fdate(sent.dateEnvoi)+'</span><span class="l">envoyé'+(sent.relance&&!sent.relanceFaite?' · relance '+fdate(sent.relance):'')+'</span></div>':'<span class="sub">'+esc(ml[0].liste||"Liste")+' · à envoyer</span>'):'<span class="sub">—</span>')+'</td>'+
-     '<td class="r num">'+(ca?eur(ca):'<span class="sub">—</span>')+'</td></tr>'}).join("")+'</tbody></table></div>'+
+     '<td class="r num">'+(k.histo?eur(hCA(k))+'<div class="sub">'+k.histo.y0+' : '+eur(hCA(k,k.histo.y0))+'</div>':ca?eur(ca)+'<div class="sub">mailing</div>':'<span class="sub">—</span>')+'</td></tr>'}).join("")+'</tbody></table></div>'+
    '<div class="pager">'+(L.length>shown.length?'<button class="btn" type="button" data-act="kmore">Afficher '+Math.min(150,L.length-shown.length)+' de plus</button>':'')+'<span class="sub">'+shown.length+' sur '+pl(L.length,"compte")+'</span></div>';
   el.innerHTML=h;
 }
@@ -1361,22 +1375,22 @@ function renderCompte(){
   const t=todayISO(),cts=ctOf(k.id).slice().sort((a,b)=>(b.principal-a.principal)||String(a.nom).localeCompare(String(b.nom),"fr")),cs=cibOf(k.id),A=actOf(k.id),ml=mlOf(k.id);
   const open=A.filter(isOpen).sort(aSort),n=open[0],la=lastOf(k.id),ca=caOf(k.id);
   const hist=A.filter(a=>a.statut!=="afaire").map(a=>Object.assign({},a));
-  ml.filter(m=>m.envoye).forEach(m=>hist.push({mailing:true,id:m.id,type:"mail",date:m.dateEnvoi,statut:"fait",objet:"Mail envoyé · liste « "+(m.liste||"mailing")+" »",details:m.commentaire||"",contactId:m.contactId,resultat:m.relanceFaite?"Relancé le "+fdate(m.relanceFaite):m.relance?"Relance prévue le "+fdate(m.relance):""}));
+  ml.filter(m=>m.envoye&&!S.actions.some(a=>a.mailingId===m.id)).forEach(m=>hist.push({mailing:true,id:m.id,type:"mail",date:m.dateEnvoi,statut:"fait",objet:"Mail envoyé · liste « "+(m.liste||"mailing")+" »",details:m.commentaire||"",contactId:m.contactId,resultat:m.relanceFaite?"Relancé le "+fdate(m.relanceFaite):m.relance?"Relance prévue le "+fdate(m.relance):""}));
   hist.sort(aSortDesc);
   const hf=UI.histF,H=hist.filter(x=>!hf||hGroup(x)===hf);
   const rel=ml.filter(m=>m.envoye&&m.relance&&!m.relanceFaite);
   let h='<div class="page-h"><div class="grow"><span class="crumb"><button type="button" data-nav="comptes">Comptes</button>›<span>Fiche compte</span></span></div></div>';
-  h+='<div class="acc-h"><div class="acc-top"><div class="grow"><h2>'+esc(k.nom)+'</h2><div class="acc-tags">'+tyTag(k.type)+(secteurOf(k)?'<span class="tag bu">'+esc(secteurOf(k))+'</span>':'')+(k.dept?'<span class="ty">'+esc(dLabel(k.dept))+'</span>':'')+(k.ville?'<span class="sub">'+esc(k.ville)+'</span>':'')+(k.agence?'<span class="sub">· agence '+esc(k.agence)+'</span>':'')+'</div></div>'+
+  h+='<div class="acc-h"><div class="acc-top"><div class="grow"><h2>'+esc(k.nom)+'</h2><div class="acc-tags">'+tyTag(k.type)+(secteurOf(k)?'<span class="tag bu">'+esc(secteurOf(k))+'</span>':'')+(k.dept?'<span class="ty">'+esc(dLabel(k.dept))+'</span>':'')+(k.ville?'<span class="sub">'+esc(k.ville)+'</span>':'')+(k.contrat?'<span class="tag bu">Contrat cadre</span>':'')+(FNOM[famOf(k)]?'<span class="sub">· '+esc(FNOM[famOf(k)])+'</span>':'')+(k.agence?'<span class="sub">· agence '+esc(k.agence)+'</span>':'')+'</div></div>'+
     '<div class="bar"><button class="btn" type="button" data-kedit="'+esc(k.id)+'">Modifier</button><button class="btn" type="button" data-ctnew="'+esc(k.id)+'">'+I_PLUS+'Contact</button><button class="btn" type="button" data-cibnew="'+esc(k.id)+'">'+I_PLUS+'Campagne</button><button class="btn primary" type="button" data-anew="visite" data-k="'+esc(k.id)+'">'+I_PLUS+'RDV</button></div></div>'+
     '<div class="acc-stats"><div><b class="'+(n&&n.date&&n.date<t?'late':'')+'">'+(n?esc(n.date?fdate(n.date):"Sans date"):"—")+'</b><span>'+(n?esc(n.objet||ALBL[n.type]):"Aucune action prévue")+'</span></div>'+
      '<div><b>'+(la?fdate(la.date):"—")+'</b><span>'+(la?"Dernier contact · "+esc(la.label):"Jamais contacté")+'</span></div>'+
      '<div><b>'+A.filter(a=>a.statut==="fait"&&a.type!=="note").length+'</b><span>actions réalisées · '+A.filter(a=>a.type==="visite"&&a.statut==="fait").length+' visite(s)</span></div>'+
      '<div><b>'+cs.length+'</b><span>'+(cs.length?esc(cs.map(c=>SL[c.etape]).join(", ")):"campagne")+'</span></div>'+
-     '<div><b>'+(ca?eur(ca):"—")+'</b><span>CA connu (listes mailing)</span></div></div></div>';
+     (k.histo?'<div><b>'+eur(hCA(k))+'</b><span>CA facturé '+k.histo.y1+' · '+k.histo.y0+' : '+eur(hCA(k,k.histo.y0))+'</span></div>':'<div><b>'+(ca?eur(ca):"—")+'</b><span>CA connu (listes mailing)</span></div>')+'</div></div>';
   /* Colonne 1 : informations et contacts */
   const kv=(l,v)=>v?'<dt>'+l+'</dt><dd>'+v+'</dd>':'';
   const c1='<div class="panel"><div class="ph"><h2>Informations</h2><button type="button" class="more" data-kedit="'+esc(k.id)+'">Modifier</button></div><dl class="kvl">'+
-     kv("Type",esc(k.type))+kv("Segment",esc(k.segment))+kv("Typologie",esc(k.typologie))+kv("Département",esc(dLabel(k.dept)))+kv("Adresse",esc([k.adresse,k.ville].filter(Boolean).join(", ")))+
+     kv("Type",esc(k.type))+kv("Famille",esc(FNOM[famOf(k)]||""))+kv("Segment",esc(k.segment))+kv("Typologie",esc(k.typologie)+(k.sousTypo&&k.sousTypo!==k.typologie?' · '+esc(k.sousTypo):''))+kv("Département",esc(dLabel(k.dept)))+kv("Adresse",esc([k.adresse,k.ville].filter(Boolean).join(", ")))+
      kv("Téléphone",k.tel?'<a class="dl num" href="tel:'+esc(k.tel.replace(/[^\d+]/g,""))+'">'+esc(k.tel)+'</a>':"")+kv("Site web",k.web?'<a class="dl" href="'+esc(/^https?:/.test(k.web)?k.web:"https://"+k.web)+'" target="_blank" rel="noopener">'+esc(k.web)+'</a>':"")+
      kv("Agence",esc(k.agence))+kv("Apporteur",esc(k.apporteur))+'</dl>'+(k.notes?'<p class="dnotes" style="border-top:1px solid var(--line);padding-top:10px">'+esc(k.notes)+'</p>':'<p class="hint">Aucune note. Ajoutez l\'organisation, le patrimoine, les contrats en place…</p>')+'</div>'+
    '<div class="panel"><div class="ph"><h2>Contacts</h2><span class="sub num">'+cts.length+'</span><button type="button" class="more" data-ctnew="'+esc(k.id)+'">+ Ajouter</button></div>'+
@@ -1386,6 +1400,7 @@ function renderCompte(){
   /* Colonne 2 : à venir et historique */
   const c2='<div class="panel"><div class="ph"><h2>À venir</h2><span class="sub num">'+open.length+'</span></div>'+qBtns(k.id,cs.length===1?cs[0].id:"")+
      (open.length||rel.length?'<div class="todo">'+open.map(a=>tItem(a,{noCompte:true,full:true})).join("")+rel.map(rItem).join("")+'</div>':'<p class="hint">Aucune action prévue : planifiez un RDV, un appel ou un rappel.</p>')+'</div>'+
+   '<div class="panel"><div class="ph"><h2>Antécédents de facturation</h2>'+(k.histo?'<span class="sub">import du '+fdate(k.histo.imp)+' · '+pl(k.histo.nb,"pièce")+'</span>':'')+'</div>'+histoHead(k)+'<div id="histoList"></div></div>'+
    '<div class="panel"><div class="ph"><h2>Historique</h2><span class="sub num">'+hist.length+'</span></div>'+
     (hist.length?'<div class="chips echips">'+HF.filter(([f])=>!f||hist.some(x=>hGroup(x)===f)).map(([f,l])=>'<button type="button" class="chip" data-hf="'+f+'" aria-pressed="'+(hf===f)+'">'+l+'<span class="n num">'+(f?hist.filter(x=>hGroup(x)===f).length:hist.length)+'</span></button>').join("")+'</div>':'')+
     (H.length?'<div class="tl">'+H.map(x=>{const ct=ctById(x.contactId),who=[ct?ct.nom:"",x.interlocuteur&&(!ct||x.interlocuteur!==ct.nom)?x.interlocuteur:"",x.accompagnant?"avec "+x.accompagnant:""].filter(Boolean).join(" · "),cb=cibById(x.cibleId);
@@ -1400,7 +1415,7 @@ function renderCompte(){
    (ml.length?'<div class="panel"><div class="ph"><h2>Mailing</h2><span class="sub num">'+ml.length+'</span></div><div>'+ml.map(m=>'<div class="mlc" data-mopen="'+esc(m.id)+'"><div><b style="font-weight:600">'+esc(m.liste||"Liste")+'</b> · '+(m.envoye?'<span style="color:var(--ok)">envoyé le '+fdate(m.dateEnvoi)+'</span>':'<span class="sub">'+(mOui(m)?'à envoyer':esc(m.envoyer))+'</span>')+'</div><div class="sub">'+esc([m.contact,m.mail].filter(Boolean).join(" · "))+'</div>'+
      (m.mission||m.ca?'<div class="sub">'+esc([m.mission?"Dernière mission : "+m.mission:"",m.ca?"CA "+m.ca+" €":"",m.nbFact?m.nbFact+" facture(s)":""].filter(Boolean).join(" · "))+'</div>':'')+(m.relance?'<div class="sub">Relance '+(m.relanceFaite?'faite le '+fdate(m.relanceFaite):'le '+fdate(m.relance))+'</div>':'')+(m.commentaire?'<div class="sub">'+esc(m.commentaire)+'</div>':'')+'</div>').join("")+'</div></div>':'');
   h+='<div class="acc-grid"><div class="c1">'+c1+'</div><div class="c2">'+c2+'</div><div class="c3">'+c3+'</div></div>';
-  el.innerHTML=h;
+  el.innerHTML=h;if(k.histo)loadHisto(k.id);
 }
 
 /* ================= V3 · Cibles & campagnes (suivi de prospection) ================= */
@@ -1871,7 +1886,7 @@ const pacTitre=()=>curPlan().titre||curPlan().nom||PAC_TITRE_DEF;
 const pacPeriode=()=>curPlan().periode||String(new Date().getFullYear());
 /* Cibles couvertes par une ligne : campagnes reliées et/ou secteurs reliés */
 function pacCibles(p,cibles){const C=cibles||S.cibles,cp=p.campagnes||[],sc=p.secteurs||[];if(!cp.length&&!sc.length)return [];
-  return C.filter(c=>cp.includes(c.campagne)||(sc.length&&sc.includes(secteurOf(kOf(c.compteId)))))}
+  return C.filter(c=>{if(cp.includes(c.campagne))return true;if(!sc.length)return false;const k=kOf(c.compteId);return !!k&&(sc.includes(k.segment)||sc.includes(k.typologie))})}
 function pacStats(p,cibles){const C=pacCibles(p,cibles);
   return {n:C.length,visites:C.reduce((s,c)=>s+visitsDone(c),0),opps:C.filter(c=>c.opp.creee).length,
     devis:C.filter(c=>String(c.opp.devis||"").trim()).length,ca:C.filter(c=>c.opp.creee&&c.opp.statut==="Conclue").reduce((s,c)=>s+(Number(c.opp.montant)||0),0)}}
@@ -1882,19 +1897,20 @@ function renderPac(){
   const camps=[...new Set(S.cibles.map(c=>c.campagne).filter(Boolean))];
   const linked=new Set(lines.flatMap(p=>p.campagnes)),free=camps.filter(c=>!linked.has(c)).sort((a,b)=>a.localeCompare(b,"fr"));
   let h=pageH("Pilotage","Plan d'action commercial","Plusieurs plans possibles : un par secteur d'activité, un par plan d'action. Les résultats se calculent à partir des cibles reliées.",
-    '<button class="btn" type="button" data-act="pplannew">'+I_PLUS+'Nouveau plan</button>');
-  h+='<div class="plans" role="tablist" aria-label="Plans">'+S.plans.slice().sort((a,b)=>(a.ordre||0)-(b.ordre||0)||String(a.creeLe).localeCompare(String(b.creeLe))).map(p=>'<button type="button" class="plan" data-plan="'+esc(p.id)+'" aria-pressed="'+(p.id===plan.id)+'">'+esc(p.nom)+'<span class="ax">'+esc((PAXES.find(x=>x[0]===p.axe)||PAXES[2])[1])+'</span><span class="n">'+planLines(p.id).length+'</span></button>').join("")+'</div>';
+    (FAMILLES.some(f=>!S.plans.some(p=>p.famille===f[0]))?'<button class="btn" type="button" data-act="pfam">Un plan par famille de clients</button>':'')+'<button class="btn" type="button" data-act="pplannew">'+I_PLUS+'Nouveau plan</button>');
+  h+='<div class="plans" role="tablist" aria-label="Plans">'+S.plans.slice().sort((a,b)=>(a.ordre||0)-(b.ordre||0)||String(a.creeLe).localeCompare(String(b.creeLe))).map(p=>'<button type="button" class="plan" data-plan="'+esc(p.id)+'" aria-pressed="'+(p.id===plan.id)+'">'+esc(p.nom)+'<span class="ax">'+esc((PAXES.find(x=>x[0]===p.axe)||PAXES[PAXES.length-1])[1])+'</span><span class="n">'+planLines(p.id).length+'</span></button>').join("")+'</div>';
   const tools='<div class="bar pac-tools"><button class="btn ghost" type="button" data-act="phead">Paramètres du plan</button><button class="btn ghost" type="button" data-act="pmod">Lignes types</button><button class="btn ghost" type="button" data-act="psecteurs">Une ligne par secteur</button><button class="btn ghost" type="button" data-act="pimport">Importer un PAC Excel</button>'+
     (lines.length?(IN_FRAME?'<a class="btn ghost" href="'+pacPrintURL()+'" target="_blank" rel="noopener" title="S\'ouvre dans un onglet pour imprimer ou enregistrer en PDF">Imprimer</a>':'<button class="btn ghost" type="button" data-act="pprint">Imprimer</button>'):'')+
     '<button class="btn ghost" type="button" data-act="pexport">Exporter / Excel</button><button class="btn primary" type="button" data-act="pnew">'+I_PLUS+'Nouvelle ligne</button></div>';
   h+=pacHead(pacTitre(),pacPeriode(),lines,tools);
+  if(plan.famille)h+=famPanel(plan.famille);
   if(!lines.length){
     h+='<div class="list-wrap"><div class="empty"><h3>Ce plan est vide</h3><p>Chaque ligne est un axe : objectif, actions par trimestre, qui, quand, indicateurs, résultats et décision corrective. Reliez une ligne à des campagnes ou à des secteurs : ses résultats se calculent à partir de vos cibles.</p>'+
      '<div class="bar" style="justify-content:center">'+(camps.length?'<button class="btn" type="button" data-act="pfromcamps">Une ligne par campagne ('+camps.length+')</button>':'')+'<button class="btn" type="button" data-act="psecteurs">Une ligne par secteur</button><button class="btn" type="button" data-act="pmod">Lignes types</button><button class="btn" type="button" data-act="pimport">Importer un PAC Excel</button><button class="btn primary" type="button" data-act="pnew">Nouvelle ligne</button></div></div></div>';
   }else{
     const dg=pacDupGroups();
     if(dg.length)h+='<div class="notice warn" style="display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center"><span style="flex:1;min-width:260px"><b>'+pl(dg.reduce((s,g)=>s+g.length-1,0),"ligne")+' en double</b> dans ce plan : '+esc(dg.map(g=>g[0].element+" ×"+g.length).join(", "))+'. La fusion garde une ligne par élément, complétée avec les décisions, priorités et résultats des autres.</span><button class="btn" type="button" data-act="pdedup" id="pDedup">Fusionner les doublons</button></div>';
-    if(free.length&&plan.axe!=="secteur")h+='<div class="notice">'+free.length+' campagne'+(free.length>1?'s':'')+' sans ligne dans ce plan : '+esc(free.map(x=>x.replace(/^PAC IDF – /,"")).join(", "))+'. <button class="btn ghost" type="button" data-act="pfromcamps">Créer '+(free.length>1?'les lignes':'la ligne')+'</button></div>';
+    if(free.length&&plan.axe!=="secteur"&&plan.axe!=="famille")h+='<div class="notice">'+free.length+' campagne'+(free.length>1?'s':'')+' sans ligne dans ce plan : '+esc(free.map(x=>x.replace(/^PAC IDF – /,"")).join(", "))+'. <button class="btn ghost" type="button" data-act="pfromcamps">Créer '+(free.length>1?'les lignes':'la ligne')+'</button></div>';
     const V=pacView(),nP=k=>k==="0"?lines.filter(p=>!p.prio).length:k?lines.filter(p=>p.prio===k).length:lines.length;
     h+='<div class="pac-filt"><div class="chips grow" aria-label="Filtrer par priorité">'+[["","Toutes"],["1","P1 · haute"],["2","P2 · moyenne"],["3","P3 · basse"],["0","Sans priorité"]].filter(([k])=>!k||nP(k)||PUI.f===k).map(([k,l])=>'<button type="button" class="chip" data-pf="'+k+'" aria-pressed="'+(PUI.f===k)+'">'+l+'<span class="n num">'+nP(k)+'</span></button>').join("")+'</div>'+
       '<div class="ps"><label for="pSort">Trier</label><select id="pSort"><option value="prio"'+(PUI.sort==="prio"?' selected':'')+'>Par priorité</option><option value="manuel"'+(PUI.sort==="manuel"?' selected':'')+'>Ordre manuel</option></select></div></div>';
@@ -1961,9 +1977,9 @@ function pacDedup(btn){const G=pacDupGroups();if(!G.length)return;
   bump();commit();toast("Doublons fusionnés : "+pl(G.length,"ligne")+" conservée"+(G.length>1?"s":""))}
 
 /* ---------- Export, sauvegarde, restauration ---------- */
-function backupJSON(){return JSON.stringify(Object.assign({app:"PAC Prospection IDF",version:3,exportLe:now()},snapshot()))}
+async function backupJSON(){const h=await hAll();return JSON.stringify(Object.assign({app:"PAC Prospection IDF",version:3,exportLe:now()},snapshot(),{histo:h||{}}))}
 function markBackup(){S.settings.lastBackup=now();if(S.settings.migrationV3)S.settings.migrationV3.vu=true;lsSave();renderNav()}
-async function doBackup(){if(IN_FRAME&&!$("#exBox"))exportMenu();await offer("PAC_sauvegarde_"+todayISO()+".json",backupJSON());markBackup();if(S.tab==="tdb")renderTdb()}
+async function doBackup(){if(IN_FRAME&&!$("#exBox"))exportMenu();await offer("PAC_sauvegarde_"+todayISO()+".json",await backupJSON());markBackup();if(S.tab==="tdb")renderTdb()}
 async function restore(text){
   let j;try{j=JSON.parse(text);if(!j||!Array.isArray(j.cibles))throw 0}catch(e){toast("Sauvegarde illisible : choisissez le fichier exporté par cette application.");return}
   const before={c:S.cibles.length,k:S.comptes.length,ct:S.contacts.length,a:S.actions.length,m:S.mailing.length,p:S.pac.length};
@@ -1982,6 +1998,7 @@ async function restore(text){
       if(ex){m.id=ex.id;m.compteId=ex.compteId;m.contactId=ex.contactId;Object.assign(ex,m)}else{if(!m.id)m.id=uid();S.mailing.push(absorbMailing(m))}bump()});
     (j.pac||[]).forEach(x=>{const p=pnorm(x);if(!p.id)p.id=uid();const i=S.pac.findIndex(y=>y.id===p.id);if(i>=0){p.planId=S.pac[i].planId;S.pac[i]=p}else{p.planId=curPlan().id;S.pac.push(p)}});
     bump();ensurePlans();S.cibles.forEach(autoStage)}
+  if(j.histo&&typeof j.histo==="object"){try{await hPutMany(new Map(Object.entries(j.histo)))}catch(e){}}
   lsSave();closeDrawer();render();
   const d=(a,b)=>a-b;
   toast("Restauré · "+[pl(S.cibles.length,"cible"),pl(S.comptes.length,"compte")+(S.comptes.length>before.k?" (+"+d(S.comptes.length,before.k)+")":""),pl(S.actions.length,"action"),pl(S.mailing.length,"ligne")+" de mailing",pl(S.pac.length,"ligne")+" de PAC"].join(" · "));
@@ -1990,7 +2007,8 @@ function exportMenu(){
   const rows=[["Compte","Type","Secteur","Département","Contact principal","Fonction","Téléphone","E-mail","Agence","BU d'origine","Apporteur","Source","Campagne","Diagnostics visés","Potentiel annuel (€)","Priorité","Étape","Motif sans suite","Prochaine action","Quoi","Visites réalisées","Opportunité","Montant opp. (€)","Statut opp.","N° devis","Notes"]]
     .concat(S.cibles.map(c=>{const k=kOf(c.compteId)||{},p=principal(c.compteId)||{},n=nextFor(c);return [c.compte,k.type,secteurOf(k),dLabel(c.dept),p.nom,p.fonction,p.tel,p.mail,c.agence,c.bu.join(", "),c.apporteur,c.source,c.campagne,c.prestations.map(x=>PLABEL[x]||x).join(", "),c.potentiel,c.priorite,SL[c.etape],c.motif,n?fdate(n.date):"",n?n.objet:"",visitsDone(c),c.opp.creee?"Oui":"Non",c.opp.creee?c.opp.montant:"",c.opp.creee?c.opp.statut:"",c.opp.devis,c.notes]}));
   const arows=[["Date","Heure","Compte","Type","Statut","Résultat","Contact","Objet","Détails / compte rendu","Accompagnant","Campagne"]].concat(S.actions.slice().sort(aSortDesc).map(a=>{const k=kOf(a.compteId)||{},ct=ctById(a.contactId),cb=cibById(a.cibleId);return [fdate(a.date),a.heure,k.nom,ALBL[a.type]||a.type,stLbl(a),a.resultat,ct?ct.nom:a.interlocuteur,a.objet,a.details,a.accompagnant,cb?cb.campagne:""]}));
-  const krows=[["Compte","Type","Segment","Typologie","Département","Ville","Agence","Apporteur","Contacts","Campagnes","Dernier contact","Prochaine action","Quoi","CA connu (€)"]].concat(S.comptes.map(k=>{const n=nextOf(k.id),l=lastOf(k.id);return [k.nom,k.type,k.segment,k.typologie,dLabel(k.dept),k.ville,k.agence,k.apporteur,ctOf(k.id).length,cibOf(k.id).map(c=>c.campagne).join(", "),l?fdate(l.date):"",n?fdate(n.date):"",n?n.objet:"",caOf(k.id)||""]}));
+  const yy=new Date().getFullYear(),y0s=String(yy-1),y1s=String(yy);
+  const krows=[["Compte","Type","Famille","Segment","Typologie","Contrat cadre","Statut","CA facturé "+y0s+" (€)","CA facturé "+y1s+" (€)","Devis en attente (€)","Département","Ville","Agence","Apporteur","Contacts","Campagnes","Dernier contact","Prochaine action","Quoi"]].concat(S.comptes.map(k=>{const n=nextOf(k.id),l=lastOf(k.id),h=k.histo;return [k.nom,k.type,FNOM[famOf(k)]||"",k.segment,k.typologie,k.contrat?"Oui":"",h?(HST[h.st]||[""])[0]:"",h?hCA(k,y0s):"",h?hCA(k,y1s):"",h&&h.dv.n?h.dv.m:"",dLabel(k.dept),k.ville,k.agence,k.apporteur,ctOf(k.id).length,cibOf(k.id).map(c=>c.campagne).join(", "),l?fdate(l.date):"",n?fdate(n.date):"",n?n.objet:""]}));
   const crows=[["Compte","Contact","Fonction","Téléphone","E-mail","Principal","Notes"]].concat(S.contacts.map(c=>{const k=kOf(c.compteId)||{};return [k.nom,c.nom,c.fonction,c.tel,c.mail,c.principal?"Oui":"",c.notes]}));
   const mrows=[["Envoyé","Date d'envoi","Relance le","Relance faite","Commentaire","Client","Typologie","Famille","Contact","E-mail","Agence","Apporteur","Liste","Envoyer ?","Point d'attention"]].concat(S.mailing.map(m=>[m.envoye?"Oui":"Non",fdate(m.dateEnvoi),fdate(m.relance),fdate(m.relanceFaite),m.commentaire,m.client,m.typologie,m.famille,m.contact,m.mail,m.agence,m.apporteur,m.liste,m.envoyer,m.attention]));
   let hasBk=false;try{hasBk=!!localStorage.getItem(BK_KEY)}catch(e){}
@@ -2000,7 +2018,7 @@ function exportMenu(){
   '<div class="db">'+
   '<div style="display:flex;flex-direction:column;gap:8px"><span class="lbl">Sauvegarde complète</span>'+
   '<button class="btn primary" type="button" id="exJ">Télécharger la sauvegarde complète (.json)</button>'+
-  '<p class="hint">À faire chaque semaine : c\'est la seule copie de vos données en dehors de ce navigateur. '+(lb?'Dernière sauvegarde : '+new Date(lb).toLocaleDateString("fr-FR")+'.':'Aucune sauvegarde faite depuis la V3.')+'</p></div>'+
+  '<p class="hint">À faire chaque semaine : c\'est la seule copie de vos données en dehors de ce navigateur. '+(lb?'Dernière sauvegarde : '+new Date(lb).toLocaleDateString("fr-FR")+'.':'Aucune sauvegarde faite depuis la V3.')+' '+(()=>{let u=0;try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);u+=k.length+(localStorage.getItem(k)||"").length}}catch(e){}return 'Espace utilisé dans ce navigateur (toutes vos applis du même site) : '+(u/1048576).toLocaleString("fr-FR",{maximumFractionDigits:1})+' Mo sur environ 5.'})()+'</p></div>'+
   '<div style="display:flex;flex-direction:column;gap:8px"><span class="lbl">Fichier Excel</span>'+
   (IN_FRAME?'<a class="btn" id="exX" href="#" target="_blank" rel="noopener" aria-disabled="true">Préparation du lien…</a><p class="hint">Notion bloque les téléchargements : un onglet s\'ouvre, produit le fichier et le télécharge. Il ne garde rien.</p>'
    :'<button class="btn" type="button" id="exX">Exporter en Excel (.xlsx)</button>')+
@@ -2166,8 +2184,8 @@ const addDaysTo=(iso,n)=>{const d=new Date(iso+"T12:00:00");d.setDate(d.getDate(
 const relJ=()=>{const n=parseInt(S.settings.mailRelanceJ,10);return isNaN(n)?15:Math.max(0,n)};
 /* Enregistrement : différé pendant la saisie, groupé pour les actions en masse */
 let mT=null;const mDirty=new Map();
-function mPersist(m){bump();clearTimeout(mT);mT=setTimeout(()=>{mT=null;lsSave();renderNav()},300)}
-async function mBulk(list){list.forEach(x=>{absorbMailing(x);const i=S.mailing.findIndex(y=>y.id===x.id);if(i>=0)S.mailing[i]=x;else S.mailing.push(x)});bump();lsSave();renderNav();return true}
+function mPersist(m){syncMailAction(m);bump();clearTimeout(mT);mT=setTimeout(()=>{mT=null;lsSave();renderNav()},300)}
+async function mBulk(list){list.forEach(x=>{absorbMailing(x);const i=S.mailing.findIndex(y=>y.id===x.id);if(i>=0)S.mailing[i]=x;else S.mailing.push(x);syncMailAction(x)});bump();lsSave();renderNav();return true}
 window.addEventListener("pagehide",()=>{if(mT&&S.mode!=="db"){clearTimeout(mT);lsSave()}});
 /* Mails types : {APPEL} et {ACCROCHE} remplacés pour chaque contact */
 function mTpl(m){const T=S.settings.mailTypes||[];if(!T.length)return null;const f=nh(m.famille),ty=nh(m.typologie);
@@ -2235,7 +2253,7 @@ function renderMailing(){
     '<div class="field-s"><label for="mRj">Relance après (jours)</label><input type="number" id="mRj" min="0" step="1" class="num" value="'+relJ()+'"'+(ro?' disabled':'')+'></div></div>'+
    '<div id="mNote" class="notice" hidden></div>'+
    '<div class="list-wrap" id="mList"></div><div class="bar" id="mMore"></div>'+
-   '<p class="hint">Cocher « Envoyé » inscrit la date du jour et une date de relance '+relJ()+' jours plus tard ; les deux restent modifiables. Le bouton Mail ouvre votre messagerie avec le mail type de la famille du client, quand le fichier importé en contient.</p>';
+   '<p class="hint">Cocher « Envoyé » inscrit la date du jour et une date de relance '+relJ()+' jours plus tard ; les deux restent modifiables. Le compte client est créé si besoin et le mail s\'ajoute à l\'historique du compte. Le bouton Mail ouvre votre messagerie avec le mail type de la famille du client, quand le fichier importé en contient.</p>';
   renderMKpis();renderMList();renderMNote();
 }
 /* Actions sur une ligne */
@@ -2362,7 +2380,7 @@ function mParseTypes(rows){
   for(let i=0;i<Math.min(rows.length,12);i++){const hd=Array.from(rows[i],v=>nh(cellVal(v)));const fi=hd.indexOf("famille"),oi=hd.indexOf("objet"),ci=hd.findIndex(x=>x==="corps du mail"||x==="corps"),ti=hd.findIndex(x=>x.startsWith("typologies"));
     if(fi<0||oi<0||ci<0)continue;const out=[];
     for(let r=i+1;r<rows.length;r++){const g=k=>{const v=cellVal(rows[r][k]);return v==null?"":String(v)};if(!g(fi)||!g(ci))continue;
-      out.push({famille:g(fi).trim(),typos:ti>=0?g(ti).split(/[;,]/).map(x=>x.trim()).filter(Boolean):[],objet:g(oi).trim(),corps:g(ci)})}
+      out.push({famille:g(fi).trim(),typos:ti>=0?g(ti).split(g(ti).includes(";")?/;/:/[;,]/).map(x=>x.trim()).filter(Boolean):[],objet:g(oi).trim(),corps:g(ci)})}
     return out.length?out:null}
   return null}
 let MIMP=null;
@@ -2541,9 +2559,10 @@ async function buildXlsx(cibles,settings,pac,mailing){mailing=mailing||[];settin
   const wa=xlTable(wb,"Actions","Actions","FF6E6862",AC,acts.map(a=>{const k=kOf(a.compteId)||{},ct=ctById(a.contactId),cb=cibById(a.cibleId);return [toDate(a.date),a.heure||null,k.nom||"",ALBL[a.type]||a.type,stLbl(a),a.resultat,ct?ct.nom:a.interlocuteur,a.objet,a.details,a.accompagnant,cb?cb.campagne:""]}),0);
   acts.forEach((a,i)=>{const cell=wa.getRow(i+2).getCell(5);cell.fill={type:"pattern",pattern:"solid",fgColor:{argb:{ok:"FFE2F0E6",warn:"FFFBEED3",bad:"FFF7E1DA",grey:"FFECEAE6"}[stTone(a)]}}});
   /* ---- Comptes ---- */
-  const KC=[{h:"Compte",w:32,bold:true},{h:"Type",w:14},{h:"Segment",w:24,wrap:true},{h:"Typologie",w:24,wrap:true},{h:"Département",w:18},{h:"Ville",w:16},{h:"Agence",w:18},{h:"Apporteur",w:18},{h:"Contacts",w:9,al:"center"},{h:"Campagnes",w:30,wrap:true},{h:"Dernier contact",w:13,fmt:DFMT,al:"center"},{h:"Prochaine action",w:13,fmt:DFMT,al:"center"},{h:"Quoi",w:30,wrap:true},{h:"CA connu",w:13,fmt:EUR},{h:"Notes",w:40,wrap:true}];
+  const yy=new Date().getFullYear(),y0s=String(yy-1),y1s=String(yy);
+  const KC=[{h:"Compte",w:32,bold:true},{h:"Type",w:14},{h:"Famille",w:26,wrap:true},{h:"Segment",w:24,wrap:true},{h:"Typologie",w:24,wrap:true},{h:"Contrat cadre",w:9,al:"center"},{h:"Statut",w:24,wrap:true},{h:"CA facturé "+y0s,w:14,fmt:EUR},{h:"CA facturé "+y1s,w:14,fmt:EUR},{h:"Devis en attente",w:14,fmt:EUR},{h:"Département",w:18},{h:"Agence",w:18},{h:"Apporteur",w:18},{h:"Contacts",w:9,al:"center"},{h:"Campagnes",w:30,wrap:true},{h:"Dernier contact",w:13,fmt:DFMT,al:"center"},{h:"Prochaine action",w:13,fmt:DFMT,al:"center"},{h:"Quoi",w:30,wrap:true},{h:"Notes",w:40,wrap:true}];
   const ks=S.comptes.slice().sort((a,b)=>a.nom.localeCompare(b.nom,"fr"));
-  xlTable(wb,"Comptes","Comptes","FFA35C2A",KC,ks.map(k=>{const n=nextOf(k.id),l=lastOf(k.id);return [k.nom,k.type,k.segment,k.typologie,dLabel(k.dept),k.ville,k.agence,k.apporteur,ctOf(k.id).length,cibOf(k.id).map(c=>c.campagne.replace(/^PAC IDF – /,"")).join(", "),l?toDate(l.date):null,n?toDate(n.date):null,n?n.objet:"",caOf(k.id)||null,k.notes]}),1);
+  xlTable(wb,"Comptes","Comptes","FFA35C2A",KC,ks.map(k=>{const n=nextOf(k.id),l=lastOf(k.id);const h=k.histo;return [k.nom,k.type,FNOM[famOf(k)]||"",k.segment,k.typologie,k.contrat?"Oui":"",h?(HST[h.st]||[""])[0]:"",h?hCA(k,y0s):null,h?hCA(k,y1s):null,h&&h.dv.n?h.dv.m:null,dLabel(k.dept),k.agence,k.apporteur,ctOf(k.id).length,cibOf(k.id).map(c=>c.campagne.replace(/^PAC IDF – /,"")).join(", "),l?toDate(l.date):null,n?toDate(n.date):null,n?n.objet:"",k.notes]}),1);
   /* ---- Contacts ---- */
   const CC=[{h:"Compte",w:32,bold:true},{h:"Contact",w:24},{h:"Fonction",w:22},{h:"Téléphone",w:15},{h:"E-mail",w:30},{h:"Principal",w:9,al:"center"},{h:"Notes",w:40,wrap:true}];
   const cs=S.contacts.slice().sort((a,b)=>((kOf(a.compteId)||{}).nom||"").localeCompare((kOf(b.compteId)||{}).nom||"","fr")||(b.principal-a.principal));
@@ -2957,6 +2976,227 @@ async function buildTemplate(){
 }
 
 
+/* ================= V3.1 · Antécédents de facturation, familles de clients, mailing → comptes ================= */
+/* Pièces (factures, devis, commandes) stockées dans IndexedDB : volumineuses, ré-importables */
+const IDB_NAME="pac-idf",IDB_STORE="histo";
+let idbP=null;
+function idb(){if(idbP)return idbP;idbP=new Promise((res,rej)=>{try{if(!window.indexedDB){rej(new Error("idb"));return}const r=indexedDB.open(IDB_NAME,1);r.onupgradeneeded=()=>{r.result.createObjectStore(IDB_STORE)};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}catch(e){rej(e)}});idbP.catch(()=>{idbP=null});return idbP}
+async function hGet(kid){try{const db=await idb();return await new Promise((res,rej)=>{const q=db.transaction(IDB_STORE).objectStore(IDB_STORE).get(kid);q.onsuccess=()=>res(q.result||[]);q.onerror=()=>rej(q.error)})}catch(e){return null}}
+async function hPutMany(map){const db=await idb();await new Promise((res,rej)=>{const tx=db.transaction(IDB_STORE,"readwrite"),st=tx.objectStore(IDB_STORE);map.forEach((v,k)=>st.put(v,k));tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error)})}
+async function hDel(kid){try{const db=await idb();await new Promise(res=>{const tx=db.transaction(IDB_STORE,"readwrite");tx.objectStore(IDB_STORE).delete(kid);tx.oncomplete=res;tx.onerror=res})}catch(e){}}
+async function hAll(){try{const db=await idb();return await new Promise((res,rej)=>{const out={},c=db.transaction(IDB_STORE).objectStore(IDB_STORE).openCursor();c.onsuccess=()=>{const cur=c.result;if(cur){out[cur.key]=cur.value;cur.continue()}else res(out)};c.onerror=()=>rej(c.error)})}catch(e){return null}}
+async function hMove(src,dst){const a=await hGet(src);if(!a||!a.length)return;const b=await hGet(dst)||[];const seen=new Set(b.map(p=>p.n+"|"+p.d+"|"+p.m));
+  await hPutMany(new Map([[dst,b.concat(a.filter(p=>!seen.has(p.n+"|"+p.d+"|"+p.m))).sort((x,y)=>String(y.d).localeCompare(String(x.d)))]]));await hDel(src);
+  const k=kOf(dst),P=await hGet(dst);if(k&&P&&P.length){k.histo=Object.assign(hSum(P),{imp:(k.histo&&k.histo.imp)||todayISO()});lsSave();render()}}
+
+/* Familles de clients (mêmes regroupements que les mails types) */
+const FAMILLES=[["F1","Foncières, gestionnaires & prescripteurs",["Investisseur / Foncière","Prescripteur","Copropriété"]],["F2","Collectivités & acteurs publics",["Collectivité territoriale","État & établissement public"]],
+ ["F3","Bailleurs sociaux (hors contrat cadre)",["Bailleur social"]],["F4","Entreprises occupantes",["Industrie","Commerce & distribution","Hôtellerie, restauration & loisirs","Tertiaire & services","Banque & assurance","Énergie, eau & télécom","Transport & mobilité"]],
+ ["F5","Santé, enseignement & associatif",["Santé & médico-social","Enseignement & recherche","Associatif & cultuel"]],["F6","Promoteurs, aménageurs & entreprises de travaux",["Promoteur / Aménageur","Entreprise BTP & services techniques"]]];
+const FNOM=Object.fromEntries(FAMILLES.map(f=>[f[0],f[1]]));
+const SEG2FAM={"Industriel":"F4","Logistique / entrepôts":"F4","Tertiaire / bureaux":"F4","Bailleur social":"F3","Foncière / investisseur":"F1","Promoteur":"F6","Syndic / administrateur de biens":"F1","Property / facility management":"F1","Collectivité / établissement public":"F2","Maîtrise d'œuvre / architecte / BET":"F1","Entreprise de travaux (prescripteur)":"F6","Expert d'assurance / après sinistre":"F1"};
+const FAM_BY_TYPO={};FAMILLES.forEach(([c,,t])=>t.forEach(x=>{FAM_BY_TYPO[nh(x)]=c}));
+function famOf(k){if(!k)return "";const t=FAM_BY_TYPO[nh(k.typologie)];if(t)return t;
+  const ml=mlOf(k.id).find(m=>m.famille);if(ml){const f=FAMILLES.find(x=>nh(x[1])===nh(ml.famille));if(f)return f[0]}
+  return SEG2FAM[k.segment]||""}
+
+/* Pièces : étapes du logiciel de facturation */
+const ETP={"FACTURE COMPTABILISEE":"FC","FACTURE VALIDEE":"FV","FACTURE":"FA","FACTURE D'AVOIR":"AV","DEVIS":"DV","DEVIS REJETE":"DR","COMMANDE":"CO","BON DE LIVRAISON":"BL","PROFORMA":"PF","DEMANDE D'AVOIR":"DA"};
+const ETL={FC:"Facture",FV:"Facture validée",FA:"Facture",AV:"Avoir",DV:"Devis",DR:"Devis rejeté",CO:"Commande",BL:"Bon de livraison",PF:"Proforma",DA:"Demande d'avoir",X:"Autre"};
+const ETT={FC:"ok",FV:"ok",FA:"ok",AV:"grey",DV:"warn",DR:"bad",CO:"info",BL:"info",PF:"info",DA:"grey",X:"grey"};
+const isFact=e=>e==="FC"||e==="FV"||e==="FA"||e==="AV";
+const HST={actif:["Client actif","ok"],nouveau:["Nouveau client","info"],relance:["Perdu ? pièce sans facture cette année","warn"],perdu:["Perdu : facturé l'an dernier, rien cette année","bad"],devis:["Devis sans facture","grey"],cmd:["Commande en cours, pas encore facturée","info"]};
+/* Résumé des antécédents : CA facturé par année (avoirs déduits), toutes pièces, devis en attente, statut */
+function hSum(P){const Y=new Date().getFullYear(),y1=String(Y),y0=String(Y-1),ans={},vc={},dc={},lim=addD(todayISO(),-365),r2=x=>Math.round(x*100)/100;
+  let first="",last="",lastP="";const dv={n:0,m:0,d:""},co={n:0,m:0};
+  P.forEach(p=>{const y=String(p.d||"").slice(0,4);if(!y)return;const a=ans[y]||(ans[y]={ca:0,nf:0,tp:0,np:0}),m=Number(p.m)||0;a.tp+=m;a.np++;
+    if(isFact(p.e)){a.ca+=m;if(p.e!=="AV")a.nf++;if(m>0){if(!first||p.d<first)first=p.d;if(p.d>last)last=p.d}}
+    if(p.d>lastP)lastP=p.d;
+    if(p.e==="DV"&&p.d>=lim){dv.n++;dv.m+=m;if(p.d>dv.d)dv.d=p.d}
+    if((p.e==="CO"||p.e==="BL"||p.e==="PF")&&y===y1){co.n++;co.m+=m}
+    if(p.v)vc[p.v]=(vc[p.v]||0)+1;const dp=String(p.cp||"").slice(0,2);if(/^(75|77|78|91|92|93|94|95)$/.test(dp))dc[dp]=(dc[dp]||0)+1});
+  Object.values(ans).forEach(a=>{a.ca=r2(a.ca);a.tp=r2(a.tp)});
+  const A0=ans[y0]||{},A1=ans[y1]||{},f0=A0.nf>0,f1=A1.nf>0;
+  const st=f1?(A0.np?"actif":"nouveau"):f0?(A1.np?"relance":"perdu"):(co.n?"cmd":"devis");
+  return {ans,first,last,lastP,dv:{n:dv.n,m:r2(dv.m),d:dv.d},co:{n:co.n,m:r2(co.m)},st,villes:Object.entries(vc).sort((a,b)=>b[1]-a[1]).slice(0,3).map(x=>x[0]),dept:(Object.entries(dc).sort((a,b)=>b[1]-a[1])[0]||[""])[0],nb:P.length,y0,y1}}
+const hCA=(k,y)=>{const h=k&&k.histo;if(!h)return 0;const a=h.ans[y||h.y1];return a?a.ca:0};
+
+/* ---------- Mailing : un mail coché « envoyé » = un compte client + une action Mail dans son historique ---------- */
+function syncMailAction(m){
+  const ex=S.actions.find(a=>a.mailingId===m.id);
+  if(!m.envoye){if(ex&&ex.origine==="mailing"){S.actions=S.actions.filter(a=>a!==ex);bump()}return}
+  absorbMailing(m);const k=kOf(m.compteId);if(k&&k.type!=="Client existant"){k.type="Client existant";k.majLe=now()}
+  const t=mTpl(m),ob="Mailing « "+(m.liste||"clients")+" »"+(t&&t.objet?" : "+t.objet:"");
+  if(ex){ex.date=m.dateEnvoi||ex.date;ex.contactId=m.contactId||ex.contactId;ex.compteId=m.compteId;ex.details=m.commentaire||"";ex.majLe=now()}
+  else S.actions.push(anorm({id:uid(),compteId:m.compteId,contactId:m.contactId||"",type:"mail",date:m.dateEnvoi||todayISO(),statut:"fait",resultat:"Envoyé",objet:ob,details:m.commentaire||"",faitLe:m.dateEnvoi||todayISO(),mailingId:m.id,origine:"mailing",creeLe:now(),majLe:now()}));
+  bump()}
+
+/* ---------- PAC : un plan par famille de clients ---------- */
+function famLines(code){const Y=new Date().getFullYear(),y0=Y-1,y1=Y,fam=FNOM[code]||"",low=fam.charAt(0).toLowerCase()+fam.slice(1);
+  const L=[{prio:"1",element:"Reconquête des clients perdus",objectif:"Faire revenir les clients de la famille facturés en "+y0+" sans commande en "+y1+" ("+low+")",
+    descriptif:"Liste issue de l'historique de facturation : filtre « Clients perdus » de l'onglet Comptes, classé par CA. Comprendre la raison de l'arrêt (prix, concurrent, absence de besoin, interlocuteur parti) et proposer une reprise de contact ciblée.",
+    t1:"Extraire les clients perdus de la famille, classés par CA\nAppeler les premiers comptes et qualifier la raison de l'arrêt",t2:"RDV avec les comptes au plus fort potentiel\nProposition adaptée (BPU, délais, interlocuteur dédié)",
+    t3:"Relance des comptes restés sans suite\nMailing de reprise de contact",t4:"Bilan : comptes réactivés, CA récupéré, motifs de perte",
+    qui:"CSC + chefs d'agence + apporteurs",quand:"T1 à T4, point mensuel",kpi:"Clients perdus contactés, RDV, devis émis, comptes réactivés, CA récupéré",attendus:"Réactivation des principaux comptes perdus et motifs de perte connus"},
+   {prio:"2",element:"Fidélisation et développement des clients actifs",objectif:"Augmenter le CA par client et sécuriser les comptes récurrents",
+    descriptif:"Mailing aux clients "+y0+"-"+y1+" (mail type de la famille), relance à 15 jours, RDV annuel avec les principaux comptes, proposition des diagnostics pas encore commandés, suivi des devis en attente.",
+    t1:"Envoi du mailing et relances\nRDV annuel avec les principaux comptes",t2:"Proposer les diagnostics complémentaires\nRelancer les devis en attente",t3:"Point qualité : délais, rapports, interlocuteurs",t4:"Revue annuelle des comptes, préparation de l'année suivante",
+    qui:"CSC + chefs d'agence",quand:"T1 à T4",kpi:"Mails envoyés, relances, RDV, devis en attente relancés, CA par client",attendus:"Hausse du CA moyen par client et du taux de transformation des devis"}];
+  const S2={
+   F1:[{prio:"1",element:"Copropriétés et syndics",objectif:"Capter les obligations des copropriétés : DPE collectif, DTA des parties communes, repérages avant travaux",descriptif:"Le DPE collectif s'impose à toutes les copropriétés, par étapes selon leur taille. Les syndics gèrent aussi les DTA des parties communes et les repérages avant les travaux votés en AG : s'appuyer sur les syndics déjà clients pour couvrir leur portefeuille.",
+     t1:"Recenser les syndics clients et le nombre de copropriétés gérées\nPrésenter une offre portefeuille (DPE collectif + DTA)",t2:"Interventions en conseil syndical sur demande\nTarif par lot pour le DPE collectif",t3:"Programmer les diagnostics avant les AG de printemps",t4:"Bilan des copropriétés traitées, relance des syndics inactifs",qui:"CSC + chefs d'agence",quand:"T1 à T4",kpi:"Syndics rencontrés, copropriétés couvertes, DPE collectifs et DTA commandés, CA",attendus:"Accords de travail avec plusieurs syndics et flux régulier de copropriétés"},
+    {prio:"2",element:"Foncières et gestionnaires d'actifs",objectif:"Se référencer chez les foncières, asset et property managers",descriptif:"DTA et mises à jour, repérages avant travaux preneurs, DPE tertiaire, diagnostics avant cession d'actifs ou de portefeuilles (data room).",
+     t1:"Cartographier les foncières et gestionnaires clients et leurs patrimoines",t2:"RDV directions techniques et property managers\nInscriptions sur les plateformes prestataires",t3:"Réponses aux consultations et BPU\nOffre data room pour les cessions",t4:"Revue annuelle avec les comptes signés",qui:"CSC + chefs d'agence",quand:"T1 à T4, revue trimestrielle",kpi:"Foncières rencontrées, référencements et contrats-cadres signés, volume de commandes, CA",attendus:"Contrats-cadres récurrents sur les grands patrimoines"}],
+   F2:[{prio:"1",element:"Marchés publics",objectif:"Être titulaire des accords-cadres de diagnostics des collectivités clientes",descriptif:"Veille des avis de marché (BOAMP, profils acheteurs), réponse avec la cellule AO, suivi des échéances des marchés en cours chez les clients pour être consulté au renouvellement.",
+     t1:"Recenser les marchés en cours et leurs échéances\nMettre en place la veille AO",t2:"Réponses aux consultations\nRDV avec les services patrimoine",t3:"Bons de commande : réactivité et qualité des rendus",t4:"Bilan des marchés gagnés et perdus, préparation des renouvellements",qui:"CSC + cellule AO + chefs d'agence",quand:"T1 à T4",kpi:"AO répondus, AO gagnés, montant des marchés, bons de commande reçus",attendus:"Marchés à bons de commande sur plusieurs collectivités"},
+    {prio:"2",element:"Patrimoine scolaire et bâtiments publics",objectif:"Anticiper les travaux d'été et les mises à jour des DTA",descriptif:"Écoles, gymnases, équipements culturels : repérages amiante et plomb avant les travaux programmés pendant les vacances scolaires, DTA à mettre à jour, PEMD avant démolition.",
+     t1:"Récupérer les programmes de travaux d'été des collectivités clientes",t2:"Chiffrer et planifier les repérages avant fin mai",t3:"Interventions pendant l'été, rendus rapides",t4:"Bilan et calendrier de l'année suivante",qui:"CSC + chefs d'agence",quand:"T1 à T3",kpi:"Programmes récupérés, repérages commandés avant l'été, délais de rendu",attendus:"Commandes groupées avant l'été"}],
+   F3:[{prio:"1",element:"Avant relocation et avant vente",objectif:"Devenir le prestataire des diagnostics de rotation des logements",descriptif:"DPE, amiante (DAPP), plomb (CREP), électricité et gaz à chaque relocation ou vente : volume régulier, délais courts. Proposer un BPU et un circuit de commande simple avec les agences de gestion.",
+     t1:"Identifier les bailleurs hors contrat cadre et leurs agences de gestion",t2:"Proposer un BPU relocation / vente avec délai garanti",t3:"Suivi des délais et de la qualité des rendus",t4:"Revue annuelle, extension à d'autres agences",qui:"CSC + chefs d'agence",quand:"T1 à T4",kpi:"Bailleurs rencontrés, BPU signés, logements traités, délais",attendus:"Flux régulier de diagnostics de rotation"},
+    {prio:"2",element:"Réhabilitation et démolition",objectif:"Être consulté sur les programmes de réhabilitation et de renouvellement urbain",descriptif:"Repérages amiante et plomb avant travaux, PEMD avant démolition, accompagnement des plans stratégiques de patrimoine et des opérations de renouvellement urbain.",
+     t1:"Récupérer les plans de réhabilitation et les opérations prévues",t2:"Présentation aux directions du patrimoine et de la maîtrise d'ouvrage",t3:"Réponses aux consultations",t4:"Bilan, préparation des programmes suivants",qui:"CSC + chefs d'agence",quand:"T1 à T4",kpi:"Opérations identifiées, consultations reçues, devis, CA",attendus:"Présence sur les opérations de réhabilitation des bailleurs clients"}],
+   F4:[{prio:"1",element:"Sites industriels et tertiaires",objectif:"Ouvrir des comptes récurrents sur les diagnostics avant travaux et de maintenance",descriptif:"DTA à jour, repérages amiante avant travaux et arrêts techniques, plomb, DPE tertiaire. Cibler les responsables travaux, maintenance et HSE des sites.",
+     t1:"Lister les sites clients par département et identifier les responsables travaux / HSE",t2:"Visites ciblées avec les chefs d'agence",t3:"Proposer un BPU ou un accord annuel\nAnticiper les arrêts techniques d'été",t4:"Bilan des comptes ouverts",qui:"CSC + chefs d'agence",quand:"T1 à T4",kpi:"Sites visités, BPU proposés, devis, CA",attendus:"Comptes récurrents sur les principaux sites"},
+    {prio:"2",element:"Synergies avec les autres BU",objectif:"Croiser les clients avec ceux des autres BU du groupe",descriptif:"Identifier les clients communs avec les BU Équipements, Environnement et Construction ; visites communes ; présentation de l'offre diagnostic en Café Commerce et en réunion inter-BU.",
+     t1:"Croiser les listes clients avec les apporteurs des autres BU",t2:"Visites communes",t3:"Suivi des opportunités transmises",t4:"Bilan des affaires apportées par BU",qui:"CSC + apporteurs des autres BU",quand:"T1 à T4, réunion inter-BU mensuelle",kpi:"Clients communs identifiés, visites communes, opportunités apportées, CA",attendus:"Flux d'affaires régulier avec les autres BU"}],
+   F5:[{prio:"1",element:"Établissements recevant du public",objectif:"Couvrir les obligations des établissements : DTA, plomb, avant travaux",descriptif:"Établissements de santé et médico-sociaux, enseignement privé et supérieur, associations et lieux de culte : DTA à jour, repérages avant travaux, plomb dans les bâtiments anciens.",
+     t1:"Recenser les établissements clients et leurs gestionnaires (directions techniques, économats)",t2:"Proposer la mise à jour des DTA et un tarif multi-sites",t3:"Repérages avant travaux d'été",t4:"Bilan, programmation de l'année suivante",qui:"CSC + chefs d'agence",quand:"T1 à T4",kpi:"Établissements rencontrés, DTA mis à jour, repérages, CA",attendus:"Accords multi-sites avec les principaux gestionnaires"},
+    {prio:"2",element:"Calendrier des travaux d'été",objectif:"Être retenu avant les vacances scolaires",descriptif:"Les travaux des établissements d'enseignement et de nombreux ERP se concentrent l'été : capter les besoins de repérage dès le printemps.",
+     t1:"Mailing et appels : recueillir les programmes de travaux",t2:"Devis et planification avant fin mai",t3:"Interventions en juillet-août",t4:"Retour d'expérience et relance pour l'année suivante",qui:"CSC + chefs d'agence",quand:"T1 à T3",kpi:"Programmes recueillis, devis émis avant fin mai, interventions réalisées",attendus:"Planning d'été rempli dès le printemps"}],
+   F6:[{prio:"1",element:"Promoteurs et aménageurs",objectif:"Accompagner les opérations dès l'acquisition foncière",descriptif:"Diagnostics avant acquisition, amiante avant démolition, plomb, PEMD. S'appuyer sur les clients promoteurs de la BU Construction.",
+     t1:"Identifier les opérations en cours avec la BU Construction",t2:"RDV directions techniques et de programmes\nProposer un BPU promoteur",t3:"Offre « avant acquisition / avant démolition »",t4:"Bilan des référencements",qui:"CSC + apporteurs BU Construction",quand:"T1 à T4",kpi:"Promoteurs rencontrés, opérations suivies, devis, CA",attendus:"Référencement chez plusieurs promoteurs"},
+    {prio:"2",element:"Entreprises de travaux",objectif:"Faire prescrire le repérage avant intervention par les entreprises de travaux",descriptif:"Étancheurs, couvreurs, désamianteurs, entreprises générales : le repérage amiante avant intervention est obligatoire. Proposer des contrats-cadres sur le modèle du contrat étancheurs.",
+     t1:"Lister les entreprises clientes et leurs conducteurs de travaux",t2:"Présenter le contrat-cadre et un délai garanti",t3:"Suivi des chantiers et réactivité",t4:"Bilan des contrats signés",qui:"CSC + chefs d'agence",quand:"T1 à T4",kpi:"Entreprises rencontrées, contrats-cadres signés, chantiers traités, CA",attendus:"Contrats-cadres actifs avec plusieurs entreprises"}]};
+  return L.concat(S2[code]||[])}
+function ensureFamilyPlans(force){if(S.settings.pacFamilles&&!force)return 0;let n=0;
+  const Y=new Date().getFullYear(),per=String(new Date().getMonth()>=9?Y+1:Y);
+  FAMILLES.forEach(([code,nom])=>{if(S.plans.some(p=>p.famille===code))return;
+    const p={id:uid(),nom:nom,axe:"famille",famille:code,titre:"Plan d'action commercial · "+nom,periode:per,ordre:S.plans.length+1,creeLe:now()};S.plans.push(p);
+    famLines(code).forEach((l,j)=>S.pac.push(Object.assign(pblank(),l,{id:uid(),planId:p.id,ordre:j+1,creeLe:now(),majLe:now()})));n++});
+  S.settings.pacFamilles=true;bump();return n}
+/* Indicateurs d'une famille : comptes, CA par année, perdus, devis en attente, mailing, actions, opportunités */
+function famStats(code){const K=S.comptes.filter(k=>famOf(k)===code),ids=new Set(K.map(k=>k.id)),Y=new Date().getFullYear(),y0=String(Y-1),y1=String(Y);
+  const o={k:K.length,ctr:0,ca0:0,ca1:0,n0:0,n1:0,perdus:0,caPerdu:0,dvN:0,dvM:0,histo:0};
+  K.forEach(k=>{if(k.contrat)o.ctr++;const h=k.histo;if(!h)return;o.histo++;const a0=h.ans[y0]||{},a1=h.ans[y1]||{};if(a0.nf){o.ca0+=a0.ca;o.n0++}if(a1.nf){o.ca1+=a1.ca;o.n1++}
+    if(h.st==="perdu"||h.st==="relance"){o.perdus++;o.caPerdu+=a0.ca||0}o.dvN+=h.dv.n;o.dvM+=h.dv.m});
+  const ML=S.mailing.filter(m=>ids.has(m.compteId));o.ml=ML.length;o.sent=ML.filter(m=>m.envoye).length;o.rel=relancesDues().filter(m=>ids.has(m.compteId)).length;
+  const A=S.actions.filter(a=>ids.has(a.compteId)&&a.origine!=="mailing");o.rdv=A.filter(a=>isRdv(a.type)&&a.statut==="fait").length;o.appels=A.filter(a=>a.type==="appel"&&a.statut==="fait").length;o.open=A.filter(isOpen).length;
+  const C=S.cibles.filter(c=>ids.has(c.compteId)&&c.opp.creee);o.opps=C.length;o.oppM=C.reduce((s,c)=>s+(Number(c.opp.montant)||0),0);o.y0=y0;o.y1=y1;return o}
+function famPanel(code){const s=famStats(code),t=(l,v,d,act)=>'<button type="button" class="kpi click"'+(act||"")+'><span class="lbl">'+l+'</span><span class="v">'+v+'</span><span class="d">'+d+'</span></button>';
+  return '<div class="kpis6">'+t("Comptes de la famille",s.k,(s.ctr?s.ctr+" en contrat cadre · ":"")+pl(s.histo,"avec antécédents","avec antécédents"),' data-famgo="'+code+'"')+
+   t("CA facturé "+s.y0,eur(s.ca0),pl(s.n0,"client facturé","clients facturés"),' data-famgo="'+code+'"')+
+   t("CA facturé "+s.y1+" à date",eur(s.ca1),pl(s.n1,"client facturé","clients facturés"),' data-famgo="'+code+'"')+
+   t("Clients perdus",s.perdus,eur(s.caPerdu)+" facturés en "+s.y0,' data-famgo="'+code+'" data-kvset="perdus"')+
+   t("Devis en attente",s.dvN,eur(s.dvM)+" sur 12 mois",' data-famgo="'+code+'" data-kvset="devis"')+
+   t("Actions",s.sent+" / "+s.ml,"mails envoyés · "+pl(s.rdv,"RDV")+" · "+pl(s.appels,"appel")+" · "+s.open+" à faire",' data-famgo="'+code+'"')+'</div>'+
+   (s.histo?'':'<div class="notice">Les chiffres de facturation apparaîtront après l\'import de l\'historique clients (Comptes › Importer › Historique clients).</div>')}
+
+/* ---------- Import de l'historique clients (export de facturation) ---------- */
+const BILLING=/^(factur|compta|invoice|fournisseur|supplier|yooz|basware|dematerial|achats?[._-]|ap[._-]|accounts?|scan|edi|noreply|no-reply)/i;
+let HIMP=null;
+async function parseHisto(file){const book=await openBook(file);const out={pieces:[],clients:new Map(),contacts:[],contrats:new Set(),types:null,sheets:[],fname:file.name};
+  for(const sh of book.sheets){if(sh.state&&sh.state!=="visible"&&book.sheets.length>1)continue;const rows=await book.load(sh);if(!rows.length)continue;
+    let h=-1,H=null;for(let i=0;i<Math.min(rows.length,12);i++){const hd=Array.from(rows[i],v=>nh(cellVal(v)));if((hd.includes("tiers")&&hd.includes("etape wf"))||hd.includes("client tiers")||hd.includes("compte nom exact")||(hd.includes("famille")&&hd.includes("objet"))){h=i;H=hd;break}}
+    if(h<0)continue;
+    const col=(...n)=>{for(const x of n){const i=H.indexOf(x);if(i>=0)return i}return -1};
+    const g=(r,i)=>{if(i<0)return "";const v=cellVal(r[i]);return v==null?"":v};
+    const s=(r,i)=>{const v=g(r,i);return v instanceof Date?toISO(v):String(v).trim()};
+    if(H.includes("etape wf")){
+      const iT=col("tiers"),iD=col("date"),iE=col("etape wf"),iM=col("total ht"),iV=col("ville"),iCP=col("cp"),iN=col("n de piece"),iA=col("adresse de l intervention"),iAp=col("apporteur d affaire"),iAg=col("agence"),iC=col("nom"),iCt=col("contact"),iTe=col("technicien");
+      let n=0;for(let r=h+1;r<rows.length;r++){const R=rows[r]||[];const t=s(R,iT);if(!t)continue;const e=ETP[String(g(R,iE)).trim().toUpperCase()]||"X";
+        out.pieces.push({t,d:toISO(g(R,iD)),e,m:Number(toNum(g(R,iM)))||0,v:s(R,iV),cp:s(R,iCP),n:s(R,iN),a:s(R,iA),ap:s(R,iAp).replace(/^-$/,""),ag:s(R,iAg),c:s(R,iC)||s(R,iCt).replace(/\S+@\S+/,"").replace(/^[.\s]+$/,"").trim(),te:s(R,iTe)});n++}
+      out.sheets.push([sh.name,"pièces",n]);continue}
+    if(H.includes("compte nom exact")){const i=col("compte nom exact");let n=0;for(let r=h+1;r<rows.length;r++){const v=s(rows[r]||[],i);if(v){out.contrats.add(nh(v));n++}}out.sheets.push([sh.name,"contrats cadres",n]);continue}
+    if(!H.includes("client tiers")){const t=mParseTypes(rows);if(t){out.types=t;out.sheets.push([sh.name,"mails types",t.length])}continue}
+    const iT=col("client tiers"),iTy=col("typologie"),iSt=col("sous typologie"),iF=col("fiabilite"),iAg=col("agence principale"),iAp=col("apporteur d affaire principal","apporteur principal"),
+      iCP=col("contact principal"),iMP=col("e mail contact principal"),iC=col("contact"),iMl=col("e mail"),iNF=col("nb factures"),iCA=col("ca ht 2026","ca ht facture 2026"),iDF=col("derniere facture"),iPr=col("prenom"),iNo=col("nom");
+    let n=0;for(let r=h+1;r<rows.length;r++){const R=rows[r]||[];const t=s(R,iT);if(!t)continue;const k=nh(t);let c=out.clients.get(k);if(!c){c={nom:t};out.clients.set(k,c)}
+      [["typologie",iTy],["sousTypo",iSt],["fiab",iF],["agence",iAg],["apporteur",iAp]].forEach(([f,i])=>{const v=s(R,i);if(v&&v!=="-"&&!c[f])c[f]=v});
+      if(iCP>=0){const nm=s(R,iCP),ml=s(R,iMP);if((nm||ml)&&!c.princ)c.princ={nom:nm,mail:ml}}
+      if(iC>=0){const nm=(s(R,iC)||[s(R,iPr),s(R,iNo)].filter(Boolean).join(" ")).replace(/^[.\s]+$/,""),ml=s(R,iMl);if(nm||ml)out.contacts.push({k,nom:nm,mail:ml,nf:s(R,iNF),ca:s(R,iCA),df:toISO(g(R,iDF))})}
+      n++}
+    out.sheets.push([sh.name,"clients",n])}
+  /* clients présents seulement dans les pièces */
+  out.pieces.forEach(p=>{const k=nh(p.t);if(!out.clients.has(k))out.clients.set(k,{nom:p.t})});
+  if(!out.pieces.length&&!out.clients.size)throw new Error("vide");
+  return out}
+function histoMenu(){
+  const d=$("#drawer");HIMP=null;const last=S.settings.histoImport;
+  d.innerHTML='<div class="dh"><div class="grow"><span class="lbl">Comptes</span><h2 id="dTitle">Importer</h2></div><button class="btn ghost" type="button" data-act="close">Fermer</button></div>'+
+  '<div class="db"><div class="addv" style="border-style:solid;background:var(--surface)"><span class="lbl">Historique clients (export de facturation)</span>'+
+   '<p class="hint">Le classeur d\'analyse des clients facturés : onglets de pièces (factures, devis, commandes), clients typés, contacts clients, contrats cadres et mails types. Pour chaque client : le compte est créé ou complété (type « Client existant », typologie, famille, agence, apporteur, contrat cadre), ses contacts sont ajoutés et ses antécédents calculés : CA facturé par année, devis en attente, commandes en cours, statut (actif, nouveau, perdu).</p>'+
+   '<p class="hint">Rien n\'est supprimé : vos comptes, contacts, actions et cibles sont conservés. Un nouvel import remplace seulement les antécédents par ceux du fichier.'+(last?' Dernier import : '+new Date(last.le).toLocaleDateString("fr-FR")+' · '+esc(last.fichier||"")+'.':'')+'</p>'+
+   '<input type="file" id="hiFile" accept=".xlsx"><div id="hiPrev"></div></div>'+
+  '<div class="addv"><span class="lbl">Cibles de prospection</span><p class="hint">Une liste de clients ou de prospects à travailler en campagne (Excel ou CSV, une ligne par entreprise).</p><div class="bar"><button class="btn" type="button" id="btnImpCib">Importer des cibles</button></div></div></div>';
+  $("#scrim").hidden=false;d.hidden=false;
+  $("#btnImpCib").onclick=()=>importMenu();
+  $("#hiFile").onchange=async e=>{const f=e.target.files[0];if(!f)return;const pv=$("#hiPrev");pv.innerHTML='<p class="hint">Lecture du fichier… (quelques secondes pour un gros classeur)</p>';
+    try{HIMP=await parseHisto(f);drawHistoPrev()}catch(err){console.error(err);pv.innerHTML='<div class="notice warn"><b>Aucune donnée reconnue.</b> Il faut des onglets avec une colonne « Client (Tiers) » ou des pièces (« Tiers », « Etape WF », « Total HT »).</div>'}};
+}
+function drawHistoPrev(){const H=HIMP,pv=$("#hiPrev");
+  const ty={};H.clients.forEach(c=>{const t=c.typologie||"Sans typologie";ty[t]=(ty[t]||0)+1});
+  const exDef=t=>/^(interne|particulier)/i.test(t);
+  let nEx=0;H.clients.forEach(c=>{if(findCompte(c.nom))nEx++});
+  const years={};H.pieces.forEach(p=>{const y=String(p.d).slice(0,4);if(y)years[y]=(years[y]||0)+1});
+  pv.innerHTML='<div style="display:flex;flex-direction:column;gap:12px;margin-top:8px">'+
+   '<p class="hint">'+esc(H.fname)+' · '+H.sheets.map(x=>esc(x[0])+' ('+x[2]+' '+x[1]+')').join(" · ")+'</p>'+
+   '<div class="imp-sum"><div><b>'+H.clients.size+'</b><span class="sub">clients</span></div><div><b>'+nEx+'</b><span class="sub">déjà dans l\'appli</span></div><div><b>'+H.pieces.length+'</b><span class="sub">pièces ('+Object.entries(years).sort().map(([y,n])=>y+" : "+n).join(", ")+')</span></div><div><b>'+H.contacts.length+'</b><span class="sub">lignes de contacts</span></div><div><b>'+H.contrats.size+'</b><span class="sub">contrats cadres</span></div></div>'+
+   '<div class="f"><span class="lbl">Typologies à importer</span><div class="checks" id="hiTy">'+Object.entries(ty).sort((a,b)=>b[1]-a[1]).map(([t,n])=>'<label><input type="checkbox" data-hity value="'+esc(t)+'"'+(exDef(t)?'':' checked')+'>'+esc(t)+' · '+n+'</label>').join("")+'</div><p class="hint">Particuliers et facturation interne sont décochés par défaut : ils ne sont pas des comptes à prospecter. Les comptes déjà présents dans l\'appli sont toujours complétés.</p></div>'+
+   '<div class="bar"><button class="btn primary" type="button" id="hiGo">Importer l\'historique</button></div></div>';
+  $("#hiGo").onclick=histoApply}
+async function histoApply(){const H=HIMP;if(!H)return;const btn=$("#hiGo");btn.disabled=true;btn.textContent="Import en cours…";
+  await new Promise(r=>setTimeout(r,30));
+  const keep=new Set([...document.querySelectorAll("#hiTy input:checked")].map(i=>i.value));
+  const byK=new Map();H.pieces.forEach(p=>{const k=nh(p.t);let l=byK.get(k);if(!l)byK.set(k,l=[]);l.push(p)});
+  const store=new Map(),done=new Map();let nNew=0,nUpd=0,nSkip=0;const c0=S.contacts.length;
+  H.clients.forEach((c,k)=>{let acc=findCompte(c.nom);
+    if(!acc&&!keep.has(c.typologie||"Sans typologie")){nSkip++;return}
+    const isNew=!acc;if(!acc)acc=ensureCompte(c.nom,{origine:"historique"});
+    const P=(byK.get(k)||[]).map(p=>{const o=Object.assign({},p);delete o.t;return o}).sort((a,b)=>String(b.d).localeCompare(String(a.d)));
+    if(P.some(p=>isFact(p.e))||mlOf(acc.id).length)acc.type="Client existant";else if(isNew)acc.type="Prospect";
+    if(c.typologie&&(!acc.typologie||/^à qualifier$/i.test(acc.typologie)))acc.typologie=c.typologie;
+    if(c.sousTypo)acc.sousTypo=c.sousTypo;if(c.fiab)acc.fiab=c.fiab;
+    if(c.agence&&!acc.agence)acc.agence=c.agence;if(c.apporteur&&!acc.apporteur)acc.apporteur=c.apporteur;
+    acc.contrat=H.contrats.has(k);
+    if(P.length){acc.histo=Object.assign(hSum(P),{imp:todayISO()});store.set(acc.id,P);if(!acc.dept&&acc.histo.dept)acc.dept=acc.histo.dept}
+    acc.majLe=now();done.set(k,acc);
+    if(c.princ&&(c.princ.nom||c.princ.mail)&&!BILLING.test(c.princ.mail||"")){const ct=ensureContact(acc.id,c.princ);if(!ctOf(acc.id).some(x=>x.principal&&x.id!==ct.id))ct.principal=true}
+    isNew?nNew++:nUpd++});
+  bump();
+  H.contacts.forEach(x=>{const acc=done.get(x.k);if(!acc)return;if(x.mail&&BILLING.test(x.mail))return;if(!x.nom&&!x.mail)return;
+    const ct=ensureContact(acc.id,{nom:x.nom,mail:x.mail});
+    const info=[x.nf?pl(Number(x.nf)||0,"facture"):"",x.ca&&Number(toNum(x.ca))?eur(toNum(x.ca))+" HT":"",x.df?"dernière facture le "+fdate(x.df):""].filter(Boolean).join(" · ");
+    if(info&&!ct.notes)ct.notes="Facturation "+new Date().getFullYear()+" : "+info});
+  try{if(store.size)await hPutMany(store)}catch(e){toast("Antécédents détaillés non enregistrés (stockage du navigateur indisponible) : les totaux sont conservés.")}
+  if(H.types&&H.types.length)S.settings.mailTypes=H.types;
+  const np=ensureFamilyPlans();
+  S.settings.histoImport={le:now(),fichier:H.fname,clients:done.size,pieces:H.pieces.length};
+  bump();lsSave();HIMP=null;closeDrawer();UI.kv.v="tous";uiSave();showTab("comptes");
+  toast(pl(nNew,"compte créé","comptes créés")+" · "+pl(nUpd,"compte complété","comptes complétés")+" · "+pl(S.contacts.length-c0,"contact ajouté","contacts ajoutés")+(nSkip?" · "+nSkip+" ignorés (typologies décochées)":"")+(np?" · "+pl(np,"PAC")+" par famille":""))}
+
+/* Antécédents dans la fiche compte */
+function histoHead(k){const h=k.histo;if(!h)return '<p class="hint">Aucun antécédent de facturation pour ce compte'+(S.settings.histoImport?'.':' : importez l\'historique clients (Comptes › Importer › Historique clients).')+'</p>';
+  const a0=h.ans[h.y0]||{},a1=h.ans[h.y1]||{},st=HST[h.st]||["",""];
+  return '<div class="acc-stats" style="grid-template-columns:repeat(4,minmax(0,1fr))"><div><b>'+eur(a0.ca||0)+'</b><span>CA facturé '+h.y0+' · '+pl(a0.nf||0,"facture")+'</span></div><div><b>'+eur(a1.ca||0)+'</b><span>CA facturé '+h.y1+' à date · '+pl(a1.nf||0,"facture")+'</span></div>'+
+    '<div><b class="'+(h.dv.n?'late':'')+'" style="'+(h.dv.n?'color:var(--warn)':'')+'">'+(h.dv.n?eur(h.dv.m):"—")+'</b><span>'+(h.dv.n?pl(h.dv.n,"devis en attente","devis en attente")+(h.dv.d?' · dernier le '+fdate(h.dv.d):''):'Aucun devis en attente')+'</span></div>'+
+    '<div><b>'+(h.last?fdate(h.last):"—")+'</b><span>Dernière facture'+(h.first?' · 1re le '+fdate(h.first):'')+'</span></div></div>'+
+    '<div class="acc-tags" style="margin-top:8px"><span class="pill tone-'+st[1]+'">'+esc(st[0])+'</span>'+(k.contrat?'<span class="tag bu">Contrat cadre</span>':'<span class="tag">Gré à gré</span>')+(h.co.n?'<span class="sub">'+pl(h.co.n,"commande")+' en cours ('+eur(h.co.m)+')</span>':'')+(h.villes.length?'<span class="sub">Interventions : '+esc(h.villes.join(", "))+'</span>':'')+(k.fiab?'<span class="sub">· classement '+esc(k.fiab.toLowerCase())+'</span>':'')+'</div>'}
+async function loadHisto(kid){const box=$("#histoList");if(!box)return;const P=await hGet(kid);if(S.kid!==kid||!$("#histoList"))return;
+  if(P==null){box.innerHTML='<p class="hint">Détail des pièces indisponible dans ce navigateur.</p>';return}
+  if(!P.length){box.innerHTML="";return}
+  const f=UI.hisF||"",L=P.filter(p=>!f||(f==="fact"?isFact(p.e):f==="devis"?(p.e==="DV"||p.e==="DR"):!isFact(p.e)&&p.e!=="DV"&&p.e!=="DR")),lim=UI.hisAll?L.length:12;
+  const n=x=>P.filter(p=>x==="fact"?isFact(p.e):x==="devis"?(p.e==="DV"||p.e==="DR"):!isFact(p.e)&&p.e!=="DV"&&p.e!=="DR").length;
+  box.innerHTML='<div class="chips echips">'+[["","Toutes",P.length],["fact","Factures",n("fact")],["devis","Devis",n("devis")],["autre","Commandes et autres",n("autre")]].filter(x=>x[2]||!x[0]).map(([k,l,c])=>'<button type="button" class="chip" data-hisf="'+k+'" aria-pressed="'+(f===k)+'">'+l+'<span class="n num">'+c+'</span></button>').join("")+'</div>'+
+   '<div class="imp-prev" style="margin-top:8px"><table><thead><tr><th>Date</th><th>Pièce</th><th>Étape</th><th class="r">Montant HT</th><th>Lieu d\'intervention</th><th>Contact</th><th>Apporteur</th></tr></thead><tbody>'+
+   L.slice(0,lim).map(p=>'<tr style="cursor:default"><td class="num" style="white-space:nowrap">'+fdate(p.d)+'</td><td class="num sub">'+esc(p.n)+'</td><td><span class="pill tone-'+(ETT[p.e]||"grey")+'" style="font-size:11px">'+esc(ETL[p.e]||p.e)+'</span></td><td class="r num">'+eur(p.m)+'</td><td>'+esc([p.a,[p.cp,p.v].filter(Boolean).join(" ")].filter(Boolean).join(", "))+'</td><td class="sub">'+esc(p.c||"")+'</td><td class="sub">'+esc(p.ap||"")+'</td></tr>').join("")+'</tbody></table></div>'+
+   (L.length>lim?'<button type="button" class="more" data-act="hisall" style="padding:6px 2px;text-align:left">Afficher les '+L.length+' pièces</button>':'')}
+
+/* Mise à niveau des données (V3.1) : comptes du mailing = clients, mails envoyés = actions, PAC par famille */
+function upgrade31(){if(S.settings.upg31)return false;
+  const ml=new Set(S.mailing.map(m=>m.compteId));S.comptes.forEach(k=>{if(ml.has(k.id))k.type="Client existant"});
+  S.mailing.forEach(m=>{if(m.envoye)syncMailAction(m)});
+  ensureFamilyPlans();S.settings.upg31=true;bump();return true}
+
 /* ================= V3 · Événements ================= */
 document.addEventListener("click",async e=>{
   const t=e.target.closest("button,a[data-kopen],[data-aid],[data-mopen],[data-cday],[data-cib],[data-pid],tr[data-id],tr[data-kid],[data-act]");if(!t)return;
@@ -2977,6 +3217,10 @@ document.addEventListener("click",async e=>{
   if(d.act==="kmergego"){kMergeGo();return}
   if(d.act==="kmergeto"){kMergeGo(d.to);return}
   /* Navigation */
+  if(d.famgo!=null){UI.kv.fam=d.famgo;UI.kv.v=d.kvset||"tous";UI.kv.lim=150;uiSave();closeModal();showTab("comptes");return}
+  if(d.hisf!=null){UI.hisF=d.hisf;UI.hisAll=false;loadHisto(S.kid);return}
+  if(d.act==="hisall"){UI.hisAll=true;loadHisto(S.kid);return}
+  if(d.act==="pfam"){const n=ensureFamilyPlans(true);const f=S.plans.find(p=>p.famille);if(f)S.settings.planCourant=f.id;commit();toast(n?pl(n,"plan")+" créé"+(n>1?"s":"")+" : un par famille de clients":"Les plans par famille existent déjà");return}
   if(d.nav){closeModal();showTab(d.nav);return}
   if(d.kopen){e.stopPropagation();if(!d.kopen)return;closeModal();if(!$("#drawer").hidden)closeDrawer();showTab("compte",d.kopen);return}
   if(d.knew){openCompte(null);return}
@@ -2991,10 +3235,11 @@ document.addEventListener("click",async e=>{
     let kid=d.k||"",cid=d.c||"";
     if(D&&t.closest("#drawer")){if(!(await doSave(true)))return;kid=D.compteId;cid=D.id}
     else if(!kid&&S.tab==="compte")kid=S.kid;
-    openAction({type:d.anew,compteId:kid,cibleId:cid});return}
+    openAction({type:d.anew,compteId:kid,cibleId:cid,objet:d.obj||""});return}
   if(d.aid&&!t.matches("button.ck")){openAction({id:d.aid});return}
   if(d.mopen){mEditMenu(d.mopen);return}
   if(d.relday){MUI.view="rel";showTab("mailing");return}
+  if(d.mailday){MUI.view="env";MUI.lim=200;showTab("mailing");return}
   if(d.cday){openAction({type:"visite",date:d.cday,compteId:S.tab==="compte"?S.kid:""});return}
   /* Calendrier */
   if(d.cmode){const k=d.cal;UI.cal[k].mode=d.cmode;if(k==="agenda")UI.ag.vue=d.cmode;uiSave();render();return}
@@ -3011,7 +3256,7 @@ document.addEventListener("click",async e=>{
   /* Comptes */
   if(d.kv){UI.kv.v=d.kv;UI.kv.lim=150;uiSave();render();return}
   if(d.act==="kmore"){UI.kv.lim+=150;render();return}
-  if(d.act==="kimport"){importMenu();return}
+  if(d.act==="kimport"){histoMenu();return}
   if(t.matches("tr[data-kid]")){showTab("compte",d.kid);return}
   if(d.hf!=null&&t.matches(".chip")){UI.histF=d.hf;renderCompte();return}
   /* Cibles */
