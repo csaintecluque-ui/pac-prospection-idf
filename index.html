@@ -405,6 +405,22 @@ body{min-height:100vh}
 .nav button[aria-current="page"]{background:#3A2C22;color:#F3E9D6;box-shadow:inset 3px 0 0 var(--copper)}
 .nav .nb{margin-left:auto;font:500 11px var(--f-num);background:#2E2622;color:#CDBDA2;border-radius:999px;padding:1px 7px}
 .nav .nb.hot{background:#C9804F;color:#1B1512}
+.qk{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:0 4px 4px}
+.qk button{display:flex;flex-direction:column;align-items:center;gap:4px;background:#2A221D;border:1px solid #3A302A;border-radius:8px;padding:8px 2px 7px;color:#E8DCC6;font:500 11.5px/1.15 var(--f-ui);cursor:pointer;text-align:center}
+.qk button:hover{border-color:#C9804F;color:#fff;background:#3A2C22}
+.qk button svg{width:17px;height:17px}
+.kc{position:relative}
+.kc-list{position:absolute;left:0;right:0;top:calc(100% + 4px);background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);max-height:330px;overflow:auto;z-index:6;padding:4px}
+.kc-h{font:600 11px var(--f-label);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);padding:6px 9px 4px}
+.kc-o{display:flex;width:100%;text-align:left;gap:10px;align-items:center;border:0;background:none;padding:7px 9px;border-radius:6px;cursor:pointer;font:inherit;color:inherit}
+.kc-o svg{width:15px;height:15px;flex:none;color:var(--accent)}
+.kc-o.act,.kc-o:hover{background:var(--accent-soft)}
+.kc-o .grow{flex:1;min-width:0}.kc-o b{font-weight:600}.kc-o .sub{display:block;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kc-o mark{background:none;color:var(--accent);font-weight:700}
+.kc-sel{color:var(--fg)}
+.crv{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:4px 12px;font-size:13px;border-left:3px solid var(--info);background:var(--surface-2);padding:8px 10px;border-radius:0 6px 6px 0;margin:2px 0 0}
+.crv dt{color:var(--muted);font-size:12px;padding-top:1px}
+.crv dd{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
 .side-f{margin-top:auto;display:flex;flex-direction:column;gap:8px;padding:14px 4px 0;border-top:1px solid #2E2622}
 .side-f .btn{background:#2A221D;border-color:#3A302A;color:#E8DCC6;justify-content:flex-start;width:100%}
 .side-f .btn:hover{border-color:#6B5B4A}
@@ -601,6 +617,9 @@ input[type=time]{width:100%;background:var(--surface);border:1px solid var(--lin
   .side{position:sticky;height:auto;flex-direction:row;align-items:center;gap:8px;padding:8px 10px;overflow-x:auto;overflow-y:hidden}
   .side .brand{border:0;margin:0;padding:0}
   .side .brand .grow,.nav-g,.side-f .sync,.side-f .ver{display:none}
+  .qk{display:flex;gap:2px;padding:0;border-left:1px solid #3A302A;padding-left:6px}
+  .qk button{padding:6px;background:none;border-color:transparent}
+  .qk button span{display:none}
   .nav{flex-direction:row;gap:2px}
   .nav button{padding:7px 9px}
   .nav button span.l{display:none}
@@ -631,10 +650,12 @@ input[type=time]{width:100%;background:var(--surface);border:1px solid var(--lin
     </div>
   </div>
   <nav class="nav" id="nav"></nav>
+  <div class="nav-g qk-h">Action rapide</div>
+  <div class="qk" id="qk"></div>
   <div class="side-f">
     <span class="sync" id="sync" data-s="wait"><i></i><span id="syncTxt">Chargement…</span></span>
     <button class="btn" type="button" data-act="export" title="Exporter, sauvegarder, restaurer"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11"/></svg><span>Exporter / sauvegarder</span></button>
-    <span class="ver">V3.2 · CSC</span>
+    <span class="ver">V3.3 · CSC</span>
   </div>
 </aside>
 
@@ -723,7 +744,7 @@ function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTi
 const nh=x=>String(x==null?"":x).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
 const now=()=>new Date().toISOString();
 const S={open:new Set(),mode:"wait",cibles:[],comptes:[],contacts:[],actions:[],plans:[],pac:[],mailing:[],settings:{objectif:8},writable:true,view:"actives",tab:"tdb",kid:"",db:null,downloads:null,ver:0};
-const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.2";
+const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.3";
 let STORE="ls"; /* "idb" dès que les données sont dans la base du navigateur */
 const IN_FRAME=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 const TYPE_RANK={"Client existant":3,"Prescripteur":2,"Prospect":1};
@@ -974,6 +995,7 @@ const NAV=[["tdb","Tableau de bord",SV+'<rect x="2" y="2" width="5" height="6" r
  ["mailing","Mailing",SV+'<path d="M14 2 7 9M14 2l-4.5 12L7 9 2 6.5z"/></svg>',""],
  ["pac","Plan d'action (PAC)",SV+'<path d="M3 14.5V2M3 2.5h8.5l-1.5 3 1.5 3H3"/></svg>',"Pilotage"]];
 function renderNav(){
+  renderQk();
   const t=todayISO(),late=S.actions.filter(a=>isOpen(a)&&a.date&&a.date<t).length,tod=S.actions.filter(a=>isOpen(a)&&a.date===t).length;
   const rel=S.mailing.filter(m=>m.envoye&&m.relance&&m.relance<=t&&!m.relanceFaite).length;
   const cnt={tdb:"",comptes:S.comptes.length,cibles:S.cibles.filter(isActive).length,agenda:late?[late,1]:tod?[tod,0]:"",mailing:rel?[rel,1]:"",pac:S.pac.filter(p=>p.planId===curPlan().id).length};
@@ -1043,7 +1065,7 @@ function openAction(o){o=o||{};
     AM=Object.assign(ablank(),{id:uid(),creeLe:now(),type:ty,objet:o.objet||"",compteId:o.compteId||"",cibleId:o.cibleId||"",date:ty==="tache"&&!o.date?addD(todayISO(),1):d,heure:o.heure||"",
       statut:ty==="note"?"fait":(isRdv(ty)||ty==="tache")?"afaire":(d>todayISO()?"afaire":"fait")});
     if(k){const p=principal(k.id);if(p)AM.contactId=p.id;const cs=cibOf(k.id);if(!AM.cibleId&&cs.length===1)AM.cibleId=cs[0].id}}
-  AM._k=(kOf(AM.compteId)||{}).nom||"";AM._suite=null;
+  AM._k=(kOf(AM.compteId)||{}).nom||"";AM._suite=null;AM._crOpen=!!(o.cr||AM.cr);if(o.cr&&amNew){AM.statut="fait";AM.objet=AM.objet||"Compte rendu de RDV"}
   drawAction();setTimeout(()=>{const f=amNew&&!AM._k?$("#am-k"):$("#am-obj");if(f)f.focus()},40);
 }
 function amRead(){if(!AM||!$("#am-obj"))return;
@@ -1051,6 +1073,7 @@ function amRead(){if(!AM||!$("#am-obj"))return;
   AM.date=vOf("am-date");AM.heure=vOf("am-heure");AM.objet=vOf("am-obj");AM.details=vOf("am-det");
   const r=$("#am-res");AM.resultat=r?r.value:"";const ac=$("#am-acc");AM.accompagnant=ac?ac.value.trim():AM.accompagnant;const li=$("#am-lieu");AM.lieu=li?li.value.trim():AM.lieu;
   const ct=$("#am-ct");if(ct)AM.contactId=ct.value;const cb=$("#am-cib");if(cb)AM.cibleId=cb.value;
+  crRead();
   const su=$("#am-su");if(su&&su.checked){AM._suite={type:$("#am-sut").value,date:$("#am-sud").value,objet:$("#am-suo").value.trim()}}else if(su)AM._suite=null;
 }
 function drawAction(){
@@ -1059,7 +1082,7 @@ function drawAction(){
   showModal(mHead(amNew?"Nouvelle action":"Action",esc(ALBL[a.type]||"Action")+(a._k?' · '+esc(a._k):''))+
   '<div class="db"><form id="amForm" onsubmit="return false" style="display:flex;flex-direction:column;gap:14px">'+
    '<div class="tpick" role="group" aria-label="Type d\'action">'+ATYPES.map(([t,l])=>'<button type="button" data-atype="'+t+'" aria-pressed="'+(a.type===t)+'">'+(I_EV[t]||"")+esc(l)+'</button>').join("")+'</div>'+
-   '<div class="f"><label class="lbl" for="am-k">Compte <span class="req">*</span></label><input type="text" id="am-k" list="kList" value="'+esc(a._k)+'" placeholder="Nom du compte (existant ou nouveau)" autocomplete="off">'+comptesDL()+(a._k&&!k?'<p class="hint">Nouveau compte : il sera créé à l\'enregistrement.</p>':'')+'</div>'+
+   kcHTML(a,k)+
    '<div class="row4"><div class="f"><label class="lbl" for="am-date">Date</label><input type="date" id="am-date" value="'+esc(a.date)+'"></div><div class="f"><label class="lbl" for="am-heure">Heure</label><input type="time" id="am-heure" value="'+esc(a.heure)+'"></div>'+
     '<div class="f" style="grid-column:span 2"><span class="lbl">Statut</span><div class="seg" role="group" aria-label="Statut">'+ST.map(([s,l])=>'<button type="button" data-ast="'+s+'" aria-pressed="'+(a.statut===s)+'">'+l+'</button>').join("")+'</div></div></div>'+
    '<div class="row"><div class="f"><label class="lbl" for="am-ct">Contact</label><select id="am-ct"><option value="">—</option>'+cts.map(c=>'<option value="'+esc(c.id)+'"'+(c.id===a.contactId?' selected':'')+'>'+esc(c.nom||c.mail||"Contact")+(c.fonction?' · '+esc(c.fonction):'')+'</option>').join("")+'</select>'+(k?'<button type="button" class="more" style="align-self:flex-start;background:none;border:0;padding:2px 0;color:var(--accent);cursor:pointer;font-size:12.5px" data-ctnew="'+esc(k.id)+'" data-from="am">+ Nouveau contact</button>':'')+'</div>'+
@@ -1067,7 +1090,8 @@ function drawAction(){
    '<div class="f"><label class="lbl" for="am-obj">Objet</label><input type="text" id="am-obj" value="'+esc(a.objet)+'" placeholder="'+esc(EOBJ[a.type]||"")+'"></div>'+
    (res?'<div class="f"><label class="lbl" for="am-res">Résultat</label><select id="am-res"><option value="">—</option>'+res.map(r=>'<option'+(r===a.resultat?' selected':'')+'>'+esc(r)+'</option>').join("")+'</select></div>':'')+
    (rdv?'<div class="row"><div class="f"><label class="lbl" for="am-acc">Accompagnant</label><input type="text" id="am-acc" value="'+esc(a.accompagnant)+'" placeholder="Chef d\'agence ou commercial de la BU"></div><div class="f"><label class="lbl" for="am-lieu">Lieu</label><input type="text" id="am-lieu" value="'+esc(a.lieu)+'" placeholder="Site, adresse, visio…"></div></div>':'')+
-   ta("am-det",a.type==="note"?"Note":rdv||a.type==="evenement"?"Compte rendu":"Détails",a.details,a.type==="note"||rdv?6:4,EPH[a.type])+
+   ta("am-det",a.type==="note"?"Note":(a.cr||a._crOpen)?"Points abordés":rdv||a.type==="evenement"?"Compte rendu":"Détails",a.details,a.type==="note"||rdv?6:4,EPH[a.type])+
+   (crOK(a.type)?crSection(a):'')+
    (a.suite?'<p class="hint">Suite notée : '+esc(a.suite)+'</p>':'')+
    '<div class="suite"><label class="toggle"><input type="checkbox" id="am-su"'+(a._suite?' checked':'')+'> Planifier une suite</label>'+
     '<div id="am-suw" class="row3"'+(a._suite?'':' hidden')+'><div class="f"><label class="lbl" for="am-sut">Type</label><select id="am-sut">'+ATYPES.filter(x=>x[0]!=="note").map(([t,l])=>'<option value="'+t+'"'+((a._suite?a._suite.type:"tache")===t?' selected':'')+'>'+esc(l)+'</option>').join("")+'</select></div>'+
@@ -1083,11 +1107,12 @@ async function amSave(){
   a.compteId=k.id;if(!a.objet&&a.type!=="note")a.objet=ALBL[a.type];
   if(a.statut==="fait"&&!a.faitLe)a.faitLe=todayISO();if(a.statut!=="fait")a.faitLe="";
   if(a.statut==="fait"&&!a.date)a.date=todayISO();
-  const suite=a._suite;const o=Object.assign({},a);delete o._k;delete o._suite;
+  const suite=a._suite;const o=Object.assign({},a);delete o._k;delete o._suite;delete o._crOpen;if(!o.cr||!crOK(o.type))delete o.cr;
   put("actions",o);
   if(suite){put("actions",anorm({id:uid(),creeLe:now(),compteId:k.id,cibleId:a.cibleId,contactId:a.contactId,type:suite.type||"tache",date:suite.date||"",objet:suite.objet||ALBL[suite.type]||"Suite",statut:"afaire"}))}
+  const integ=o.cr?crToCible(o,k):"";
   restage(k.id);const wasNew=amNew;closeModal();commit();if(D)drawDrawer();
-  toast((wasNew?"Action ajoutée":"Action enregistrée")+(suite?" · suite planifiée":"")+(created?" · compte « "+k.nom+" » créé":""));
+  toast((wasNew?(o.cr?"Compte rendu enregistré":"Action ajoutée"):"Action enregistrée")+" dans « "+k.nom+" »"+(suite?" · suite planifiée":"")+integ+(created?" · compte créé":""));
 }
 async function amDelete(btn){if(!amDel){amDel=true;btn.classList.add("armed");btn.textContent="Confirmer la suppression";return}
   const kid=AM.compteId;drop("actions",AM.id);restage(kid);closeModal();commit();if(D)drawDrawer();toast("Action supprimée")}
@@ -1095,7 +1120,7 @@ async function toggleDone(id){const a=S.actions.find(x=>x.id===id);if(!a)return;
   if(a.statut==="fait"){a.statut="afaire";a.faitLe=""}else{a.statut="fait";a.faitLe=todayISO();if(!a.date||a.date>todayISO())a.date=todayISO()}
   a.majLe=now();bump();restage(a.compteId);commit();if(D)drawDrawer();
   if(a.statut==="fait"){
-    if(isRdv(a.type)&&!a.details){openAction({id:a.id});toast("RDV réalisé : ajoutez le compte rendu si besoin.");return}
+    if(isRdv(a.type)&&!a.details&&!a.cr){openAction({id:a.id,cr:true});toast("RDV réalisé : rédigez le compte rendu.");return}
     toast("Fait : "+(a.objet||ALBL[a.type]))}
   else toast("Action rouverte")}
 function relanceFaite(id){const m=S.mailing.find(x=>x.id===id);if(!m)return;m.relanceFaite=todayISO();lsSave();render();toast("Relance notée comme faite : "+m.client)}
@@ -1291,10 +1316,10 @@ function renderTdb(){
 }
 
 /* ---------- Agenda & actions ---------- */
-const AGF=[["afaire","À faire"],["retard","En retard"],["nodate","Sans date"],["faites","Faites"],["toutes","Toutes"]];
+const AGF=[["afaire","À faire"],["retard","En retard"],["nodate","Sans date"],["faites","Faites"],["cr","Comptes rendus"],["toutes","Toutes"]];
 function agBase(){const q=nh(UI.ag.q),ty=UI.ag.type;
   return S.actions.filter(a=>{if(ty&&a.type!==ty)return false;if(q){const k=kOf(a.compteId),ct=ctById(a.contactId);if(!nh([a.objet,a.details,a.resultat,k&&k.nom,ct&&ct.nom,a.accompagnant].join(" ")).includes(q))return false}return true})}
-const agFilt=(f,a)=>{const t=todayISO();return f==="afaire"?isOpen(a):f==="retard"?isOpen(a)&&a.date&&a.date<t:f==="nodate"?isOpen(a)&&!a.date:f==="faites"?a.statut!=="afaire":true};
+const agFilt=(f,a)=>{const t=todayISO();return f==="afaire"?isOpen(a):f==="retard"?isOpen(a)&&a.date&&a.date<t:f==="nodate"?isOpen(a)&&!a.date:f==="faites"?a.statut!=="afaire":f==="cr"?!!a.cr:true};
 function renderAgenda(){
   const el=$("#view-agenda"),B=agBase(),f=UI.ag.f,L=B.filter(a=>agFilt(f,a));
   let h=pageH("Actions commerciales","Agenda &amp; actions",pl(S.actions.filter(isOpen).length,"action")+" à faire · "+pl(S.actions.filter(a=>a.statut==="fait").length,"action réalisée","actions réalisées"),
@@ -1310,7 +1335,7 @@ function renderAgenda(){
   if(!L.length){h+='<div class="list-wrap"><div class="empty"><h3>Aucune action dans cette vue</h3><p>Ajoutez un RDV, un appel ou un rappel avec les boutons en haut, ou depuis la fiche d\'un compte.</p></div></div>';el.innerHTML=h;return}
   const t=todayISO(),tom=addD(t,1),wkEnd=addD(mondayOf(t),6);
   let groups;
-  if(f==="faites"||f==="toutes"&&false){const m={};L.slice().sort(aSortDesc).forEach(a=>{const k=(a.date||"").slice(0,7)||"Sans date";(m[k]=m[k]||[]).push(a)});
+  if(f==="faites"||f==="cr"){const m={};L.slice().sort(aSortDesc).forEach(a=>{const k=(a.date||"").slice(0,7)||"Sans date";(m[k]=m[k]||[]).push(a)});
     groups=Object.entries(m).map(([k,v])=>[k==="Sans date"?k:dObj(k+"-01").toLocaleDateString("fr-FR",{month:"long",year:"numeric"}),v])}
   else{const S2=L.slice().sort(aSort),gs=[["En retard",a=>isOpen(a)&&a.date&&a.date<t],["Aujourd'hui",a=>a.date===t],["Demain",a=>a.date===tom],["Cette semaine",a=>a.date>tom&&a.date<=wkEnd],["Plus tard",a=>a.date>wkEnd],["Passées",a=>a.date&&a.date<t],["Sans date",a=>!a.date]];
     const used=new Set();groups=gs.map(([l,fn])=>[l,S2.filter(a=>{if(used.has(a.id)||!fn(a))return false;used.add(a.id);return true})]).filter(([,v])=>v.length);
@@ -1322,7 +1347,7 @@ function renderAgenda(){
       h+='<tr data-aid="'+esc(a.id)+'"><td><button type="button" class="ck'+(a.statut==="fait"?' on':'')+'" data-done="'+esc(a.id)+'" aria-label="Marquer comme fait">'+(a.statut==="fait"?I_CHECK:'')+'</button></td>'+
         '<td class="num'+(late?' late':'')+'" style="white-space:nowrap">'+(a.date?esc(fday(a.date))+(a.date.slice(0,4)!==t.slice(0,4)?' '+a.date.slice(0,4):''):'<span class="sub">—</span>')+(a.heure?'<div class="sub">'+esc(a.heure.replace(":","h"))+'</div>':'')+'</td>'+
         '<td><span class="eic eic-'+esc(a.type)+'" style="vertical-align:middle">'+(I_EV[a.type]||I_EV.autre)+'</span> <span class="sub">'+esc(ESHORT[a.type]||a.type)+'</span></td>'+
-        '<td><b style="font-weight:500">'+esc(a.objet||ALBL[a.type])+'</b>'+(a.details?'<div class="sub" style="max-width:520px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(a.details)+'</div>':'')+'</td>'+
+        '<td><b style="font-weight:500">'+esc(a.objet||ALBL[a.type])+'</b>'+(a.cr?' <span class="pill tone-info" style="font-size:11px">Compte rendu</span>':'')+(a.details?'<div class="sub" style="max-width:520px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(a.details)+'</div>':'')+'</td>'+
         '<td>'+(k?'<button type="button" class="lk strong" data-kopen="'+esc(k.id)+'">'+esc(k.nom)+'</button>':'')+'</td><td class="sub">'+esc(ct?ct.nom:"")+'</td><td class="sub">'+esc(cb?campShort(cb):"")+'</td>'+
         '<td><span class="pill tone-'+stTone(a)+'">'+esc(stLbl(a))+'</span>'+(a.resultat?'<div class="sub">'+esc(a.resultat)+'</div>':'')+'</td></tr>'}}
   h+='</tbody></table></div>'+(L.length>lim?'<div class="pager"><button class="btn" type="button" data-act="agmore">Afficher plus</button><span class="sub">'+lim+' sur '+L.length+'</span></div>':'');
@@ -1372,7 +1397,7 @@ function renderComptes(){
 }
 
 /* ---------- Fiche compte ---------- */
-const HF=[["","Tout"],["rdv","RDV et visites"],["appel","Appels"],["mail","Mails"],["note","Notes"],["autre","Autres"]];
+const HF=[["","Tout"],["cr","Comptes rendus"],["rdv","RDV et visites"],["appel","Appels"],["mail","Mails"],["note","Notes"],["autre","Autres"]];
 const hGroup=x=>x.mailing?"mail":isRdv(x.type)?"rdv":x.type==="appel"?"appel":x.type==="mail"?"mail":x.type==="note"?"note":"autre";
 function renderCompte(){
   const el=$("#view-compte"),k=kOf(S.kid);
@@ -1382,7 +1407,7 @@ function renderCompte(){
   const hist=A.filter(a=>a.statut!=="afaire").map(a=>Object.assign({},a));
   ml.filter(m=>m.envoye&&!S.actions.some(a=>a.mailingId===m.id)).forEach(m=>hist.push({mailing:true,id:m.id,type:"mail",date:m.dateEnvoi,statut:"fait",objet:"Mail envoyé · liste « "+(m.liste||"mailing")+" »",details:m.commentaire||"",contactId:m.contactId,resultat:m.relanceFaite?"Relancé le "+fdate(m.relanceFaite):m.relance?"Relance prévue le "+fdate(m.relance):""}));
   hist.sort(aSortDesc);
-  const hf=UI.histF,H=hist.filter(x=>!hf||hGroup(x)===hf);
+  const hf=UI.histF,hm=(x,f)=>f==="cr"?!!x.cr:hGroup(x)===f,H=hist.filter(x=>!hf||hm(x,hf));
   const rel=ml.filter(m=>m.envoye&&m.relance&&!m.relanceFaite);
   let h='<div class="page-h"><div class="grow"><span class="crumb"><button type="button" data-nav="comptes">Comptes</button>›<span>Fiche compte</span></span></div></div>';
   h+='<div class="acc-h"><div class="acc-top"><div class="grow"><h2>'+esc(k.nom)+'</h2><div class="acc-tags">'+tyTag(k.type)+(secteurOf(k)?'<span class="tag bu">'+esc(secteurOf(k))+'</span>':'')+(k.dept?'<span class="ty">'+esc(dLabel(k.dept))+'</span>':'')+(k.ville?'<span class="sub">'+esc(k.ville)+'</span>':'')+(k.contrat?'<span class="tag bu">Contrat cadre</span>':'')+(FNOM[famOf(k)]?'<span class="sub">· '+esc(FNOM[famOf(k)])+'</span>':'')+(k.agence?'<span class="sub">· agence '+esc(k.agence)+'</span>':'')+'</div></div>'+
@@ -1407,10 +1432,10 @@ function renderCompte(){
      (open.length||rel.length?'<div class="todo">'+open.map(a=>tItem(a,{noCompte:true,full:true})).join("")+rel.map(rItem).join("")+'</div>':'<p class="hint">Aucune action prévue : planifiez un RDV, un appel ou un rappel.</p>')+'</div>'+
    '<div class="panel"><div class="ph"><h2>Antécédents de facturation</h2>'+(k.histo?'<span class="sub">import du '+fdate(k.histo.imp)+' · '+pl(k.histo.nb,"pièce")+'</span>':'')+'</div>'+histoHead(k)+'<div id="histoList"></div></div>'+
    '<div class="panel"><div class="ph"><h2>Historique</h2><span class="sub num">'+hist.length+'</span></div>'+
-    (hist.length?'<div class="chips echips">'+HF.filter(([f])=>!f||hist.some(x=>hGroup(x)===f)).map(([f,l])=>'<button type="button" class="chip" data-hf="'+f+'" aria-pressed="'+(hf===f)+'">'+l+'<span class="n num">'+(f?hist.filter(x=>hGroup(x)===f).length:hist.length)+'</span></button>').join("")+'</div>':'')+
+    (hist.length?'<div class="chips echips">'+HF.filter(([f])=>!f||hist.some(x=>hm(x,f))).map(([f,l])=>'<button type="button" class="chip" data-hf="'+f+'" aria-pressed="'+(hf===f)+'">'+l+'<span class="n num">'+(f?hist.filter(x=>hm(x,f)).length:hist.length)+'</span></button>').join("")+'</div>':'')+
     (H.length?'<div class="tl">'+H.map(x=>{const ct=ctById(x.contactId),who=[ct?ct.nom:"",x.interlocuteur&&(!ct||x.interlocuteur!==ct.nom)?x.interlocuteur:"",x.accompagnant?"avec "+x.accompagnant:""].filter(Boolean).join(" · "),cb=cibById(x.cibleId);
-      return '<div class="tl-i'+(x.statut==="annule"?' annule':'')+'" '+(x.mailing?'data-mopen="'+esc(x.id)+'"':'data-aid="'+esc(x.id)+'"')+'><span class="eic eic-'+esc(x.type)+'">'+(I_EV[x.type]||I_EV.autre)+'</span><div style="min-width:0;display:flex;flex-direction:column;gap:3px"><div class="eh"><span class="num">'+(x.date?fdate(x.date):"—")+'</span><b>'+esc(x.mailing?"Mailing":ESHORT[x.type]||x.type)+'</b>'+(x.statut==="annule"?'<span class="pill tone-grey">Annulé</span>':'')+(x.resultat?'<span class="pill tone-'+(/^(Joint|Réponse|Appel reçu|Mail reçu|Rencontr|Relancé)/.test(x.resultat)?"ok":"info")+'">'+esc(x.resultat)+'</span>':'')+'<span class="sub grow">'+esc(who)+(cb&&cs.length>1?' · '+esc(campShort(cb)):'')+'</span></div>'+
-       (x.objet?'<div class="eobj">'+esc(x.objet)+'</div>':'')+(x.details?'<p class="edet">'+esc(x.details)+'</p>':'')+(x.suite?'<div class="sub">Suite : '+esc(x.suite)+'</div>':'')+'</div></div>'}).join("")+'</div>':'<p class="hint">'+(hist.length?'Rien pour ce filtre.':'Aucun échange enregistré. Les appels, RDV et mails faits apparaissent ici, avec les mails envoyés depuis le mailing.')+'</p>')+'</div>';
+      return '<div class="tl-i'+(x.statut==="annule"?' annule':'')+'" '+(x.mailing?'data-mopen="'+esc(x.id)+'"':'data-aid="'+esc(x.id)+'"')+'><span class="eic eic-'+esc(x.type)+'">'+(I_EV[x.type]||I_EV.autre)+'</span><div style="min-width:0;display:flex;flex-direction:column;gap:3px"><div class="eh"><span class="num">'+(x.date?fdate(x.date):"—")+'</span><b>'+esc(x.mailing?"Mailing":ESHORT[x.type]||x.type)+'</b>'+(x.statut==="annule"?'<span class="pill tone-grey">Annulé</span>':'')+(x.cr?'<span class="pill tone-info">Compte rendu</span>':'')+(x.resultat?'<span class="pill tone-'+(/^(Joint|Réponse|Appel reçu|Mail reçu|Rencontr|Relancé)/.test(x.resultat)?"ok":"info")+'">'+esc(x.resultat)+'</span>':'')+'<span class="sub grow">'+esc(who)+(cb&&cs.length>1?' · '+esc(campShort(cb)):'')+'</span></div>'+
+       (x.objet?'<div class="eobj">'+esc(x.objet)+'</div>':'')+(x.details?'<p class="edet">'+esc(x.details)+'</p>':'')+(x.cr?crHTML(x):'')+(x.suite?'<div class="sub">Suite : '+esc(x.suite)+'</div>':'')+'</div></div>'}).join("")+'</div>':'<p class="hint">'+(hist.length?'Rien pour ce filtre.':'Aucun échange enregistré. Les appels, RDV et mails faits apparaissent ici, avec les mails envoyés depuis le mailing.')+'</p>')+'</div>';
   /* Colonne 3 : prospection, opportunités, mailing */
   const c3='<div class="panel"><div class="ph"><h2>Prospection</h2><button type="button" class="more" data-cibnew="'+esc(k.id)+'">+ Campagne</button></div>'+
     (cs.length?'<div class="cards">'+cs.map(c=>'<div class="cibc" data-cib="'+esc(c.id)+'"><div class="ctop"><span class="prio prio-'+esc(c.priorite)+'">'+esc(c.priorite)+'</span><span class="grow">'+esc(campShort(c))+'</span><span class="pill st-'+c.etape+'">'+esc(SL[c.etape])+'</span></div>'+
@@ -2015,7 +2040,7 @@ async function restore(text){
 function exportMenu(){
   const rows=[["Compte","Type","Secteur","Département","Contact principal","Fonction","Téléphone","E-mail","Agence","BU d'origine","Apporteur","Source","Campagne","Diagnostics visés","Potentiel annuel (€)","Priorité","Étape","Motif sans suite","Prochaine action","Quoi","Visites réalisées","Opportunité","Montant opp. (€)","Statut opp.","N° devis","Notes"]]
     .concat(S.cibles.map(c=>{const k=kOf(c.compteId)||{},p=principal(c.compteId)||{},n=nextFor(c);return [c.compte,k.type,secteurOf(k),dLabel(c.dept),p.nom,p.fonction,p.tel,p.mail,c.agence,c.bu.join(", "),c.apporteur,c.source,c.campagne,c.prestations.map(x=>PLABEL[x]||x).join(", "),c.potentiel,c.priorite,SL[c.etape],c.motif,n?fdate(n.date):"",n?n.objet:"",visitsDone(c),c.opp.creee?"Oui":"Non",c.opp.creee?c.opp.montant:"",c.opp.creee?c.opp.statut:"",c.opp.devis,c.notes]}));
-  const arows=[["Date","Heure","Compte","Type","Statut","Résultat","Contact","Objet","Détails / compte rendu","Accompagnant","Campagne"]].concat(S.actions.slice().sort(aSortDesc).map(a=>{const k=kOf(a.compteId)||{},ct=ctById(a.contactId),cb=cibById(a.cibleId);return [fdate(a.date),a.heure,k.nom,ALBL[a.type]||a.type,stLbl(a),a.resultat,ct?ct.nom:a.interlocuteur,a.objet,a.details,a.accompagnant,cb?cb.campagne:""]}));
+  const arows=[["Date","Heure","Compte","Type","Statut","Résultat","Contact","Objet","Détails / compte rendu","Accompagnant","Campagne","Compte rendu"]].concat(S.actions.slice().sort(aSortDesc).map(a=>{const k=kOf(a.compteId)||{},ct=ctById(a.contactId),cb=cibById(a.cibleId);return [fdate(a.date),a.heure,k.nom,ALBL[a.type]||a.type,stLbl(a),a.resultat,ct?ct.nom:a.interlocuteur,a.objet,a.details,a.accompagnant,cb?cb.campagne:"",a.cr?crRows(a).map(([l,v])=>l+" : "+v).join("\n"):""]}));
   const yy=new Date().getFullYear(),y0s=String(yy-1),y1s=String(yy);
   const krows=[["Compte","Type","Famille","Segment","Typologie","Contrat cadre","Statut","CA facturé "+y0s+" (€)","CA facturé "+y1s+" (€)","Devis en attente (€)","Département","Ville","Agence","Apporteur","Contacts","Campagnes","Dernier contact","Prochaine action","Quoi"]].concat(S.comptes.map(k=>{const n=nextOf(k.id),l=lastOf(k.id),h=k.histo;return [k.nom,k.type,FNOM[famOf(k)]||"",k.segment,k.typologie,k.contrat?"Oui":"",h?(HST[h.st]||[""])[0]:"",h?hCA(k,y0s):"",h?hCA(k,y1s):"",h&&h.dv.n?h.dv.m:"",dLabel(k.dept),k.ville,k.agence,k.apporteur,ctOf(k.id).length,cibOf(k.id).map(c=>c.campagne).join(", "),l?fdate(l.date):"",n?fdate(n.date):"",n?n.objet:""]}));
   const crows=[["Compte","Contact","Fonction","Téléphone","E-mail","Principal","Notes"]].concat(S.contacts.map(c=>{const k=kOf(c.compteId)||{};return [k.nom,c.nom,c.fonction,c.tel,c.mail,c.principal?"Oui":"",c.notes]}));
@@ -2563,9 +2588,9 @@ async function buildXlsx(cibles,settings,pac,mailing){mailing=mailing||[];settin
     if(c.priorite==="A")pr.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FFA35C2A"}};else if(c.priorite==="B")pr.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FFF5E7DB"}};
     const n=nextFor(c);if(n&&n.date&&n.date<todayISO()&&isActive(c))row.getCell(10).font={name:"Calibri",size:10,bold:true,color:{argb:"FFB0442D"}}});
   /* ---- Actions ---- */
-  const AC=[{h:"Date",w:12,fmt:DFMT,al:"center"},{h:"Heure",w:8,al:"center"},{h:"Compte",w:30,bold:true},{h:"Type",w:15},{h:"Statut",w:11,al:"center"},{h:"Résultat",w:15},{h:"Contact",w:22},{h:"Objet",w:32,wrap:true},{h:"Détails / compte rendu",w:70,wrap:true},{h:"Accompagnant",w:18},{h:"Campagne",w:28}];
+  const AC=[{h:"Date",w:12,fmt:DFMT,al:"center"},{h:"Heure",w:8,al:"center"},{h:"Compte",w:30,bold:true},{h:"Type",w:15},{h:"Statut",w:11,al:"center"},{h:"Résultat",w:15},{h:"Contact",w:22},{h:"Objet",w:32,wrap:true},{h:"Détails / compte rendu",w:70,wrap:true},{h:"Accompagnant",w:18},{h:"Campagne",w:28},{h:"Compte rendu",w:70,wrap:true}];
   const acts=S.actions.slice().sort(aSortDesc);
-  const wa=xlTable(wb,"Actions","Actions","FF6E6862",AC,acts.map(a=>{const k=kOf(a.compteId)||{},ct=ctById(a.contactId),cb=cibById(a.cibleId);return [toDate(a.date),a.heure||null,k.nom||"",ALBL[a.type]||a.type,stLbl(a),a.resultat,ct?ct.nom:a.interlocuteur,a.objet,a.details,a.accompagnant,cb?cb.campagne:""]}),0);
+  const wa=xlTable(wb,"Actions","Actions","FF6E6862",AC,acts.map(a=>{const k=kOf(a.compteId)||{},ct=ctById(a.contactId),cb=cibById(a.cibleId);return [toDate(a.date),a.heure||null,k.nom||"",ALBL[a.type]||a.type,stLbl(a),a.resultat,ct?ct.nom:a.interlocuteur,a.objet,a.details,a.accompagnant,cb?cb.campagne:"",a.cr?crRows(a).filter(r=>r[0]!=="Points abordés").map(([l,v])=>l+" : "+v).join("\n"):""]}),0);
   acts.forEach((a,i)=>{const cell=wa.getRow(i+2).getCell(5);cell.fill={type:"pattern",pattern:"solid",fgColor:{argb:{ok:"FFE2F0E6",warn:"FFFBEED3",bad:"FFF7E1DA",grey:"FFECEAE6"}[stTone(a)]}}});
   /* ---- Comptes ---- */
   const yy=new Date().getFullYear(),y0s=String(yy-1),y1s=String(yy);
@@ -3272,12 +3297,95 @@ function planAct(act,id,btn){const p=S.plans.find(x=>x.id===id);if(!p)return;
     ensurePlans();renum();bump();lsSave();planManage();render();toast("Plan « "+p.nom+" » supprimé");return}}
 function renum(){S.plans.slice().sort(plSort).forEach((x,k)=>x.ordre=k+1);bump()}
 
+/* ================= V3.3 · Actions rapides, recherche de compte, comptes rendus ================= */
+/* Barre latérale : une action en un clic, rattachée au compte choisi */
+const QK=[["visite","RDV"],["appel","Appel"],["mail","Mail"],["tache","Rappel"],["note","Note"],["cr","Compte rendu"]];
+const I_CR=SV+'<path d="M4 1.8h6l2.5 2.5v9.9H4z"/><path d="M10 1.8v2.5h2.5M6 7h4.5M6 9.3h4.5M6 11.6h3"/></svg>';
+function renderQk(){const el=$("#qk");if(!el||el.dataset.done)return;el.dataset.done="1";
+  el.innerHTML=QK.map(([t,l])=>'<button type="button" data-anew="'+(t==="cr"?"visite":t)+'"'+(t==="cr"?' data-cr="1"':'')+' data-qk="1" title="'+esc(t==="cr"?"Rédiger un compte rendu":"Nouveau : "+l)+'">'+(t==="cr"?I_CR:I_EV[t])+'<span>'+esc(l)+'</span></button>').join("")}
+
+/* ---------- Recherche de compte (nom, ville, contact, e-mail, typologie…) ---------- */
+let KSX=null,KSXV=-1,KC_I=0;
+function kIndex(){if(KSX&&KSXV===S.ver)return KSX;
+  KSX=S.comptes.map(k=>({k,n:nh(k.nom),h:nh([k.nom,k.ville,k.typologie,k.segment,k.agence,k.apporteur,ctOf(k.id).map(c=>c.nom+" "+c.mail).join(" ")].join(" "))}));KSXV=S.ver;return KSX}
+function kRecent(){const seen=new Set(),out=[];if(S.tab==="compte"&&kOf(S.kid)){out.push(kOf(S.kid));seen.add(S.kid)}
+  S.actions.filter(a=>a.origine!=="mailing").sort((a,b)=>String(b.majLe||"").localeCompare(String(a.majLe||""))).some(a=>{if(!seen.has(a.compteId)&&kOf(a.compteId)){seen.add(a.compteId);out.push(kOf(a.compteId))}return out.length>=8});
+  return out}
+function kSearch(q,lim){const w=nh(q).split(" ").filter(Boolean);if(!w.length)return kRecent();const full=w.join(" "),R=[];
+  for(const x of kIndex()){if(!w.every(t=>x.h.includes(t)))continue;const s=x.n===full?100:x.n.startsWith(full)?80:w.every(t=>x.n.includes(t))?60:20;R.push([s,x.k])}
+  return R.sort((a,b)=>b[0]-a[0]||a[1].nom.localeCompare(b[1].nom,"fr")).slice(0,lim||12).map(r=>r[1])}
+function kInfo(k){const h=k.histo,p=principal(k.id);
+  return [k.type,k.dept?dLabel(k.dept):"",k.ville,FNOM[famOf(k)]||k.typologie||k.segment,p?p.nom:"",h?"CA "+h.y1+" : "+eur(hCA(k)):""].filter(Boolean).join(" · ")}
+function kcHTML(a,k){return '<div class="f"><label class="lbl" for="am-k">Compte <span class="req">*</span></label><div class="kc"><input type="search" id="am-k" value="'+esc(a._k)+'" placeholder="Rechercher un compte : nom, ville, contact, e-mail…" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="kcList" aria-autocomplete="list"><div class="kc-list" id="kcList" role="listbox" hidden></div></div>'+
+  (k?'<p class="hint kc-sel">'+esc(kInfo(k))+'</p>':a._k?'<p class="hint">Nouveau compte : il sera créé à l\'enregistrement.</p>':'<p class="hint">Tapez quelques lettres : la liste se filtre sur le nom, la ville, les contacts et leurs e-mails.</p>')+'</div>'}
+function renderKc(){const inp=$("#am-k"),box=$("#kcList");if(!inp||!box)return;const q=inp.value.trim(),L=kSearch(q,12);KC_I=0;
+  const hl=s=>{let o=esc(s);nh(q).split(" ").filter(t=>t.length>1).forEach(t=>{const re=new RegExp("("+t.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","ig");o=o.replace(re,"<mark>$1</mark>")});return o};
+  let h=(!q&&L.length?'<div class="kc-h">Comptes récents</div>':'')+L.map((k,i)=>'<button type="button" class="kc-o'+(i===0?' act':'')+'" data-kpick="'+esc(k.id)+'" role="option"><span class="grow"><b>'+hl(k.nom)+'</b><span class="sub">'+esc(kInfo(k))+'</span></span></button>').join("");
+  if(q&&!findCompte(q))h+='<button type="button" class="kc-o'+(L.length?'':' act')+'" data-kpick="__new" role="option">'+I_PLUS+'<span class="grow">Créer le compte « <b>'+esc(q)+'</b> »</span></button>';
+  if(q&&!L.length&&!h)h='<div class="kc-h">Aucun compte trouvé</div>';
+  box.innerHTML=h;box.hidden=!h;inp.setAttribute("aria-expanded",String(!box.hidden))}
+function kcHide(){const b=$("#kcList");if(b)b.hidden=true;const i=$("#am-k");if(i)i.setAttribute("aria-expanded","false")}
+function kPick(id){if(!AM)return;const typed=vOf("am-k");amRead();
+  if(id==="__new"){AM._k=typed;AM.compteId="";AM.contactId="";AM.cibleId=""}
+  else{const k=kOf(id);if(!k)return;AM.compteId=id;AM._k=k.nom;const p=principal(id);AM.contactId=p?p.id:"";const cs=cibOf(id);AM.cibleId=cs.length===1?cs[0].id:""}
+  drawAction();setTimeout(()=>{const f=$("#am-obj");if(f)f.focus()},20)}
+function kcKey(e){const box=$("#kcList");if(!box||box.hidden){if(e.key==="ArrowDown"){renderKc();e.preventDefault()}return false}
+  const o=[...box.querySelectorAll(".kc-o")];if(!o.length)return false;
+  if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();o[KC_I].classList.remove("act");KC_I=(KC_I+(e.key==="ArrowDown"?1:-1)+o.length)%o.length;o[KC_I].classList.add("act");o[KC_I].scrollIntoView({block:"nearest"});return true}
+  if(e.key==="Enter"){e.preventDefault();kPick(o[KC_I].dataset.kpick);return true}
+  if(e.key==="Escape"){e.preventDefault();e.stopPropagation();kcHide();return true}
+  return false}
+
+/* ---------- Compte rendu structuré ---------- */
+const CRF=[["contexte","Contexte / objet de l'échange",2,"Pourquoi ce RDV, situation du client, patrimoine concerné…"],["besoins","Besoins exprimés",3,"Projets de travaux, obligations à couvrir, volumes, calendrier…"],
+  ["decisions","Décisions et engagements",2,"Ce qui a été convenu de part et d'autre…"],["suites","Prochaines étapes",2,"Devis à envoyer, personnes à rencontrer, relance…"]];
+const crOK=t=>t!=="note"&&t!=="tache";
+function crSection(a){const on=!!(a.cr||a._crOpen),c=a.cr||{},k=kOf(a.compteId),ct=ctById(a.contactId);
+  const cli=c.client!=null?c.client:(ct?ct.nom+(ct.fonction?" ("+ct.fonction+")":""):"");
+  return '<div class="suite"><label class="toggle"><input type="checkbox" id="am-cr"'+(on?' checked':'')+'> Rédiger un compte rendu</label>'+
+   '<div id="am-crw" style="display:'+(on?'flex':'none')+';flex-direction:column;gap:10px">'+
+    '<div class="row"><div class="f"><label class="lbl" for="cr-cli">Participants côté client</label><input type="text" id="cr-cli" list="crCt" value="'+esc(cli)+'" placeholder="Nom (fonction), …"><datalist id="crCt">'+(k?ctOf(k.id).map(x=>'<option value="'+esc(x.nom+(x.fonction?" ("+x.fonction+")":""))+'">').join(""):"")+'</datalist></div>'+
+    '<div class="f"><label class="lbl" for="cr-int">Participants internes</label><input type="text" id="cr-int" value="'+esc(c.interne!=null?c.interne:["CSC",a.accompagnant].filter(Boolean).join(", "))+'" placeholder="CSC, chef d\'agence, apporteur…"></div></div>'+
+    CRF.slice(0,2).map(([f,l,r,ph])=>ta("cr-"+f,l,c[f],r,ph)).join("")+
+    '<div class="f"><span class="lbl">Diagnostics évoqués</span><div class="checks">'+PRESTA.map(([v,l])=>'<label><input type="checkbox" data-crp value="'+esc(v)+'"'+((c.prestas||[]).includes(v)?' checked':'')+'>'+esc(l)+'</label>').join("")+'</div></div>'+
+    '<div class="row"><div class="f"><label class="lbl" for="cr-pot">Potentiel annuel estimé (€)</label><input type="number" min="0" step="500" class="num" id="cr-pot" value="'+esc(c.potentiel||"")+'"></div><div class="f"><label class="lbl" for="cr-conc">Concurrence en place</label><input type="text" id="cr-conc" value="'+esc(c.concurrence||"")+'" placeholder="Prestataire actuel, contrat, échéance…"></div></div>'+
+    CRF.slice(2).map(([f,l,r,ph])=>ta("cr-"+f,l,c[f],r,ph)).join("")+
+    '<p class="hint">Les diagnostics évoqués et le potentiel complètent la cible du compte. Les points abordés se saisissent dans le champ ci-dessus ; vous pouvez y coller un compte rendu dicté.</p>'+
+    '<div class="bar"><button class="btn" type="button" data-act="crcopy">Copier le compte rendu</button><button class="btn" type="button" data-act="crmail">Envoyer par mail</button><button class="btn ghost" type="button" data-act="crprint">Imprimer / PDF</button></div>'+
+   '</div></div>'}
+function crRead(){const box=$("#am-cr");if(!box)return;
+  if(!box.checked){AM.cr=null;AM._crOpen=false;return}
+  AM._crOpen=true;AM.cr={client:vOf("cr-cli"),interne:vOf("cr-int"),contexte:vOf("cr-contexte"),besoins:vOf("cr-besoins"),prestas:[...document.querySelectorAll("#amForm input[data-crp]:checked")].map(i=>i.value),
+    potentiel:vOf("cr-pot"),concurrence:vOf("cr-conc"),decisions:vOf("cr-decisions"),suites:vOf("cr-suites")}}
+const crRows=(a)=>{const c=a.cr||{};return [["Participants (client)",c.client],["Participants (interne)",c.interne],["Lieu",a.lieu],["Contexte",c.contexte],["Besoins exprimés",c.besoins],["Points abordés",a.details],
+  ["Diagnostics évoqués",(c.prestas||[]).map(p=>PLABEL[p]||p).join(", ")],["Potentiel estimé",c.potentiel?eur(c.potentiel)+" par an":""],["Concurrence",c.concurrence],["Décisions",c.decisions],["Prochaines étapes",c.suites]].filter(r=>r[1])};
+function crTitle(a){return "Compte rendu – "+(ALBL[a.type]||"Échange")+(a.date?" du "+dObj(a.date).toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"}):"")+(a.heure?" à "+a.heure.replace(":","h"):"")}
+function crText(a){const k=kOf(a.compteId);return crTitle(a)+"\n"+(k?"Compte : "+k.nom+"\n":"")+(a.objet?"Objet : "+a.objet+"\n":"")+"\n"+crRows(a).map(([l,v])=>l+" :\n"+v).join("\n\n")}
+function crHTML(a){const R=crRows(a).filter(r=>r[0]!=="Points abordés"&&r[0]!=="Lieu");if(!R.length)return "";return '<dl class="crv">'+R.map(([l,v])=>'<dt>'+esc(l)+'</dt><dd>'+esc(v)+'</dd>').join("")+'</dl>'}
+function crCurrent(){amRead();const a=Object.assign({},AM);if(!a.cr){toast("Cochez « Rédiger un compte rendu » et complétez-le.");return null}return a}
+async function crCopy(){const a=crCurrent();if(!a)return;const t=crText(a);try{await navigator.clipboard.writeText(t);toast("Compte rendu copié")}catch(e){toast("Copie bloquée ici : utilisez Imprimer / PDF.")}}
+function crMail(){const a=crCurrent();if(!a)return;const ct=ctById(a.contactId),to=ct&&ct.mail?ct.mail:"",body=crText(a);
+  const url="mailto:"+encodeURIComponent(to).replace(/%40/g,"@")+"?subject="+encodeURIComponent(crTitle(a)+(kOf(a.compteId)?" – "+kOf(a.compteId).nom:""))+"&body="+encodeURIComponent(body.length>1800?body.slice(0,1800)+"\n[…]":body);
+  const l=document.createElement("a");l.href=url;l.target="_blank";l.rel="noopener";document.body.appendChild(l);l.click();l.remove()}
+function crPrint(){const a=crCurrent();if(!a)return;const k=kOf(a.compteId);
+  const html='<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>'+esc(crTitle(a))+'</title><style>body{font:11pt/1.5 "IBM Plex Sans",Arial,sans-serif;color:#1E1B18;margin:18mm 16mm}h1{font-size:16pt;margin:0 0 2mm}p.s{color:#69625B;margin:0 0 6mm}dl{display:grid;grid-template-columns:48mm 1fr;gap:3mm 6mm;margin:0}dt{font-weight:600;color:#A35C2A}dd{margin:0;white-space:pre-wrap}footer{margin-top:10mm;font-size:9pt;color:#69625B;border-top:1px solid #E0DDD7;padding-top:3mm}</style></head><body>'+
+    '<h1>'+esc(crTitle(a))+'</h1><p class="s">'+esc([k&&k.nom,a.objet].filter(Boolean).join(" · "))+'</p><dl>'+crRows(a).map(([l,v])=>'<dt>'+esc(l)+'</dt><dd>'+esc(v)+'</dd>').join("")+'</dl><footer>Édité le '+new Date().toLocaleDateString("fr-FR")+'</footer><script>setTimeout(()=>print(),300)<\/script></body></html>';
+  const w=window.open("","_blank");if(!w){toast("Fenêtre bloquée : autorisez les fenêtres, ou utilisez Copier.");return}w.document.write(html);w.document.close()}
+/* Le compte rendu complète la cible : diagnostics évoqués, potentiel */
+function crToCible(a,k){const c=a.cr;if(!c||!(c.prestas.length||c.potentiel))return "";const cs=cibOf(k.id),cb=cs.find(x=>x.id===a.cibleId)||(cs.length===1?cs[0]:null);if(!cb)return "";
+  const before=JSON.stringify([cb.prestations,cb.potentiel]);cb.prestations=PRESTA.map(p=>p[0]).filter(p=>cb.prestations.includes(p)||c.prestas.includes(p));
+  if(c.potentiel&&!cb.potentiel)cb.potentiel=Number(c.potentiel);if(JSON.stringify([cb.prestations,cb.potentiel])===before)return "";cb.majLe=now();bump();return " · cible « "+campShort(cb)+" » complétée"}
+
 /* ================= V3 · Événements ================= */
 document.addEventListener("click",async e=>{
   const t=e.target.closest("button,a[data-kopen],[data-aid],[data-mopen],[data-cday],[data-cib],[data-pid],tr[data-id],tr[data-kid],[data-act]");if(!t)return;
   const d=t.dataset;
   /* Fenêtre modale ouverte : ses propres boutons d'abord */
   if(d.act==="mclose"){closeModal();return}
+  if(d.kpick){kPick(d.kpick);return}
+  if(d.act==="crcopy"){crCopy();return}
+  if(d.act==="crmail"){crMail();return}
+  if(d.act==="crprint"){crPrint();return}
   if(d.atype&&AM){amRead();AM.type=d.atype;if(AM.type==="note")AM.statut="fait";drawAction();return}
   if(d.ast&&AM){amRead();AM.statut=d.ast;drawAction();return}
   if(d.act==="amsave"){await amSave();return}
@@ -3310,7 +3418,7 @@ document.addEventListener("click",async e=>{
     let kid=d.k||"",cid=d.c||"";
     if(D&&t.closest("#drawer")){if(!(await doSave(true)))return;kid=D.compteId;cid=D.id}
     else if(!kid&&S.tab==="compte")kid=S.kid;
-    openAction({type:d.anew,compteId:kid,cibleId:cid,objet:d.obj||""});return}
+    closeModal();openAction({type:d.anew,compteId:kid,cibleId:cid,objet:d.obj||"",cr:!!d.cr});return}
   if(d.aid&&!t.matches("button.ck")){openAction({id:d.aid});return}
   if(d.mopen){mEditMenu(d.mopen);return}
   if(d.relday){MUI.view="rel";showTab("mailing");return}
@@ -3428,8 +3536,9 @@ document.addEventListener("change",e=>{const t=e.target;
   if(t.id==="o-creee"){$("#oFields").hidden=!t.checked}
   if(t.matches("#drawer input[data-dg]"))dupCount();
   if(t.name==="plAxe"){const w=$("#plFamW");if(w)w.hidden=t.value!=="famille";return}
+  if(t.id==="am-cr"){const w=$("#am-crw");if(w)w.style.display=t.checked?"flex":"none";const l=document.querySelector('label[for="am-det"]');if(l&&AM&&AM.type!=="note")l.textContent=t.checked?"Points abordés":(isRdv(AM.type)||AM.type==="evenement"?"Compte rendu":"Détails");return}
   if(t.id==="am-su"){$("#am-suw").hidden=!t.checked;return}
-  if(t.id==="am-k"&&AM){amRead();drawAction();return}
+  if(t.id==="am-k"&&AM&&$("#kcList")&&$("#kcList").hidden){amRead();drawAction();return}
   if(t.id==="agTy"){UI.ag.type=t.value;uiSave();render();return}
   if(t.dataset&&t.dataset.kf){UI.kv[t.dataset.kf]=t.value;UI.kv.lim=150;uiSave();render();return}
 });
@@ -3437,10 +3546,12 @@ document.addEventListener("change",e=>{const t=e.target;
 function keepFocus(id,fn){const el=document.getElementById(id),pos=el?el.selectionStart:0;fn();const n=document.getElementById(id);if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(_){}}}
 let qT=null;
 document.addEventListener("input",e=>{const t=e.target;
+  if(t.id==="am-k"){renderKc();return}
   if(t.id==="agQ"){UI.ag.q=t.value;UI.ag.lim=250;clearTimeout(qT);qT=setTimeout(()=>keepFocus("agQ",render),180);return}
   if(t.id==="kQ"){UI.kv.q=t.value;UI.kv.lim=150;clearTimeout(qT);qT=setTimeout(()=>keepFocus("kQ",render),200);return}
 });
 document.addEventListener("keydown",e=>{
+  if(e.target&&e.target.id==="am-k"&&kcKey(e))return;
   if(e.key==="Escape"&&!$("#modal").hidden){closeModal();return}
   if(e.key==="Escape"&&!$("#drawer").hidden){if(D||P||ME){stayOpen();return}closeDrawer();return}
   if(e.key==="Enter"&&e.target.matches("tr[data-id]"))openDrawer(e.target.dataset.id);
@@ -3452,6 +3563,9 @@ document.addEventListener("keydown",e=>{
 function stayOpen(){toast(D||ME?"La fiche reste ouverte : Enregistrer, ou Fermer.":"Pour quitter ce panneau : Fermer.");
   const b=document.querySelector("#drawer .df .btn.primary")||document.querySelector('#drawer [data-act="close"]');if(b){b.classList.remove("nudge");void b.offsetWidth;b.classList.add("nudge")}}
 $("#scrim").addEventListener("click",stayOpen);
+document.addEventListener("mousedown",e=>{const o=e.target.closest&&e.target.closest(".kc-o");if(o){e.preventDefault();kPick(o.dataset.kpick)}});
+document.addEventListener("focusin",e=>{if(e.target.id==="am-k"){const el=e.target;if(AM&&AM.compteId&&el.value)setTimeout(()=>{if(document.activeElement===el)el.select()},0);renderKc()}});
+document.addEventListener("focusout",e=>{if(e.target.id==="am-k")setTimeout(()=>{if(document.activeElement&&document.activeElement.id==="am-k")return;kcHide()},120)});
 $("#mscrim").addEventListener("click",()=>{const b=document.querySelector("#modal .df .btn.primary");if(b){b.classList.remove("nudge");void b.offsetWidth;b.classList.add("nudge")}toast("Enregistrer, ou Annuler.")});
 ["#q","#fBu","#fAg","#fPr","#fTy","#fDp","#fCa","#fSort"].forEach(s=>$(s).addEventListener("input",()=>{if(s==="#fCa")renderCampStrip();renderList()}));
 
