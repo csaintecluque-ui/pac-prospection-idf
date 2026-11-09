@@ -953,6 +953,13 @@ body.dv-drop #view-devis,body.dv-drop #modal{outline:3px dashed var(--accent);ou
 .dv-tbl .dv-obj{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;max-width:520px}
 .dv-tbl .dv-obj.in{color:var(--fg);font-size:13px}
 .dv-tbl tr.dv-in td:first-child{border-left:3px solid var(--accent);padding-left:18px}
+
+/* V3.19 · compléter les comptes */
+.enr-g{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}@media (max-width:900px){.enr-g{grid-template-columns:minmax(0,1fr)}}
+.enr-r{display:flex;flex-direction:column;gap:8px}.enr-r .toggle{font-weight:400}
+.enr-sum{display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--line);padding-top:10px}.enr-sum ul{margin:0;padding-left:18px}
+.enr-det{max-height:240px;overflow:auto;font-size:12.5px;display:flex;flex-direction:column;gap:4px;margin-top:6px}
+.enr-g a.btn,.enr-g button.btn{width:max-content}
 </style>
 </head>
 <body>
@@ -972,7 +979,7 @@ body.dv-drop #view-devis,body.dv-drop #modal{outline:3px dashed var(--accent);ou
   <div class="side-f">
     <span class="sync" id="sync" data-s="wait"><i></i><span id="syncTxt">Chargement…</span></span>
     <button class="btn" type="button" data-act="export" title="Exporter, sauvegarder, restaurer"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11"/></svg><span>Exporter / sauvegarder</span></button>
-    <span class="ver">V3.18 · CSC</span>
+    <span class="ver">V3.19 · CSC</span>
   </div>
 </aside>
 
@@ -1063,7 +1070,7 @@ function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTi
 const nh=x=>String(x==null?"":x).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
 const now=()=>new Date().toISOString();
 const S={open:new Set(),mode:"wait",cibles:[],comptes:[],contacts:[],actions:[],plans:[],pac:[],mailing:[],devis:[],settings:{objectif:8},writable:true,view:"actives",tab:"tdb",kid:"",db:null,downloads:null,ver:0};
-const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.18";
+const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.19";
 let STORE="ls"; /* "idb" dès que les données sont dans la base du navigateur */
 const IN_FRAME=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 const TYPE_RANK={"Client existant":3,"Prescripteur":2,"Prospect":1};
@@ -1083,7 +1090,7 @@ function norm(c){const b=blank();const o=Object.assign(b,c||{});o.opp=Object.ass
   o.bu=Array.isArray(o.bu)?o.bu:[];o.prestations=Array.isArray(o.prestations)?o.prestations:[];o.leadIds=Array.isArray(o.leadIds)?o.leadIds:[];
   if(!SIDX.hasOwnProperty(o.etape))o.etape="a_qualifier";if(!o.dept)o.dept=guessDept(o);return o}
 /* Compte, contact, action */
-function kblank(){return {nom:"",type:"Prospect",segment:"",typologie:"",famille:"",dept:"",adresse:"",ville:"",web:"",tel:"",agence:"",apporteur:"",notes:"",origine:"",contrat:false,sousTypo:"",fiab:"",histo:null}}
+function kblank(){return {nom:"",type:"Prospect",segment:"",typologie:"",famille:"",siret:"",cp:"",dept:"",adresse:"",ville:"",web:"",tel:"",agence:"",apporteur:"",notes:"",origine:"",contrat:false,sousTypo:"",fiab:"",histo:null}}
 const knorm=x=>Object.assign(kblank(),x||{});
 function ctblank(){return {compteId:"",nom:"",fonction:"",tel:"",mail:"",notes:"",principal:false}}
 const ctnorm=x=>{const o=Object.assign(ctblank(),x||{});o.principal=!!o.principal;return o};
@@ -1497,12 +1504,12 @@ function openCompte(id,preset){const src=id?kOf(id):null;kmNew=!src;kmDel=false;
     '<div class="f"><label class="lbl" for="km-typo">Typologie (mailing)</label><input type="text" id="km-typo" list="kmTy" value="'+esc(KM.typologie)+'"><datalist id="kmTy">'+typos.map(t=>'<option value="'+esc(t)+'">').join("")+'</datalist></div></div>'+
    (()=>{const au=famAuto(KM);return '<div class="f"><label class="lbl" for="km-fam">Famille de clients</label><select id="km-fam"><option value="">'+esc("Automatique"+(au?" : "+FNOM[au]:" (aucune trouvée)"))+'</option>'+FAMILLES.map(([c,n])=>'<option value="'+c+'"'+(KM.famille===c?' selected':'')+'>'+esc(n)+'</option>').join("")+'</select><p class="hint" style="margin:0">Par défaut, la famille est déduite de la typologie ou du segment. Choisissez-en une pour l\'imposer.</p></div>'})()+
    '<div class="row3"><div class="f"><label class="lbl" for="km-dept">Département</label><select id="km-dept"><option value="">—</option>'+DEPTS.map(([d,n])=>'<option value="'+d+'"'+(KM.dept===d?' selected':'')+'>'+esc(d+" · "+n)+'</option>').join("")+'</select></div>'+fld("km-ville","Ville",KM.ville)+fld("km-tel","Téléphone (standard)",KM.tel,"tel")+'</div>'+
-   '<div class="row">'+fld("km-adr","Adresse",KM.adresse)+fld("km-web","Site web",KM.web,"text",' placeholder="www…"')+'</div>'+
-   '<div class="row"><div class="f"><label class="lbl" for="km-ag">Agence</label><input type="text" id="km-ag" list="kmAg" value="'+esc(KM.agence)+'"><datalist id="kmAg">'+ag.map(a=>'<option value="'+esc(a)+'">').join("")+'</datalist></div>'+fld("km-app","Apporteur interne",KM.apporteur)+'</div>'+
+   '<div class="row3">'+fld("km-adr","Adresse",KM.adresse)+fld("km-cp","Code postal",KM.cp,"text",' inputmode="numeric" maxlength="5"')+fld("km-web","Site web",KM.web,"text",' placeholder="www…"')+'</div>'+
+   '<div class="row"><div class="f"><label class="lbl" for="km-ag">Agence</label><input type="text" id="km-ag" list="kmAg" value="'+esc(KM.agence)+'"><datalist id="kmAg">'+ag.map(a=>'<option value="'+esc(a)+'">').join("")+'</datalist></div>'+fld("km-app","Apporteur interne",KM.apporteur)+'</div>'+fld("km-siret","SIRET",KM.siret,"text",' inputmode="numeric"')+
    ta("km-not","Notes sur le compte",KM.notes,4,"Organisation, patrimoine, contrats en place, concurrence…")+
   '</form></div><div class="df">'+(kmNew?'':'<button class="btn danger" type="button" data-act="kdel">Supprimer</button><button class="btn ghost" type="button" data-act="kmerge">Fusionner avec…</button>')+'<span class="grow"></span><button class="btn" type="button" data-act="mclose">Annuler</button><button class="btn primary" type="button" data-act="ksave">'+(kmNew?'Créer le compte':'Enregistrer')+'</button></div>',"compte");
   setTimeout(()=>{const f=$("#km-nom");if(f&&kmNew)f.focus()},40)}
-function kmRead(){const k=KM;k.nom=vOf("km-nom");k.segment=$("#km-seg").value;k.typologie=vOf("km-typo");const kf=$("#km-fam");if(kf)k.famille=kf.value;k.dept=$("#km-dept").value;k.ville=vOf("km-ville");k.tel=vOf("km-tel");k.adresse=vOf("km-adr");k.web=vOf("km-web");k.agence=vOf("km-ag");k.apporteur=vOf("km-app");k.notes=vOf("km-not")}
+function kmRead(){const k=KM;k.nom=vOf("km-nom");k.segment=$("#km-seg").value;k.typologie=vOf("km-typo");const kf=$("#km-fam");if(kf)k.famille=kf.value;k.dept=$("#km-dept").value;k.ville=vOf("km-ville");k.tel=vOf("km-tel");k.adresse=vOf("km-adr");k.web=vOf("km-web");k.cp=vOf("km-cp");k.siret=vOf("km-siret").replace(/\s/g,"");if(!k.dept&&/^\d{5}$/.test(k.cp)&&DNAME[k.cp.slice(0,2)])k.dept=k.cp.slice(0,2);k.agence=vOf("km-ag");k.apporteur=vOf("km-app");k.notes=vOf("km-not")}
 function kSave(){kmRead();const k=KM;
   if(!k.nom){toast("Renseignez le nom du compte.");$("#km-nom").focus();return}
   const other=findCompte(k.nom);
@@ -1702,7 +1709,7 @@ function renderComptes(){
     const x=nxt.get(a.id),y=nxt.get(b.id);return ((x&&x.date)||(x?"9998":"9999")).localeCompare((y&&y.date)||(y?"9998":"9999"))||a.nom.localeCompare(b.nom,"fr")});
   const uniq=f=>[...new Set(S.comptes.map(f).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
   let h=pageH("Suivi de prospection","Comptes",pl(S.comptes.length,"compte")+" · "+pl(S.contacts.length,"contact")+" · "+pl(S.comptes.filter(k=>cibOf(k.id).length).length,"compte")+" en prospection",
-    '<button class="btn ghost" type="button" data-act="kimport">Importer</button><button class="btn ghost" type="button" data-act="export">Exporter / Excel</button><button class="btn primary" type="button" data-knew="1">'+I_PLUS+'Nouveau compte</button>');
+    '<button class="btn ghost" type="button" data-act="kimport">Importer</button><button class="btn ghost" type="button" data-act="kenr" title="Extraire les comptes à compléter, puis réintégrer les compléments">Compléter les infos</button><button class="btn ghost" type="button" data-act="export">Exporter / Excel</button><button class="btn primary" type="button" data-knew="1">'+I_PLUS+'Nouveau compte</button>');
   h+='<div class="chips">'+KV.map(([k,l,fn])=>'<button type="button" class="chip" data-kv="'+esc(k)+'" aria-pressed="'+(U.v===k)+'">'+esc(l)+'<span class="n num">'+B.filter(fn).length+'</span></button>').join("")+'</div>';
   h+='<div class="filters" style="grid-template-columns:minmax(0,2fr) repeat(5,minmax(0,1fr))"><div class="field-s"><label for="kQ">Rechercher</label><input type="search" id="kQ" value="'+esc(U.q)+'" placeholder="Compte, ville, contact, e-mail, notes…"></div>'+
     '<div class="field-s"><label for="kSec">Secteur</label><select id="kSec" data-kf="sec"><option value="">Tous</option>'+uniq(secteurOf).map(s=>'<option'+(U.sec===s?' selected':'')+'>'+esc(s)+'</option>').join("")+'</select></div>'+
@@ -1750,7 +1757,7 @@ function renderCompte(){
   /* Colonne 1 : informations et contacts */
   const kv=(l,v)=>v?'<dt>'+l+'</dt><dd>'+v+'</dd>':'';
   const c1='<div class="panel"><div class="ph"><h2>Informations</h2><button type="button" class="more" data-kedit="'+esc(k.id)+'">Modifier</button></div><dl class="kvl">'+
-     kv("Type",esc(k.type))+kv("Famille",esc(FNOM[famOf(k)]||"")+(famOf(k)&&!k.famille?' <span class="sub">(déduite)</span>':''))+kv("Segment",esc(k.segment))+kv("Typologie",esc(k.typologie)+(k.sousTypo&&k.sousTypo!==k.typologie?' · '+esc(k.sousTypo):''))+kv("Département",esc(dLabel(k.dept)))+kv("Adresse",esc([k.adresse,k.ville].filter(Boolean).join(", ")))+
+     kv("Type",esc(k.type))+kv("Famille",esc(FNOM[famOf(k)]||"")+(famOf(k)&&!k.famille?' <span class="sub">(déduite)</span>':''))+kv("Segment",esc(k.segment))+kv("Typologie",esc(k.typologie)+(k.sousTypo&&k.sousTypo!==k.typologie?' · '+esc(k.sousTypo):''))+kv("Département",esc(dLabel(k.dept)))+kv("SIRET",esc(k.siret))+kv("Adresse",esc([k.adresse,[k.cp,k.ville].filter(Boolean).join(" ")].filter(Boolean).join(", ")))+
      kv("Téléphone",k.tel?'<a class="dl num" href="tel:'+esc(k.tel.replace(/[^\d+]/g,""))+'">'+esc(k.tel)+'</a>':"")+kv("Site web",k.web?'<a class="dl" href="'+esc(/^https?:/.test(k.web)?k.web:"https://"+k.web)+'" target="_blank" rel="noopener">'+esc(k.web)+'</a>':"")+
      kv("Agence",esc(k.agence))+kv("Apporteur",esc(k.apporteur))+'</dl>'+(k.notes?'<p class="dnotes" style="border-top:1px solid var(--line);padding-top:10px">'+esc(k.notes)+'</p>':'<p class="hint">Aucune note. Ajoutez l\'organisation, le patrimoine, les contrats en place…</p>')+'</div>'+
    '<div class="panel"><div class="ph"><h2>Contacts</h2><span class="sub num">'+cts.length+'</span><button type="button" class="more" data-ctnew="'+esc(k.id)+'">+ Ajouter</button></div>'+
@@ -3042,6 +3049,11 @@ async function handoffMode(){
       $("#hoP").textContent="Remplissez l'onglet Import, puis revenez dans Notion : Importer, et choisissez le fichier. Vous pouvez fermer cet onglet.";const b=$("#hoBtn");b.hidden=false;b.onclick=go}
     catch(e){$("#hoT").textContent="Modèle indisponible";$("#hoP").textContent="Vérifiez la connexion internet et réessayez."}
     return true}
+  if(location.hash.startsWith("#xlsk=")){const raw=location.hash.slice(6);history.replaceState(null,"",location.pathname+location.search);bare();
+    $("#app").innerHTML='<div class="empty" style="padding:60px 20px"><h3 id="hoT">Préparation du fichier Excel…</h3><p id="hoP">Le téléchargement démarre dans un instant.</p><button class="btn primary" type="button" id="hoBtn" hidden>Télécharger à nouveau</button></div>';
+    try{const d=await unpackData(raw),R=d.rows||[],blob=await buildEnrXlsx(R),go=()=>saveBlob(blob,enrName());go();$("#hoT").textContent="Fichier des comptes téléchargé";$("#hoP").textContent=pl(R.length,"compte")+" extrait"+(R.length>1?"s":"")+". Vous pouvez fermer cet onglet et revenir dans Notion.";const b=$("#hoBtn");b.hidden=false;b.onclick=go}
+    catch(e){$("#hoT").textContent="Extraction impossible";$("#hoP").textContent="Revenez dans Notion et réessayez."}
+    return true}
   if(!location.hash.startsWith("#xlsz="))return false;
   const raw=location.hash.slice(6);history.replaceState(null,"",location.pathname+location.search);bare();
   $("#app").innerHTML='<div class="empty" style="padding:60px 20px"><h3 id="hoT">Préparation du fichier Excel…</h3><p id="hoP">Le téléchargement démarre dans un instant.</p><button class="btn primary" type="button" id="hoBtn" hidden>Télécharger à nouveau</button></div>';
@@ -4083,7 +4095,7 @@ function dvCHead(G){const open=dvGOpen(G.key,G.def),k=G.k,X=G.items.map(d=>[d,dv
     '<td><b class="num">'+G.items.length+'</b> <span class="sub">dossier'+(G.items.length>1?'s':'')+'</span>'+(G.last?'<div class="sub">dernier le '+fdate(G.last)+'</div>':'')+'</td>'+
     '<td class="r"><b class="num dv-ctot'+(est?' est':'')+'">'+eur(G.tot)+'</b><div class="sub">montant global HT</div></td>'+
     '<td><div class="dv-cst">'+(acc.length?'<span class="pill dvs-accepte">'+acc.length+' · '+eur(sm(acc))+'</span>':'')+(att.length?'<span class="pill dvs-attente">'+att.length+' · '+eur(sm(att))+'</span>':'')+(lost.length?'<span class="pill dvs-refuse">'+lost.length+' · '+eur(sm(lost))+'</span>':'')+(av?'<span class="dv-av">'+av+' avoir'+(av>1?'s':'')+'</span>':'')+
-      (dec?'<div class="sub">transformation '+Math.round(acc.length/dec*100)+' %</div>':'')+'</div></td>'+
+      (dec?'<div class="sub">transfo '+Math.round(acc.length/dec*100)+' % (nb) · '+Math.round(sm(acc)/Math.max(1,sm(acc)+sm(lost))*100)+' % (€)</div>':'')+'</div></td>'+
     '<td>'+(acc.length||real?'<div class="dv-rm"><span class="num">'+eur(real)+'</span><div class="meter"><b style="width:'+(sm(acc)?Math.min(100,real/sm(acc)*100):0)+'%;background:var(--ok)"></b></div><span class="sub">réalisé</span></div>':'<span class="sub">—</span>')+
       (k?'<button type="button" class="more dv-kf" data-kopen="'+esc(k.id)+'">Fiche compte</button>':'')+'</td></tr>'}
 function dvGHead(G,lvl){const open=dvGOpen(G.key,G.def),X=G.items.map(d=>[d,dvSum(d)]),tot=X.reduce((a,[,s])=>a+s.tot,0),n=s=>G.items.filter(d=>d.statut===s).length;
@@ -4108,7 +4120,7 @@ function renderDevis(){const el=$("#view-devis");if(!el)return;
   if(!S.devis.length){el.innerHTML=h+'<div class="list-wrap"><div class="empty"><h3>Aucun devis suivi pour l\'instant</h3><p>Pour chaque devis : le compte, les prestations, leur prix, les prélèvements (nombre × prix unitaire, estimatif en rouge puis définitif en bleu), puis les prestations réalisées au fil des interventions.</p><p style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn" type="button" data-act="dvimp">Importer (devis Word ou PDF, export Excel)</button><button class="btn primary" type="button" data-dvnew="1">'+I_PLUS+'Créer un devis</button></p><p class="sub">Vous pouvez aussi glisser vos devis .docx ou .pdf, ou votre export Excel, sur cette page.</p></div></div>';return}
   const tile=(vv,lbl,val,sub,cls)=>'<button type="button" class="kpi click'+(DVUI.vs.length===1&&DVUI.vs[0]===vv?' on':'')+'" data-dvv="'+vv+'"><span class="lbl">'+lbl+'</span><span class="v'+(cls?' '+cls:'')+'">'+val+'</span><span class="d">'+sub+'</span></button>';
   h+='<div class="dv-k">'+tile("attente","En attente",K.att,eur(K.attM)+(K.rel?' · <span class="late">'+K.rel+' à relancer</span>':''))+
-    tile("realises","Acceptés",K.acc,eur(K.accM)+(K.taux!=null?' · transformation '+K.taux+' %':''))+
+    tile("realises","Acceptés",K.acc,eur(K.accM)+(K.taux!=null?'<br>transformation <b title="Acceptés ÷ (acceptés + refusés + sans suite), en nombre de devis ; les devis en attente ne comptent pas">'+K.taux+' %</b> en nombre · <b title="Même calcul sur les montants HT">'+K.tauxM+' %</b> en montant':''))+
     tile("realises","Réalisé",'<span class="num">'+eur(K.real)+'</span>',pl(K.nf,"prestation réalisée","prestations réalisées"))+
     tile("arealiser","Reste à réaliser",'<span class="num">'+eur(K.reste)+'</span>',pl(K.todo,"devis","devis")+" accepté"+(K.todo>1?"s":"")+" en cours")+
     tile("estim","Prélèvements",'<span class="num est">'+eur(K.est)+'</span>','<span class="est">'+pl(K.estD,"devis","devis")+' à confirmer</span>'+(K.def?' · <span class="def">'+eur(K.def)+' définitifs</span>':''))+'</div>';
@@ -4178,7 +4190,7 @@ function dvWidget(){const y=String(new Date().getFullYear()),all=S.devis,KA=dvKp
   const tile=(vv,lbl,val,sub)=>'<button type="button" class="dv-wk" data-dvv="'+vv+'"><span class="lbl">'+lbl+'</span><b>'+val+'</b><span class="sub">'+sub+'</span></button>';
   const row=(d,right)=>{const k=kOf(d.compteId),s=dvSum(d);return '<button type="button" class="dv-wr" data-dvid="'+esc(d.id)+'"><span class="grow"><b>'+esc(k?k.nom:"Compte ?")+'</b><span class="sub">'+esc([d.numero?"N° "+d.numero:"",d.objet||dvShort((d.lignes[0]||{}).presta)].filter(Boolean).join(" · "))+'</span></span>'+right(d,s)+'</button>'};
   h+='<div class="dv-wks">'+tile("attente","En attente",'<span class="num">'+KA.att+'</span>',eur(KA.attM)+(KA.rel?' · <span class="late">'+KA.rel+' à relancer</span>':''))+
-    tile("realises","Acceptés "+y,'<span class="num">'+KY.acc+'</span>',eur(KY.accM)+(KY.taux!=null?' · transfo '+KY.taux+' %':''))+
+    tile("realises","Acceptés "+y,'<span class="num">'+KY.acc+'</span>',eur(KY.accM)+(KY.taux!=null?' · transfo '+KY.taux+' % (nb) · '+KY.tauxM+' % (€)':''))+
     tile("realises","Réalisé "+y,'<span class="num">'+eur(KY.real)+'</span>',pl(KY.nf,"prestation","prestations"))+
     tile("arealiser","Reste à réaliser",'<span class="num">'+eur(KA.reste)+'</span>',pl(KA.todo,"devis","devis")+" en cours")+
     tile("estim","Prélèvements",'<span class="num est">'+eur(KA.est)+'</span>','<span class="est">estimatifs</span>'+(KA.def?' · <span class="def">'+eur(KA.def)+' définitifs</span>':''))+'</div>';
@@ -4457,7 +4469,7 @@ function dvFromImport(r,fname){const mt=dvMatchCompte(r.client),k=mt&&mt.k;
   const d=Object.assign(dvblank(),{id:uid(),creeLe:now(),numero:r.numero,date:r.date||todayISO(),objet:[r.objet,r.site].filter(Boolean).join(" – "),statut:"attente",lignes:r.lignes.map(l=>Object.assign({},l))});
   d.notes=["Importé depuis « "+fname+" »",r.agence?r.agence.replace(/\s*[-–]\s*socotec.*$/i,""):"",r.client&&k&&!mt.sure?"Client du devis : "+r.client:""].filter(Boolean).join(" · ");
   d.compteId=k?k.id:"";d._k=k?k.nom:r.client;
-  d._imp={file:fname,client:r.client,match:k?(mt.sure?"exact":"proche"):"nouveau",ct:r.contact,init:{adresse:r.adresse,ville:r.ville,dept:r.cp&&DNAME[r.cp.slice(0,2)]?r.cp.slice(0,2):"",origine:"devis",notes:r.siret?"SIRET "+r.siret:""},prelSur:r.prelSur};
+  d._imp={file:fname,client:r.client,match:k?(mt.sure?"exact":"proche"):"nouveau",ct:r.contact,init:{adresse:r.adresse,cp:r.cp,ville:r.ville,dept:r.cp&&DNAME[r.cp.slice(0,2)]?r.cp.slice(0,2):"",origine:"devis",siret:r.siret||""},prelSur:r.prelSur};
   if(k&&r.contact){const c=findContact(k.id,r.contact);if(c)d.contactId=c.id}
   return d}
 async function dvReadFile(f){if(/\.pdf$/i.test(f.name))return dvReadPdf(f);if(!/\.docx$/i.test(f.name))throw new Error("format");
@@ -4609,7 +4621,7 @@ function dvxSumHTML(){const X=DVX;if(!X.sel.size)return '<div class="empty" styl
    '<p class="hint" style="margin:0">Sans doublon : un n° de devis, de commande ou de facture déjà suivi met à jour le devis existant. Le détail des prestations n\'est pas dans l\'export : chaque devis porte son montant global, et vous pouvez ensuite importer le devis Word pour le détailler.</p>'}
 function dvxGo(){const X=DVX,P=dvxPlan(X.groups,[...X.sel]);S.settings.dvApporteurs=[...X.sel];
   let nk=0;const KI=dvxIndex();
-  P.add.forEach(({g})=>{let k=KI.get(dvxKey(g.tiers));if(!k){k=ensureCompte(g.tiers||"Client sans nom",{type:g.st==="accepte"?"Client existant":"Prospect",ville:g.ville,dept:g.cp&&DNAME[g.cp.slice(0,2)]?g.cp.slice(0,2):"",origine:"devis excel"});KI.set(dvxKey(k.nom),k);nk++}
+  P.add.forEach(({g})=>{let k=KI.get(dvxKey(g.tiers));if(!k){k=ensureCompte(g.tiers||"Client sans nom",{type:g.st==="accepte"?"Client existant":"Prospect",ville:g.ville,cp:/^\d{5}$/.test(g.cp)?g.cp:"",dept:g.cp&&DNAME[g.cp.slice(0,2)]?g.cp.slice(0,2):"",origine:"devis excel"});KI.set(dvxKey(k.nom),k);nk++}
     else if(g.st==="accepte"&&(TYPE_RANK[k.type]||0)<TYPE_RANK["Client existant"])k.type="Client existant";
     put("devis",dvxNew(g,k))});
   P.upd.forEach(({d,g})=>put("devis",dvxMerge(clone(d),g)));
@@ -4665,6 +4677,96 @@ async function dvReadPdf(f){const L=await pdfLines(await f.arrayBuffer());
         rows.push([[""],lines.length?lines:[""],[v.q],[v.u],[v.t],[v.v]])});
       tables.push([[["Ref. Client"],["Libellé"],["Qté"],["P.U HT"],["P.T HT"],["TVA"]]].concat(rows))}}
   return dvParseCore(paras,tables,f.name)}
+
+
+/* ================= V3.19 · Extraction des comptes à compléter, puis réintégration des compléments ================= */
+const ENR_COLS=[{h:"ID (ne pas modifier)",w:16,k:"id"},{h:"Compte",w:34,bold:true,k:"nom"},{h:"Type",w:15,k:"type"},{h:"Famille",w:30,k:"famille"},{h:"Segment",w:28,k:"segment"},{h:"Typologie",w:24,k:"typologie"},
+  {h:"SIRET",w:17,k:"siret"},{h:"Adresse",w:34,k:"adresse"},{h:"Code postal",w:11,k:"cp"},{h:"Ville",w:20,k:"ville"},{h:"Département",w:12,k:"dept"},{h:"Téléphone standard",w:17,k:"tel"},{h:"Site web",w:26,k:"web"},{h:"Agence",w:18,k:"agence"},
+  {h:"Contact principal",w:24,k:"ct_nom"},{h:"Fonction",w:22,k:"ct_fon"},{h:"E-mail contact",w:28,k:"ct_mail"},{h:"Tél. contact",w:15,k:"ct_tel"},{h:"Notes",w:40,wrap:true,k:"notes"},
+  {h:"Dernier devis (pour info)",w:44,wrap:true,k:"_dv"},{h:"Champs à compléter",w:30,wrap:true,k:"_miss"}];
+const ENR_KEY=["siret","adresse","cp","ville","tel","web","segment"],ENR_LBL={siret:"SIRET",adresse:"adresse",cp:"code postal",ville:"ville",tel:"téléphone",web:"site web",segment:"segment"};
+const enrMiss=k=>ENR_KEY.filter(f=>!String(k[f]||"").trim());
+const ENRS=[["incomplets","Comptes incomplets",k=>enrMiss(k).length>0],["auto","Comptes créés automatiquement (devis, export Excel, actions)",k=>/^(devis|action)/.test(k.origine||"")],["devis","Comptes ayant des devis",k=>dvOf(k.id).length>0],["tous","Tous les comptes",()=>true]];
+let ENR={scope:"incomplets",imp:null,repl:false};
+function enrRows(scope){const f=(ENRS.find(x=>x[0]===scope)||ENRS[0])[2];
+  return S.comptes.filter(f).sort((a,b)=>a.nom.localeCompare(b.nom,"fr")).map(k=>{const p=principal(k.id)||{},d=dvOf(k.id)[0];
+    const v={id:k.id,nom:k.nom,type:k.type,famille:FNOM[famOf(k)]||"",segment:k.segment,typologie:k.typologie,siret:k.siret,adresse:k.adresse,cp:k.cp,ville:k.ville,dept:k.dept,tel:k.tel,web:k.web,agence:k.agence,
+      ct_nom:p.nom,ct_fon:p.fonction,ct_mail:p.mail,ct_tel:p.tel,notes:k.notes,_dv:d?[d.numero,d.date?fdate(d.date):"",d.objet].filter(Boolean).join(" · "):"",_miss:enrMiss(k).map(x=>ENR_LBL[x]).join(", ")};
+    return ENR_COLS.map(c=>v[c.k]==null?"":v[c.k])})}
+async function buildEnrXlsx(rows){await loadExcel();const wb=new ExcelJS.Workbook();wb.creator="PAC Prospection IDF · CSC";wb.created=new Date();
+  /* Feuille simple (sans « tableau » Excel) : relisible quel que soit l'outil qui l'a enregistrée */
+  const ws=wb.addWorksheet("Comptes à compléter",{properties:{tabColor:{argb:COPPER}},views:[{state:"frozen",ySplit:1,xSplit:2,activeCell:"C2"}]});
+  ws.addRow(ENR_COLS.map(c=>c.h));rows.forEach(r=>ws.addRow(r));
+  ENR_COLS.forEach((c,i)=>{const col=ws.getColumn(i+1);col.width=c.w;col.alignment={vertical:"top",wrapText:!!c.wrap};if(c.bold)for(let r=2;r<=rows.length+1;r++)ws.getCell(r,i+1).font={name:"Calibri",size:10,bold:true}});
+  headStyle(ws,ENR_COLS.length);ws.autoFilter={from:{row:1,column:1},to:{row:1,column:ENR_COLS.length}};
+  const li=wb.addWorksheet("Listes",{properties:{tabColor:{argb:INK}}});const L=[["Type",TYPES],["Famille",FAMILLES.map(f=>f[1])],["Segment",SEGMENTS],["Département",DEPTS.map(d=>d[0])]];
+  L.forEach(([h,vals],i)=>{const c=li.getColumn(i+1);c.width=i===2?40:30;li.getCell(1,i+1).value=h;li.getCell(1,i+1).font={bold:true};vals.forEach((v,j)=>{li.getCell(j+2,i+1).value=v})});
+  const colL=n=>{let s="";while(n>0){const m=(n-1)%26;s=String.fromCharCode(65+m)+s;n=Math.floor((n-1)/26)}return s};
+  const val={type:"A",famille:"B",segment:"C",dept:"D"},len={type:TYPES.length,famille:FAMILLES.length,segment:SEGMENTS.length,dept:DEPTS.length};
+  const n=Math.max(rows.length,1);
+  ENR_COLS.forEach((c,ci)=>{const col=ci+1;
+    for(let r=2;r<=n+1;r++){const cell=ws.getCell(r,col);
+      if(val[c.k])cell.dataValidation={type:"list",allowBlank:true,showErrorMessage:false,formulae:["Listes!$"+val[c.k]+"$2:$"+val[c.k]+"$"+(len[c.k]+1)]};
+      if(c.k==="id"||c.k==="_dv"||c.k==="_miss")cell.font={name:"Calibri",size:9,color:{argb:GREYTXT}};
+      else if(ENR_KEY.includes(c.k)&&rows[r-2]&&!String(rows[r-2][ci]||"").trim())cell.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FFFFF4D6"}}}});
+  const md=wb.addWorksheet("Mode d'emploi");md.getColumn(1).width=110;
+  ["Compléter les comptes","","1. Complétez les cellules (en jaune : informations manquantes). Ne modifiez pas la colonne « ID ».","2. Type, Famille, Segment et Département : choisissez dans la liste (onglet « Listes »).","3. Dans l'application : Comptes › Compléter les infos › Réintégrer, puis choisissez ce fichier.","","Par défaut, seules les informations vides sont remplies ; cochez « Remplacer » pour écraser les informations existantes.","Les colonnes « Dernier devis » et « Champs à compléter » sont là pour information et ne sont pas réintégrées."].forEach((t,i)=>{const c=md.getCell(i+1,1);c.value=t;if(!i)c.font={bold:true,size:14}});
+  return new Blob([await wb.xlsx.writeBuffer()],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"})}
+const enrName=()=>"Comptes_a_completer_"+todayISO()+".xlsx";
+async function enrDownload(){const rows=enrRows(ENR.scope);if(!rows.length){toast("Aucun compte dans cette sélection.");return}
+  try{toast("Préparation du fichier…");saveBlob(await buildEnrXlsx(rows),enrName());toast(pl(rows.length,"compte")+" extrait"+(rows.length>1?"s":""))}catch(e){toast("Extraction impossible : vérifiez la connexion internet, puis réessayez.")}}
+async function enrHandoffURL(){return location.href.split("#")[0]+"#xlsk="+await packData({rows:enrRows(ENR.scope)})}
+/* Lecture du fichier complété */
+const ENR_ALIAS={id:["id ne pas modifier","id"],nom:["compte","nom du compte","nom"],type:["type"],famille:["famille"],segment:["segment"],typologie:["typologie"],siret:["siret"],adresse:["adresse"],cp:["code postal","cp"],ville:["ville"],dept:["departement","dept"],
+  tel:["telephone standard","telephone","tel standard"],web:["site web","site internet","web"],agence:["agence"],ct_nom:["contact principal","contact"],ct_fon:["fonction"],ct_mail:["e mail contact","email contact","mail contact"],ct_tel:["tel contact","telephone contact"],notes:["notes"]};
+async function enrRead(f){await loadExcel();const wb=new ExcelJS.Workbook();await wb.xlsx.load(await f.arrayBuffer());
+  for(const ws of wb.worksheets){const H={};ws.getRow(1).eachCell({includeEmpty:true},(c,i)=>{const h=nh(xv(c.value));Object.entries(ENR_ALIAS).forEach(([k,a])=>{if(H[k]==null&&a.includes(h))H[k]=i})});
+    if(H.nom==null&&H.id==null)continue;const out=[];
+    for(let r=2;r<=ws.rowCount;r++){const row=ws.getRow(r),o={};Object.entries(H).forEach(([k,i])=>{let v=xv(row.getCell(i).value);if(v instanceof Date)v=fdate(xIso(v));o[k]=String(v==null?"":v).trim()});if(o.id||o.nom)out.push(o)}
+    return out}
+  throw new Error("colonnes")}
+function enrNorm(o){const v=Object.assign({},o);
+  if(v.type){const t=TYPES.find(x=>nh(x)===nh(v.type));v.type=t||""}
+  if(v.famille){const f=FAMILLES.find(x=>nh(x[1])===nh(v.famille)||nh(x[0])===nh(v.famille));v.famille=f?f[0]:""}
+  if(v.cp){const m=v.cp.replace(/\s/g,"").match(/\d{5}/);v.cp=m?m[0]:v.cp}
+  if(v.dept){const m=v.dept.match(/\b(\d{2}|2[AB])\b/);v.dept=m?m[1]:""}
+  if(!v.dept&&v.cp&&DNAME[v.cp.slice(0,2)])v.dept=v.cp.slice(0,2);
+  if(v.siret)v.siret=v.siret.replace(/\s/g,"");return v}
+const ENR_F=["type","famille","segment","typologie","siret","adresse","cp","ville","dept","tel","web","agence","notes"];
+/* Plan : quels champs changent (champs vides seulement, ou aussi les champs remplis si « Remplacer ») */
+function enrPlan(list,repl){const P={k:[],miss:0,nf:0,keep:0};
+  list.forEach(o=>{const v=enrNorm(o),k=(v.id&&kOf(v.id))||findCompte(v.nom);if(!k){P.miss++;return}const ch=[];
+    ENR_F.forEach(f=>{const nv=v[f];if(nv==null||nv==="")return;const cur=String((f==="famille"?famOf(k):k[f])||"").trim();if(cur===nv)return;
+      if(f==="notes"){if(cur.includes(nv))return;ch.push([f,cur?cur+"\n"+nv:nv]);return}
+      if(cur&&!repl){P.keep++;return}ch.push([f,nv])});
+    if(repl&&v.nom&&v.id&&nh(v.nom)!==nh(k.nom))ch.push(["nom",v.nom]);
+    const ct=v.ct_nom||v.ct_mail?{nom:v.ct_nom||"",fonction:v.ct_fon||"",mail:v.ct_mail||"",tel:v.ct_tel||""}:null;
+    if(ch.length||ct){P.k.push({k,ch,ct});P.nf+=ch.length}});
+  return P}
+function enrApply(){const I=ENR.imp;if(!I)return;const P=enrPlan(I.list,ENR.repl);let nct=0;
+  P.k.forEach(({k,ch,ct})=>{ch.forEach(([f,v])=>{k[f]=v});
+    if(ct){const ex=findContact(k.id,ct);if(ex){["fonction","tel","mail"].forEach(f=>{if(ct[f]&&(!ex[f]||ENR.repl))ex[f]=ct[f]});if(ct.nom&&!ex.nom)ex.nom=ct.nom}else{ensureContact(k.id,ct);nct++}}
+    k.majLe=now()});
+  bump();ENR.imp=null;closeModal();commit();toast(pl(P.k.length,"compte complété","comptes complétés")+" · "+pl(P.nf,"information")+(nct?" · "+pl(nct,"contact ajouté","contacts ajoutés"):"")+(P.miss?" · "+P.miss+" ligne"+(P.miss>1?"s":"")+" sans compte correspondant":""))}
+function enrMenu(){const cnt=s=>S.comptes.filter(ENRS.find(x=>x[0]===s)[2]).length,I=ENR.imp,P=I?enrPlan(I.list,ENR.repl):null;
+  showModal(mHead("Comptes","Compléter les informations des comptes")+
+  '<div class="db"><div class="enr-g"><div class="panel"><h2>1 · Extraire</h2><p class="hint" style="margin:0">Un fichier Excel avec les informations de chaque compte ; les manques sont en jaune. Complétez-le vous-même ou donnez-le à Claude pour les recherches, puis réintégrez-le.</p>'+
+    '<div class="enr-r">'+ENRS.map(([k,l])=>'<label class="toggle"><input type="radio" name="enrS" value="'+k+'"'+(ENR.scope===k?' checked':'')+'> '+esc(l)+' <span class="sub num">'+cnt(k)+'</span></label>').join("")+'</div>'+
+    (IN_FRAME?'<a class="btn primary" id="enrX" href="#" target="_blank" rel="noopener" aria-disabled="true">Préparation du lien…</a><p class="hint" style="margin:0">Notion bloque les téléchargements : un onglet s\'ouvre et télécharge le fichier.</p>':'<button class="btn primary" type="button" data-act="enrdl">Télécharger le fichier Excel</button>')+'</div>'+
+   '<div class="panel"><h2>2 · Réintégrer</h2><p class="hint" style="margin:0">Choisissez le fichier complété. Les comptes sont retrouvés par leur ID (ou leur nom).</p>'+
+    '<label class="btn" style="width:max-content;cursor:pointer">Choisir le fichier complété (.xlsx)<input type="file" id="enrF" accept=".xlsx" hidden></label>'+
+    (I?'<div class="enr-sum"><b>'+esc(I.file)+'</b> · '+pl(I.list.length,"ligne")+'<ul><li><b>'+pl(P.k.length,"compte")+'</b> à compléter · '+pl(P.nf,"information")+' à ajouter</li>'+(P.keep?'<li>'+pl(P.keep,"information différente","informations différentes")+' déjà saisie'+(P.keep>1?'s':'')+(ENR.repl?'':' : conservée'+(P.keep>1?'s':''))+'</li>':'')+(P.miss?'<li>'+pl(P.miss,"ligne")+' sans compte correspondant (ignorée'+(P.miss>1?'s':'')+')</li>':'')+'</ul>'+
+      '<label class="toggle"><input type="checkbox" id="enrRp"'+(ENR.repl?' checked':'')+'> Remplacer aussi les informations déjà saisies</label>'+
+      (P.k.length?'<details><summary>Voir le détail</summary><div class="enr-det">'+P.k.slice(0,200).map(({k,ch,ct})=>'<div><b>'+esc(k.nom)+'</b> : '+esc(ch.map(([f,v])=>({nom:"nom",famille:"famille",dept:"département",cp:"code postal",tel:"téléphone",web:"site web"}[f]||f)+" → "+(f==="famille"?FNOM[v]:String(v).split("\n").pop())).concat(ct?["contact "+(ct.nom||ct.mail)]:[]).join(" · "))+'</div>').join("")+'</div></details>':'')+
+      '<button class="btn primary" type="button" data-act="enrgo"'+(P.k.length?'':' disabled')+'>Intégrer les compléments</button></div>':'')+'</div></div></div>'+
+  '<div class="df"><span class="grow"></span><button class="btn" type="button" data-act="mclose">Fermer</button></div>',"enr");modalBig();
+  if(IN_FRAME)enrHandoffURL().then(u=>{const a=$("#enrX");if(a){a.href=u;a.textContent="Télécharger le fichier Excel";a.removeAttribute("aria-disabled")}}).catch(()=>{const a=$("#enrX");if(a)a.textContent="Extraction indisponible ici"})}
+document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("button");if(!t)return;const a=t.dataset.act;
+  if(a==="kenr"){enrMenu();return}if(a==="enrdl"){enrDownload();return}if(a==="enrgo"){enrApply();return}});
+document.addEventListener("change",async e=>{const t=e.target;if(!t||MODAL!=="enr")return;
+  if(t.name==="enrS"){ENR.scope=t.value;enrMenu();return}
+  if(t.id==="enrRp"){ENR.repl=t.checked;enrMenu();return}
+  if(t.id==="enrF"&&t.files[0]){const f=t.files[0];try{ENR.imp={file:f.name,list:await enrRead(f)};enrMenu()}catch(x){console.error("enr",x);toast(x.message==="colonnes"?"Fichier non reconnu : il faut au moins la colonne « Compte » ou « ID ».":"Lecture impossible (vérifiez la connexion internet pour la lecture Excel).")}}});
 
 /* ================= V3 · Événements ================= */
 document.addEventListener("click",async e=>{
