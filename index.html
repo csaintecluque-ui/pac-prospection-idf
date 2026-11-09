@@ -878,6 +878,12 @@ body.dsz,body.dsz *{cursor:nwse-resize!important}
 .bl-dv .dv-wr .bl-dd{font-size:12px;color:var(--muted);width:50px;flex:none}
 .bl-dv .bl-enc{margin:0;font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
 .bl-dv .bl-enc b{color:var(--fg);font-weight:600}
+
+/* V3.10 · import de devis Word */
+.dv-imp{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}.dv-imp>span{flex:1;min-width:260px}
+.dv-impb{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;border:1px dashed var(--line);border-radius:var(--r);padding:10px 12px}
+.dv-impb .btn svg,.page-h .btn svg{width:15px;height:15px}
+body.dv-drop #view-devis,body.dv-drop #modal{outline:3px dashed var(--accent);outline-offset:-6px}
 </style>
 </head>
 <body>
@@ -897,7 +903,7 @@ body.dsz,body.dsz *{cursor:nwse-resize!important}
   <div class="side-f">
     <span class="sync" id="sync" data-s="wait"><i></i><span id="syncTxt">Chargement…</span></span>
     <button class="btn" type="button" data-act="export" title="Exporter, sauvegarder, restaurer"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11"/></svg><span>Exporter / sauvegarder</span></button>
-    <span class="ver">V3.9 · CSC</span>
+    <span class="ver">V3.10 · CSC</span>
   </div>
 </aside>
 
@@ -988,7 +994,7 @@ function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTi
 const nh=x=>String(x==null?"":x).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
 const now=()=>new Date().toISOString();
 const S={open:new Set(),mode:"wait",cibles:[],comptes:[],contacts:[],actions:[],plans:[],pac:[],mailing:[],devis:[],settings:{objectif:8},writable:true,view:"actives",tab:"tdb",kid:"",db:null,downloads:null,ver:0};
-const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.9";
+const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.10";
 let STORE="ls"; /* "idb" dès que les données sont dans la base du navigateur */
 const IN_FRAME=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 const TYPE_RANK={"Client existant":3,"Prescripteur":2,"Prospect":1};
@@ -3964,8 +3970,8 @@ function renderDevis(){const el=$("#view-devis");if(!el)return;
   const yrs=[...new Set(S.devis.map(d=>(d.date||"").slice(0,4)).filter(Boolean).concat([String(new Date().getFullYear())]))].sort().reverse();
   const prs=[...new Set(S.devis.flatMap(d=>d.lignes.map(l=>l.presta)).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
   let h=pageH("Suivi de prospection","Suivi des devis",pl(S.devis.length,"devis","devis")+' suivis · prélèvements <span class="est">en rouge : estimatifs</span>, <span class="def">en bleu : définitifs</span>',
-    '<button class="btn ghost" type="button" data-act="dvexport">Exporter / Excel</button><button class="btn primary" type="button" data-dvnew="1">'+I_PLUS+'Nouveau devis</button>');
-  if(!S.devis.length){el.innerHTML=h+'<div class="list-wrap"><div class="empty"><h3>Aucun devis suivi pour l\'instant</h3><p>Pour chaque devis : le compte, les prestations, leur prix, les prélèvements (nombre × prix unitaire, estimatif en rouge puis définitif en bleu), puis les prestations réalisées au fil des interventions.</p><p><button class="btn primary" type="button" data-dvnew="1">'+I_PLUS+'Créer un premier devis</button></p></div></div>';return}
+    '<button class="btn ghost" type="button" data-act="dvexport">Exporter / Excel</button><button class="btn" type="button" data-act="dvimp" title="Un ou plusieurs devis Word (.docx) · ou glissez les fichiers sur la page">'+SV+'<path d="M8 10.5V2.5M4.8 5.6 8 2.4l3.2 3.2M2.5 10v3.5h11V10"/></svg>'+'Importer des devis (.docx)</button><button class="btn primary" type="button" data-dvnew="1">'+I_PLUS+'Nouveau devis</button>');
+  if(!S.devis.length){el.innerHTML=h+'<div class="list-wrap"><div class="empty"><h3>Aucun devis suivi pour l\'instant</h3><p>Pour chaque devis : le compte, les prestations, leur prix, les prélèvements (nombre × prix unitaire, estimatif en rouge puis définitif en bleu), puis les prestations réalisées au fil des interventions.</p><p style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn" type="button" data-act="dvimp">'+SV+'<path d="M8 10.5V2.5M4.8 5.6 8 2.4l3.2 3.2M2.5 10v3.5h11V10"/></svg>'+'Importer des devis Word (.docx)</button><button class="btn primary" type="button" data-dvnew="1">'+I_PLUS+'Créer un devis</button></p><p class="sub">Vous pouvez aussi glisser vos fichiers .docx sur cette page.</p></div></div>';return}
   const tile=(vv,lbl,val,sub,cls)=>'<button type="button" class="kpi click'+(DVUI.v===vv?' on':'')+'" data-dvv="'+vv+'"><span class="lbl">'+lbl+'</span><span class="v'+(cls?' '+cls:'')+'">'+val+'</span><span class="d">'+sub+'</span></button>';
   h+='<div class="dv-k">'+tile("attente","En attente",K.att,eur(K.attM)+(K.rel?' · <span class="late">'+K.rel+' à relancer</span>':''))+
     tile("realises","Acceptés",K.acc,eur(K.accM)+(K.taux!=null?' · transformation '+K.taux+' %':''))+
@@ -4054,7 +4060,8 @@ function dvDraw(first){const d=DV,k=kOf(d.compteId),cts=k?ctOf(k.id):[];
   const custom=[...new Set(S.devis.flatMap(x=>x.lignes.map(l=>l.presta)).filter(p=>p&&!DV_ALL.includes(p)))];
   const rep=d.statut==="accepte"||d.statut==="refuse"||d.statut==="sansuite";
   showModal(mHead(dvNew?"Nouveau devis":"Devis",(d.numero?"N° "+esc(d.numero)+" · ":"")+esc(d._k||"Compte à renseigner"))+
-  '<div class="db"><form id="dvForm" class="dv-form" onsubmit="return false">'+
+  '<div class="db"><form id="dvForm" class="dv-form" onsubmit="return false">'+dvImpHTML()+
+   (dvNew&&!d._imp?'<div class="dv-impb"><button class="btn" type="button" data-act="dvimp">'+SV+'<path d="M8 10.5V2.5M4.8 5.6 8 2.4l3.2 3.2M2.5 10v3.5h11V10"/></svg>'+'Remplir depuis le devis Word (.docx)</button><span class="sub">Compte, n°, date, objet, prestations, prix et analyses sont repris du fichier · ou glissez-le ici</span></div>':'')+
    '<div class="dv-head">'+dvKcHTML(d,k)+
     '<div class="f"><label class="lbl" for="dv-ct">Contact</label><select id="dv-ct"><option value="">—</option>'+cts.map(c=>'<option value="'+esc(c.id)+'"'+(c.id===d.contactId?' selected':'')+'>'+esc(c.nom||c.mail||"Contact")+(c.fonction?' · '+esc(c.fonction):'')+'</option>').join("")+'</select></div>'+
     fld("dv-num","N° de devis",d.numero,"text",' placeholder="Référence du devis"')+
@@ -4087,10 +4094,11 @@ function dvSave(){dvRead();const d=DV;
   if(!d._k){toast("Indiquez le compte.");const f=$("#dv-k");if(f)f.focus();return null}
   d.lignes=d.lignes.filter(l=>l.presta||nb0(l.prix)||(l.pOn&&nb0(l.nb)));
   if(!d.lignes.length){dvDraw();toast("Ajoutez au moins une prestation.");return null}
-  let k=findCompte(d._k),created=false;if(!k){k=ensureCompte(d._k,{origine:"devis"});created=true}
-  d.compteId=k.id;if(!d.date)d.date=todayISO();
+  if(d.numero){const o=S.devis.find(x=>x.id!==d.id&&nh(x.numero)===nh(d.numero));if(o){toast("Le devis n° "+d.numero+" est déjà suivi ("+((kOf(o.compteId)||{}).nom||"")+") : pas de doublon.");return null}}
+  let k=findCompte(d._k),created=false;if(!k){k=ensureCompte(d._k,(d._imp&&d._imp.init)||{origine:"devis"});created=true}
+  d.compteId=k.id;if(!d.date)d.date=todayISO();if(d._imp)dvImpContact(d,k);
   d.lignes.forEach(l=>{if(!l.presta)l.presta="Prestation";if(!l.pOn){l.nb="";l.pu="";l.def=false}if(!l.faite)l.faiteLe="";else if(!l.faiteLe)l.faiteLe=todayISO()});
-  const o=Object.assign({},d);delete o._k;put("devis",o);
+  const o=Object.assign({},d);delete o._k;delete o._imp;delete o._upd;put("devis",o);
   const wasNew=dvNew,s=dvSum(o);closeModal();commit();
   toast((wasNew?"Devis créé":"Devis enregistré")+" · "+k.nom+" · "+eur(s.tot)+" HT"+(s.estN?" (prélèvements estimatifs)":"")+(created?" · compte créé":""));
   return {k,o}}
@@ -4202,6 +4210,124 @@ function blDevisPrint(V){if(!V)return "";const K=V.K,k=d=>(kOf(d.compteId)||{}).
    tb("Refusés / sans suite",V.lost.map(d=>tr(d.dateRep,d,DVL[d.statut]+" · "+dtx(d),dvSum(d).tot,"")))+
    tb("Prestations réalisées",V.real.map(r=>tr(r.l.faiteLe,r.d,r.l.presta+(lHasP(r.l)?" · "+nb0(r.l.nb)+" prélèvements "+(r.l.def?"définitifs":"estimatifs"):""),lTot(r.l),lHasP(r.l)?(r.l.def?"def":"est"):"")))+
    (K.est?'<p style="font-size:8.5pt;color:#69625B">Montants en rouge : prélèvements estimatifs · en bleu : prélèvements définitifs.</p>':'')}
+
+
+/* ================= V3.10 · Import d'un devis Word (.docx) : remplit la ligne devis, sans doublon ================= */
+/* Lecture du .docx dans le navigateur, sans bibliothèque : archive zip + DecompressionStream */
+async function zipText(buf,name){const u8=new Uint8Array(buf),v=new DataView(buf);let e=-1;
+  for(let i=u8.length-22;i>=Math.max(0,u8.length-65600);i--){if(v.getUint32(i,true)===0x06054b50){e=i;break}}
+  if(e<0)throw new Error("zip");
+  const n=v.getUint16(e+10,true);let p=v.getUint32(e+16,true);const td=new TextDecoder();
+  for(let i=0;i<n;i++){if(v.getUint32(p,true)!==0x02014b50)break;
+    const meth=v.getUint16(p+10,true),cs=v.getUint32(p+20,true),fl=v.getUint16(p+28,true),xl=v.getUint16(p+30,true),cl=v.getUint16(p+32,true),off=v.getUint32(p+42,true);
+    if(td.decode(u8.subarray(p+46,p+46+fl))===name){const st=off+30+v.getUint16(off+26,true)+v.getUint16(off+28,true),data=u8.subarray(st,st+cs);
+      if(meth===0)return td.decode(data);
+      if(typeof DecompressionStream==="undefined")throw new Error("inflate");
+      return td.decode(await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).arrayBuffer())}
+    p+=46+fl+xl+cl}
+  return null}
+const WNS="http://schemas.openxmlformats.org/wordprocessingml/2006/main";
+function wText(p){let s="";const tw=p.ownerDocument.createTreeWalker(p,1);let n=tw.currentNode;
+  while(n){if(n.namespaceURI===WNS){const l=n.localName;if(l==="t")s+=n.textContent;else if(l==="tab")s+=" ";else if(l==="br"||l==="cr")s+="\n"}n=tw.nextNode()}
+  return s.replace(/ /g," ")}
+const dvNum=t=>{let x=String(t||"").replace(/[\s €]/g,"");if(!x||!/\d/.test(x))return null;if(x.includes(",")&&x.includes("."))x=x.replace(/,/g,"");else x=x.replace(",",".");const n=parseFloat(x);return isFinite(n)?n:null};
+const dvIsPrel=t=>/\b(analyses?|pr[ée]l[èe]vements?|[ée]chantillons?)\b/i.test(t);
+function dvParseDocx(xml,fname){const doc=new DOMParser().parseFromString(xml,"application/xml");
+  const paras=[...doc.getElementsByTagNameNS(WNS,"p")].map(wText).map(s=>s.trim()).filter(Boolean),all=paras.join("\n");
+  const cellLines=tc=>[...tc.getElementsByTagNameNS(WNS,"p")].map(wText).join("\n").split("\n").map(s=>s.replace(/\s+/g," ").trim()).filter(Boolean);
+  const tables=[...doc.getElementsByTagNameNS(WNS,"tbl")].map(t=>[...t.getElementsByTagNameNS(WNS,"tr")].filter(tr=>tr.parentNode===t).map(tr=>[...tr.childNodes].filter(c=>c.localName==="tc").map(cellLines)));
+  const fm=String(fname||"").match(/([A-Z]{1,4}\d{5,})(?:[_ -](\d{4})-(\d{2})-(\d{2}))?/);
+  const r={numero:"",date:"",objet:"",site:"",client:"",adresse:"",cp:"",ville:"",siret:"",contact:null,emetteur:"",agence:"",lignes:[],brut:[]};
+  let m=all.match(/Affaire\s*n[°o]\s*:?\s*([A-Z]{0,4}\d{5,})/i)||all.match(/\bDevis\s*\n?\s*([A-Z]{1,4}\d{5,})/i);r.numero=m?m[1]:fm?fm[1]:"";
+  m=all.match(/\ble\s+(\d{2})\/(\d{2})\/(\d{4})/i);r.date=m?m[3]+"-"+m[2]+"-"+m[1]:fm&&fm[2]?fm[2]+"-"+fm[3]+"-"+fm[4]:"";
+  m=all.match(/^Objet\s*:\s*(.+)$/im)||all.match(/Description\s*:\s*(.+)$/im);r.objet=m?m[1].trim():"";
+  const li=paras.findIndex(p=>/LIEU D.INTERVENTION/i.test(p));if(li>=0&&paras[li+1]&&!/^(ARTICLE|[A-Z]\.\s)/.test(paras[li+1]))r.site=paras[li+1].replace(/\s+/g," ").replace(/\s*:\s*/," : ").trim();
+  /* Client : cellule « PROPOSITION ENTRE » */
+  tables.forEach(t=>t.forEach(row=>row.forEach(c=>{if(r.client||!c.length||!/^PROPOSITION ENTRE/i.test(c[0]))return;
+    const L=c.slice(1),name=[];let i=0;
+    for(;i<L.length;i++){if(/^\d|SIRET|CI APR|attention|t[ée]l[ée]phone|mail\s*:/i.test(L[i])||/\b(rue|avenue|boulevard|bd|place|all[ée]e|chemin|quai|route|impasse|cours)\b/i.test(L[i]))break;name.push(L[i])}
+    r.client=name.join(" ").replace(/\s+/g," ").trim();const adr=[];
+    for(;i<L.length;i++){if(/SIRET|CI APR|attention/i.test(L[i]))break;const z=L[i].match(/^(\d{5})\s+(.+)$/);if(z){r.cp=z[1];r.ville=z[2]}else adr.push(L[i])}
+    r.adresse=adr.join(", ");const txt=L.join("\n");
+    let x=txt.match(/SIRET\s*:?\s*([\d ]{14,})/i);if(x)r.siret=x[1].replace(/\s/g,"");
+    const nm=txt.match(/attention de\s+(?:(?:Monsieur|Madame|M\.|Mme|Mlle)\s+)?([^\n]+)/i),tel=txt.match(/t[ée]l[ée]phone\s*:?\s*([+\d][\d .]{8,})/i),ml=txt.match(/mail\s*:\s*([^\s@]+@[^\s]+)/i);
+    if(nm||ml)r.contact={nom:nm?nm[1].trim():"",tel:tel?tel[1].trim():"",mail:ml?ml[1].trim():""}})));
+  if(!r.contact){m=all.match(/attention de\s+(?:(?:Monsieur|Madame|M\.|Mme)\s+)?([^\n]+)/i);if(m)r.contact={nom:m[1].trim(),tel:"",mail:""}}
+  m=all.match(/^Agence\s+([^\n\-–]+)/im);if(m)r.agence="Agence "+m[1].trim();
+  /* Tableau des prestations : en-tête « Libellé … P.U … » */
+  const hn=s=>nh(s).replace(/ /g,"");
+  tables.forEach(t=>{const hi=t.findIndex(row=>{const h=row.map(c=>hn(c.join(" ")));return h.some(x=>x.startsWith("libell"))&&h.some(x=>x==="puht"||x==="pu"||x.startsWith("prixunit"))});if(hi<0)return;
+    const H=t[hi].map(c=>hn(c.join(" "))),ix=f=>H.findIndex(f);
+    const cL=ix(x=>x.startsWith("libell")),cQ=ix(x=>x.startsWith("qt")||x.startsWith("quant")),cU=ix(x=>x==="puht"||x==="pu"||x.startsWith("prixunit")),cT=ix(x=>x==="ptht"||x==="pt"||x.startsWith("montant")||x.startsWith("totalht")||x.startsWith("prixtotal"));
+    t.slice(hi+1).forEach(row=>{const g=(k,back)=>(row.length===H.length?row[k]:row[row.length-back])||[];
+      const lib=g(cL,H.length-cL),title=(lib[0]||"").trim();if(!title||/^total/i.test(title))return;
+      const qs=(g(cQ,H.length-cQ).join(" ")||"").trim(),q=dvNum(qs),u=dvNum(g(cU,H.length-cU).join(" ")),tt=dvNum(g(cT,H.length-cT).join(" "));
+      r.brut.push({title,desc:lib.slice(1).join(" "),qs,q,u,t:tt})})});
+  /* Prélèvements / analyses : rattachés à la prestation amiante qui prévoit des prélèvements, sinon ligne à part */
+  const rows=r.brut,base=rows.filter(x=>!dvIsPrel(x.title));
+  base.forEach(x=>{const prix=x.t!=null&&x.t>0?x.t:(x.q&&x.u!=null?x.q*x.u:0);x.l=Object.assign(dvLblank(),{presta:x.title,prix:prix?String(Math.round(prix*100)/100):"",pOn:false});if(x.q&&x.q>1&&x.u!=null)x.l.presta=x.title+" (× "+x.q+")"});
+  rows.filter(x=>dvIsPrel(x.title)).forEach(x=>{const nb=x.q!=null&&x.q>0?String(x.q):"",pu=x.u!=null?String(x.u):"";
+    const free=base.filter(b=>!b.l.pOn),tgt=free.find(b=>/amiante|plomb|hap|enrob|dta|rep[ée]rage/i.test(b.title)&&/pr[ée]l[èe]vement|sondage/i.test(b.desc))||free.find(b=>/amiante|plomb|hap|enrob|rep[ée]rage/i.test(b.title));
+    if(tgt){Object.assign(tgt.l,{pOn:true,nb,pu,def:false});tgt.prel=x.title}
+    else{const l=Object.assign(dvLblank(),{presta:x.title,prix:"",pOn:true,nb,pu,def:false});base.push({title:x.title,l})}});
+  const order=rows.map(x=>x.l).filter(Boolean);base.forEach(b=>{if(!order.includes(b.l))order.push(b.l)});r.lignes=order;
+  r.prelSur=(base.find(b=>b.prel)||{}).title||"";
+  return r}
+/* Rapprochement du client du devis avec un compte existant */
+const DV_STOP=new Set(["sa","sas","sasu","sarl","sci","eurl","snc","gie","hotel","the","de","la","le","les","des","du","et","en","paris","france","center","centre","conference","groupe","group","societe","ste","cie","immobilier","immobiliere","agence","residence"]);
+function dvMatchCompte(name){if(!name)return null;const k=findCompte(name);if(k)return {k,sure:true};
+  const W=new Set(nh(name).split(" ").filter(t=>t.length>2&&!DV_STOP.has(t)));if(!W.size)return null;let best=null,bs=0;
+  S.comptes.forEach(c=>{const cw=nh(c.nom).split(" ").filter(t=>t.length>2&&!DV_STOP.has(t));if(!cw.length||!cw.every(t=>W.has(t)))return;if(cw.length>bs){bs=cw.length;best=c}});
+  return best?{k:best,sure:false}:null}
+function dvFromImport(r,fname){const mt=dvMatchCompte(r.client),k=mt&&mt.k;
+  const d=Object.assign(dvblank(),{id:uid(),creeLe:now(),numero:r.numero,date:r.date||todayISO(),objet:[r.objet,r.site].filter(Boolean).join(" – "),statut:"attente",lignes:r.lignes.map(l=>Object.assign({},l))});
+  d.notes=["Importé depuis « "+fname+" »",r.agence?r.agence.replace(/\s*[-–]\s*socotec.*$/i,""):"",r.client&&k&&!mt.sure?"Client du devis : "+r.client:""].filter(Boolean).join(" · ");
+  d.compteId=k?k.id:"";d._k=k?k.nom:r.client;
+  d._imp={file:fname,client:r.client,match:k?(mt.sure?"exact":"proche"):"nouveau",ct:r.contact,init:{adresse:r.adresse,ville:r.ville,dept:r.cp&&DNAME[r.cp.slice(0,2)]?r.cp.slice(0,2):"",origine:"devis",notes:r.siret?"SIRET "+r.siret:""},prelSur:r.prelSur};
+  if(k&&r.contact){const c=findContact(k.id,r.contact);if(c)d.contactId=c.id}
+  return d}
+async function dvReadFile(f){if(!/\.docx$/i.test(f.name))throw new Error("format");
+  const xml=await zipText(await f.arrayBuffer(),"word/document.xml");if(!xml)throw new Error("docx");return dvParseDocx(xml,f.name)}
+/* Un fichier : la fenêtre s'ouvre pré-remplie pour vérification. Plusieurs fichiers : les devis sont créés directement. */
+async function dvImport(files){files=[...(files||[])];if(!files.length)return;
+  const bad=files.filter(f=>!/\.docx$/i.test(f.name));if(bad.length===files.length){toast(/\.pdf$/i.test(bad[0].name)?"Les PDF ne sont pas encore lus : choisissez le devis au format Word (.docx).":"Choisissez un devis au format Word (.docx).");return}
+  files=files.filter(f=>/\.docx$/i.test(f.name));
+  if(files.length===1){let r;try{r=await dvReadFile(files[0])}catch(e){toast("Lecture impossible de « "+files[0].name+" » : "+(e.message==="inflate"?"navigateur trop ancien.":"le fichier n'est pas un devis Word lisible."));return}
+    if(!r.lignes.length&&!r.numero){toast("Aucun devis reconnu dans « "+files[0].name+" ».");return}
+    const ex=r.numero?S.devis.find(d=>nh(d.numero)===nh(r.numero)):null;
+    if(ex){openDevis(ex.id);DV._upd={r,file:files[0].name};dvDraw();toast("Ce devis est déjà suivi : il est ouvert, rien n'est créé en double.");return}
+    if(DV&&MODAL==="devis"&&dvNew){dvRead();const keep={id:DV.id,creeLe:DV.creeLe},typed=DV._k;const nd=dvFromImport(r,files[0].name);DV=Object.assign(nd,keep);if(!nd.compteId&&typed&&!r.client)DV._k=typed;DVCAT=false;dvDraw(true)}
+    else{if(MODAL)closeModal();DV=dvFromImport(r,files[0].name);dvNew=true;dvDelA=false;DVCAT=false;dvDraw(true)}
+    toast("Devis lu : vérifiez puis Enregistrer.");return}
+  let n=0,dup=0,err=0,nk=0;const seen=new Set();
+  for(const f of files){let r;try{r=await dvReadFile(f)}catch(e){err++;continue}
+    const key=nh(r.numero);if(key&&(seen.has(key)||S.devis.some(d=>nh(d.numero)===key))){dup++;continue}if(key)seen.add(key);
+    if(!r.lignes.length){err++;continue}
+    const d=dvFromImport(r,f.name);const k=dvImpCompte(d);if(d._imp.match==="nouveau")nk++;d.compteId=k.id;dvImpContact(d,k);
+    const o=Object.assign({},d);delete o._k;delete o._imp;put("devis",o);n++}
+  commit();toast(pl(n,"devis importé","devis importés")+(dup?" · "+dup+" déjà suivi"+(dup>1?"s":"")+" (ignoré"+(dup>1?"s":"")+")":"")+(nk?" · "+pl(nk,"compte créé","comptes créés"):"")+(err?" · "+err+" illisible"+(err>1?"s":""):""))}
+function dvImpCompte(d){let k=findCompte(d._k)||kOf(d.compteId);if(!k){const i=d._imp&&d._imp.init||{origine:"devis"};k=ensureCompte(d._k,i)}return k}
+function dvImpContact(d,k){const c=d._imp&&d._imp.ct;if(!c||!(c.nom||c.mail))return;if(d.contactId&&ctById(d.contactId))return;const ct=ensureContact(k.id,c);d.contactId=ct.id}
+/* Mise à jour d'un devis déjà suivi depuis le fichier : statut, réalisations et nombres définitifs conservés */
+function dvApplyUpd(){if(!DV||!DV._upd)return;dvRead();const r=DV._upd.r,old=DV.lignes;
+  DV.lignes=r.lignes.map(l=>{const o=old.find(x=>nh(x.presta)===nh(l.presta)),n=Object.assign({},l,{id:o?o.id:l.id});
+    if(o){n.faite=o.faite;n.faiteLe=o.faiteLe;if(o.def&&o.pOn){n.def=true;n.nb=o.nb}}return n});
+  if(!DV.objet)DV.objet=[r.objet,r.site].filter(Boolean).join(" – ");if(r.date)DV.date=r.date;
+  delete DV._upd;dvDraw();toast("Prestations mises à jour depuis le fichier : vérifiez puis Enregistrer.")}
+function dvImpHTML(){const d=DV;if(!d)return "";
+  if(d._upd)return '<div class="notice dv-imp"><span><b>Devis déjà suivi.</b> Le fichier « '+esc(d._upd.file)+' » correspond à ce devis (n° '+esc(d.numero)+') : rien n\'a été créé en double. Pour reprendre ses prestations et ses prix, gardant statut, réalisations et nombres définitifs :</span><button class="btn" type="button" data-act="dvimpupd">Mettre à jour depuis le fichier</button></div>';
+  if(!d._imp)return "";const i=d._imp,k=kOf(d.compteId);
+  return '<div class="notice dv-imp"><span><b>Rempli depuis « '+esc(i.file)+' ».</b> '+(i.match==="exact"?'Compte reconnu : '+esc(k?k.nom:"")+'.':i.match==="proche"?'Client du devis « '+esc(i.client)+' » rapproché du compte <b>'+esc(k?k.nom:"")+'</b> : changez-le si ce n\'est pas le bon.':'Client « '+esc(i.client||"?")+' » : aucun compte trouvé, il sera créé à l\'enregistrement (adresse et contact repris), ou choisissez un compte existant.')+
+    (i.ct&&(i.ct.nom||i.ct.mail)?' Contact : '+esc([i.ct.nom,i.ct.mail].filter(Boolean).join(" · "))+(d.contactId?'':' (ajouté au compte).'):'')+
+    (i.prelSur?' Les analyses sont rattachées à « '+esc(i.prelSur)+' », en estimatif.':'')+' Vérifiez puis Enregistrer.</span></div>'}
+/* Dépôt de fichiers sur la page devis ou la fenêtre devis */
+document.addEventListener("dragover",e=>{if(!(S.tab==="devis"||MODAL==="devis"))return;if(e.dataTransfer&&[...e.dataTransfer.types].includes("Files")){e.preventDefault();document.body.classList.add("dv-drop")}});
+document.addEventListener("dragleave",e=>{if(!e.relatedTarget)document.body.classList.remove("dv-drop")});
+document.addEventListener("drop",e=>{document.body.classList.remove("dv-drop");if(!(S.tab==="devis"||MODAL==="devis"))return;if(e.dataTransfer&&e.dataTransfer.files.length){e.preventDefault();dvImport(e.dataTransfer.files)}});
+document.addEventListener("change",e=>{const t=e.target;if(t&&t.id==="dvFile"){const f=t.files;dvImport(f).finally(()=>{t.value=""})}});
+document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("button");if(!t)return;
+  if(t.dataset.act==="dvimp"){let i=$("#dvFile");if(!i){i=document.createElement("input");i.type="file";i.id="dvFile";i.accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document";i.multiple=true;i.hidden=true;document.body.appendChild(i)}i.multiple=!(MODAL==="devis");i.click();return}
+  if(t.dataset.act==="dvimpupd"){dvApplyUpd();return}});
 
 /* ================= V3 · Événements ================= */
 document.addEventListener("click",async e=>{
