@@ -15,7 +15,7 @@ const DVST=[["brouillon","À envoyer"],["attente","En attente"],["accepte","Acce
 const DVL=Object.fromEntries(DVST);
 /* Relance : délai sans réponse (réglable, 15 jours par défaut) compté depuis le devis ou la dernière relance ; « reporter » décale l'échéance */
 const dvRelJ=()=>Math.max(1,parseInt(S.settings.dvRelJ,10)||15);
-function dvRelDue(d){if(d.statut!=="attente")return "";const lr=(d.relances||[]).slice(-1)[0]||"",b=[d.date||"",lr].sort().pop();let due=b?addD(b,dvRelJ()):"";if(d.relSnooze&&d.relSnooze>due)due=d.relSnooze;return due}
+function dvRelDue(d){if(d.statut!=="attente")return "";const lr=(d.relances||[]).slice(-1)[0]||"",b=[d.date||"",lr].sort().pop();if(d.relSnooze)return d.relSnooze;return b?addD(b,dvRelJ()):""}
 const nb0=v=>{const n=parseFloat(String(v==null?"":v).replace(/[\s€]/g,"").replace(",","."));return isFinite(n)?n:0};
 const eur2=n=>(Number(n)||0).toLocaleString("fr-FR",{maximumFractionDigits:2})+" €";
 const dvPrelDef=p=>{const g=DV_CAT.findIndex(c=>c[1].includes(p));return g===0||g===1};

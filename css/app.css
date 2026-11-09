@@ -1032,3 +1032,9 @@ body.cal-dragging,body.cal-dragging *{cursor:grabbing!important;user-select:none
 .ti.dvr-ti .o,.ti.dvr-ti .m{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ti.dvr-ti .m .lk{background:none;border:0;padding:0;font:inherit;cursor:pointer}
 .ti.dvr-ti .m .lk:hover{text-decoration:underline}
+/* Relances : case « relance faite » dans À faire, choix de la durée dans la fenêtre */
+.ti.dvr-ti{grid-template-columns:22px 26px minmax(0,1fr) auto}
+.dvr-next{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:2px 18px 0;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);font-size:13px}
+.dvr-next label{color:var(--muted)}
+.dvr-next select{width:auto}
+.dvr-next .btn svg{width:14px;height:14px}

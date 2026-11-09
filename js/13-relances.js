@@ -7,9 +7,16 @@ const DVR_TPL={objet:"Votre devis n° {numero} – {objet}",
 const dvrTpl=()=>Object.assign({},DVR_TPL,S.settings.dvRelTpl||{});
 function dvRelList(){return S.devis.filter(dvRel).sort((a,b)=>(dvRelDue(a)||"").localeCompare(dvRelDue(b)||"")||dvSum(b).tot-dvSum(a).tot)}
 const dvLastRel=d=>(d.relances||[]).slice(-1)[0]||"";
+/* Après une relance (ou un report), le devis sort de la liste jusqu'à la date choisie */
+const DVR_DUR=[[7,"1 semaine"],[15,"15 jours"],[30,"1 mois"],[60,"2 mois"],[90,"3 mois"]];
+const dvrDurOpts=sel=>{const L=DVR_DUR.some(([j])=>j===sel)?DVR_DUR:DVR_DUR.concat([[sel,pl(sel,"jour")]]).sort((a,b)=>a[0]-b[0]);return L.map(([j,l])=>'<option value="'+j+'"'+(j===sel?' selected':'')+'>'+l+'</option>').join("")};
+function dvrMark(id,days,detail,ctId){const d=S.devis.find(x=>x.id===id);if(!d)return null;const t=todayISO();
+  const o=clone(d);o.relances=(o.relances||[]).concat(t);o.relSnooze=addD(t,days);put("devis",o);
+  put("actions",anorm({id:uid(),creeLe:now(),compteId:d.compteId,contactId:ctId||d.contactId||"",type:"mail",date:t,statut:"fait",faitLe:t,objet:"Relance devis"+(d.numero?" n° "+d.numero:""),details:detail||"",resultat:"Envoyé",origine:"relance devis"}));
+  return o}
 /* Élément « Devis à relancer » (À faire, tableau de bord) */
 function dvRelItem(d){const k=kOf(d.compteId),s=dvSum(d),age=dvAge(d),lr=dvLastRel(d);
-  return '<div class="ti dvr-ti" data-dvrel="'+esc(d.id)+'" title="Préparer le mail de relance"><span class="dvr-b">'+I_MAIL+'</span>'+
+  return '<div class="ti dvr-ti" data-dvrel="'+esc(d.id)+'" title="Préparer le mail de relance"><button type="button" class="ck" data-dvrok="'+esc(d.id)+'" title="Relance faite : retirer ce devis pendant '+pl(dvRelJ(),"jour")+'" aria-label="Relance faite"></button><span class="dvr-b">'+I_MAIL+'</span>'+
     '<div style="min-width:0"><div class="o">Relancer le devis'+(d.numero?' n° '+esc(d.numero):'')+' · '+esc(eur(s.tot))+'</div><div class="m">'+(k?'<button type="button" class="lk" data-kopen="'+esc(k.id)+'">'+esc(k.nom)+'</button>':'')+(d.objet?' · '+esc(d.objet.slice(0,60)):'')+'</div></div>'+
     '<div class="dt late">'+(lr?'relancé le '+fdate(lr):age!=null?pl(age,"jour"):"")+'</div></div>'}
 function dvrFill(txt,d,ct){const k=kOf(d.compteId)||{},s=dvSum(d);const obj=d.objet||d.lignes.map(l=>dvShort(l.presta)).filter(x=>!/montant global/i.test(x)).join(", ")||"votre projet";
@@ -22,30 +29,33 @@ function dvRelOpen(id){const d=S.devis.find(x=>x.id===id);if(!d)return;if(MODAL)
   showModal(mHead("Relancer le devis",(d.numero?"N° "+esc(d.numero)+" · ":"")+esc(k?k.nom:""))+
   '<div class="db"><div class="dvr-g"><div class="dvr-i">'+
     '<p class="sub" style="margin:0">Devis du '+(d.date?fdate(d.date):"—")+' · <b>'+esc(eur(s.tot))+' HT</b>'+(age!=null?' · en attente depuis '+pl(age,"jour"):'')+'</p>'+(d.objet?'<p class="sub" style="margin:0">'+esc(d.objet)+'</p>':'')+
-    '<p class="sub" style="margin:0">'+(R.length?'Déjà relancé '+(R.length>1?R.length+' fois, ':'')+'le '+R.map(fdate).join(", "):'Jamais relancé')+(d.relSnooze?' · reporté au '+fdate(d.relSnooze):'')+'</p>'+
+    '<p class="sub" style="margin:0">'+(R.length?'Déjà relancé '+(R.length>1?R.length+' fois, ':'')+'le '+R.map(fdate).join(", "):'Jamais relancé')+(d.relSnooze&&d.relSnooze>todayISO()?' · masqué jusqu\'au '+fdate(d.relSnooze):'')+'</p>'+
     '<div class="row"><div class="f"><label class="lbl" for="dvr-ct">Destinataire</label><select id="dvr-ct">'+(cts.length?cts.map(c=>'<option value="'+esc(c.id)+'"'+(ct&&c.id===ct.id?' selected':'')+'>'+esc((c.nom||c.mail||"Contact")+(c.mail?" · "+c.mail:" (sans e-mail)"))+'</option>').join(""):'<option value="">Aucun contact sur ce compte</option>')+'</select></div>'+
-    '<div class="f"><label class="lbl" for="dvr-j">Relancer au bout de</label><div style="display:flex;gap:6px;align-items:center"><input type="number" id="dvr-j" min="1" max="120" value="'+dvRelJ()+'" style="width:80px"><span class="sub">jours sans réponse (tous les devis)</span></div></div></div>'+
+    '<div class="f"><label class="lbl" for="dvr-j">Première relance au bout de</label><div style="display:flex;gap:6px;align-items:center"><input type="number" id="dvr-j" min="1" max="120" value="'+dvRelJ()+'" style="width:80px"><span class="sub">jours sans réponse (tous les devis)</span></div></div></div>'+
     fld("dvr-obj","Objet du mail",dvrFill(T.objet,d,ct))+ta("dvr-txt","Texte du mail",dvrFill(T.corps,d,ct),11)+
     '<div class="row">'+fld("dvr-sig","Signature (reprise dans les mails)",S.settings.signature||"")+'<div class="f" style="justify-content:flex-end"><button type="button" class="btn ghost" data-act="dvrtpl" title="Le texte actuel devient le modèle : {contact}, {numero}, {date}, {objet}, {montant}, {compte}, {signature} sont remplacés automatiquement">Enregistrer comme modèle</button></div></div>'+
   '</div></div></div>'+
-  '<div class="df"><button class="btn ghost" type="button" data-act="dvrsnz">Reporter de 7 jours</button><button class="btn ghost" type="button" data-dvid="'+esc(d.id)+'">Ouvrir le devis</button><span class="grow"></span>'+
-    '<button class="btn" type="button" data-act="dvrcopy">Copier le texte</button><a class="btn" id="dvrMail" href="#" target="_blank" rel="noopener">Ouvrir dans la messagerie</a><button class="btn primary" type="button" data-act="dvrdone">Marquer comme relancé</button></div>',"dvrel");
+  '<div class="dvr-next"><label for="dvr-dur">Une fois la relance faite, ne plus me proposer ce devis pendant</label><select id="dvr-dur">'+dvrDurOpts(dvRelJ())+'</select>'+
+    '<button class="btn primary" type="button" data-act="dvrdone">'+I_CHECK+'Relance faite</button><button class="btn ghost" type="button" data-act="dvrsnz" title="Masquer ce devis pendant la durée choisie, sans noter de relance">Reporter sans relancer</button></div>'+
+  '<div class="df"><button class="btn ghost" type="button" data-dvid="'+esc(d.id)+'">Ouvrir le devis</button><span class="grow"></span>'+
+    '<button class="btn" type="button" data-act="dvrcopy">Copier le texte</button><a class="btn" id="dvrMail" href="#" target="_blank" rel="noopener">Ouvrir dans la messagerie</a></div>',"dvrel");
   dvrMailto()}
 function dvrMailto(){const a=$("#dvrMail");if(!a||!DVR)return;const c=ctById(vOf("dvr-ct"));a.href="mailto:"+encodeURIComponent(c&&c.mail?c.mail:"")+"?subject="+encodeURIComponent(vOf("dvr-obj"))+"&body="+encodeURIComponent($("#dvr-txt").value)}
 function dvrRefill(){const d=S.devis.find(x=>x.id===DVR.id);if(!d)return;const ct=ctById(vOf("dvr-ct")),T=dvrTpl();$("#dvr-obj").value=dvrFill(T.objet,d,ct);$("#dvr-txt").value=dvrFill(T.corps,d,ct);dvrMailto()}
-function dvrDone(){const d=S.devis.find(x=>x.id===DVR.id);if(!d)return;const t=todayISO(),ct=ctById(vOf("dvr-ct"));
-  const o=clone(d);o.relances=(o.relances||[]).concat(t);delete o.relSnooze;put("devis",o);
-  put("actions",anorm({id:uid(),creeLe:now(),compteId:d.compteId,contactId:ct?ct.id:"",type:"mail",date:t,statut:"fait",faitLe:t,objet:"Relance devis"+(d.numero?" n° "+d.numero:""),details:"Objet : "+vOf("dvr-obj")+"\n\n"+$("#dvr-txt").value,resultat:"Envoyé",origine:"relance devis"}));
-  closeModal();commit();toast("Relance notée"+(d.numero?" pour le devis n° "+d.numero:"")+" · prochaine dans "+pl(dvRelJ(),"jour")+" sans réponse")}
+const dvrDur=()=>Math.max(1,parseInt(vOf("dvr-dur"),10)||dvRelJ());
+function dvrDone(){const ct=ctById(vOf("dvr-ct")),o=dvrMark(DVR.id,dvrDur(),"Objet : "+vOf("dvr-obj")+"\n\n"+$("#dvr-txt").value,ct?ct.id:"");if(!o)return;
+  closeModal();commit();toast("Relance notée"+(o.numero?" pour le devis n° "+o.numero:"")+" · reproposé le "+fdate(o.relSnooze)+" s'il est toujours en attente")}
 async function dvrCopy(){const t="Objet : "+vOf("dvr-obj")+"\n\n"+$("#dvr-txt").value;try{await navigator.clipboard.writeText(t);toast("Mail copié : collez-le dans Outlook")}catch(e){const x=$("#dvr-txt");x.focus({preventScroll:true});x.select();toast("Copie bloquée ici : le texte est sélectionné, faites Ctrl+C")}}
 /* capture : le bouton « Relancer » est parfois posé dans une ligne qui ouvre le devis */
-document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("[data-dvrel]");if(!t||(e.target.closest("[data-kopen]")&&t.contains(e.target.closest("[data-kopen]"))))return;e.stopPropagation();e.preventDefault();dvRelOpen(t.dataset.dvrel)},true);
+document.addEventListener("click",e=>{const ok=e.target.closest&&e.target.closest("[data-dvrok]");
+  if(ok){e.stopPropagation();e.preventDefault();const o=dvrMark(ok.dataset.dvrok,dvRelJ(),"Relance notée depuis la liste « Devis à relancer »");if(o){commit();toast("Relance faite"+(o.numero?" · devis n° "+o.numero:"")+" · reproposé le "+fdate(o.relSnooze)+" s'il est toujours en attente")}return}
+  const t=e.target.closest&&e.target.closest("[data-dvrel]");if(!t||(e.target.closest("[data-kopen]")&&t.contains(e.target.closest("[data-kopen]"))))return;e.stopPropagation();e.preventDefault();dvRelOpen(t.dataset.dvrel)},true);
 document.addEventListener("keydown",e=>{if(e.key!=="Enter")return;const t=e.target.closest&&e.target.closest("span[data-dvrel]");if(t){e.stopPropagation();e.preventDefault();dvRelOpen(t.dataset.dvrel)}},true);
 document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("button,a");if(!t)return;const d=t.dataset;
   if(MODAL!=="dvrel"||!DVR)return;
   if(d.act==="dvrdone"){dvrDone();return}
   if(d.act==="dvrcopy"){dvrCopy();return}
-  if(d.act==="dvrsnz"){const x=S.devis.find(y=>y.id===DVR.id);if(!x)return;const o=clone(x);o.relSnooze=addD(todayISO(),7);put("devis",o);closeModal();commit();toast("Relance reportée au "+fdate(o.relSnooze));return}
+  if(d.act==="dvrsnz"){const x=S.devis.find(y=>y.id===DVR.id);if(!x)return;const o=clone(x);o.relSnooze=addD(todayISO(),dvrDur());put("devis",o);closeModal();commit();toast("Relance reportée au "+fdate(o.relSnooze));return}
   if(d.act==="dvrtpl"){S.settings.dvRelTpl={objet:vOf("dvr-obj"),corps:$("#dvr-txt").value};
     /* les valeurs propres à ce devis redeviennent des repères */
     const x=S.devis.find(y=>y.id===DVR.id),ct=ctById(vOf("dvr-ct")),k=x&&kOf(x.compteId),s=x&&dvSum(x),sig=S.settings.signature||"";
