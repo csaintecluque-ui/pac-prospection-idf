@@ -1,6 +1,7 @@
-# PAC Prospection IDF
+# Registre
 
-Application personnelle de suivi de prospection (comptes, contacts, actions, campagnes, mailing, plan d'action, devis, bilan).
+Application personnelle de suivi commercial (comptes, contacts, actions, campagnes, mailing, plan d'action, devis, analyse, bilan), utilisable partout en France.
+L'adresse du dépôt et le nom interne des données (`pac-idf`) restent inchangés : rien à migrer.
 Les données restent dans le navigateur (IndexedDB) : faire régulièrement une sauvegarde complète (Exporter / sauvegarder).
 
 ## Organisation des fichiers

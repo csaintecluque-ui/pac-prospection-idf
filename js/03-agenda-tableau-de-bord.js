@@ -1,4 +1,4 @@
-/* PAC Prospection IDF · CSC — Calendrier, tableau de bord, agenda
+/* Registre · CSC — Calendrier, tableau de bord, agenda
    Fichier 3/18 : les fichiers se chargent dans l'ordre et partagent leurs déclarations. */
 "use strict";
 

@@ -1,4 +1,4 @@
-/* PAC Prospection IDF · CSC — Interface : navigation, fenêtres, actions (RDV, appel, mail…), contacts, comptes
+/* Registre · CSC — Interface : navigation, fenêtres, actions (RDV, appel, mail…), contacts, comptes
    Fichier 2/18 : les fichiers se chargent dans l'ordre et partagent leurs déclarations. */
 "use strict";
 
@@ -236,7 +236,7 @@ function openCompte(id,preset){const src=id?kOf(id):null;kmNew=!src;kmDel=false;
    ta("km-not","Notes sur le compte",KM.notes,4,"Organisation, patrimoine, contrats en place, concurrence…")+
   '</form></div><div class="df">'+(kmNew?'':'<button class="btn danger" type="button" data-act="kdel">Supprimer</button><button class="btn ghost" type="button" data-act="kmerge">Fusionner avec…</button>')+'<span class="grow"></span><button class="btn" type="button" data-act="mclose">Annuler</button><button class="btn primary" type="button" data-act="ksave">'+(kmNew?'Créer le compte':'Enregistrer')+'</button></div>',"compte");
   setTimeout(()=>{const f=$("#km-nom");if(f&&kmNew)f.focus({preventScroll:true})},40)}
-function kmRead(){const k=KM;k.nom=vOf("km-nom");k.segment=$("#km-seg").value;k.typologie=vOf("km-typo");const kf=$("#km-fam");if(kf)k.famille=kf.value;k.dept=$("#km-dept").value;k.ville=vOf("km-ville");k.tel=vOf("km-tel");k.adresse=vOf("km-adr");k.web=vOf("km-web");k.cp=vOf("km-cp");k.siret=vOf("km-siret").replace(/\s/g,"");if(!k.dept&&/^\d{5}$/.test(k.cp)&&DNAME[k.cp.slice(0,2)])k.dept=k.cp.slice(0,2);k.agence=vOf("km-ag");k.apporteur=vOf("km-app");k.notes=vOf("km-not")}
+function kmRead(){const k=KM;k.nom=vOf("km-nom");k.segment=$("#km-seg").value;k.typologie=vOf("km-typo");const kf=$("#km-fam");if(kf)k.famille=kf.value;k.dept=$("#km-dept").value;k.ville=vOf("km-ville");k.tel=vOf("km-tel");k.adresse=vOf("km-adr");k.web=vOf("km-web");k.cp=vOf("km-cp");k.siret=vOf("km-siret").replace(/\s/g,"");if(!k.dept&&cpDept(k.cp))k.dept=cpDept(k.cp);k.agence=vOf("km-ag");k.apporteur=vOf("km-app");k.notes=vOf("km-not")}
 function kSave(){kmRead();const k=KM;
   if(!k.nom){toast("Renseignez le nom du compte.");$("#km-nom").focus({preventScroll:true});return}
   const other=findCompte(k.nom);

@@ -1,4 +1,4 @@
-/* PAC Prospection IDF · CSC — Relances des devis en attente : liste à relancer, mail prêt, relance notée, report
+/* Registre · CSC — Relances des devis en attente : liste à relancer, mail prêt, relance notée, report
    Fichier 13/18 : chargé avant le démarrage, partage les déclarations des fichiers précédents. */
 "use strict";
 

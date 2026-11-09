@@ -1,4 +1,4 @@
-/* PAC Prospection IDF · CSC — Historique clients et familles, stockage IndexedDB, gestion des plans, actions rapides, comptes rendus, tableau de bord personnalisable, bloc-notes, bilan d'activité
+/* Registre · CSC — Historique clients et familles, stockage IndexedDB, gestion des plans, actions rapides, comptes rendus, tableau de bord personnalisable, bloc-notes, bilan d'activité
    Fichier 9/18 : les fichiers se chargent dans l'ordre et partagent leurs déclarations. */
 "use strict";
 
@@ -42,7 +42,7 @@ function hSum(P){const Y=new Date().getFullYear(),y1=String(Y),y0=String(Y-1),an
     if(p.d>lastP)lastP=p.d;
     if(p.e==="DV"&&p.d>=lim){dv.n++;dv.m+=m;if(p.d>dv.d)dv.d=p.d}
     if((p.e==="CO"||p.e==="BL"||p.e==="PF")&&y===y1){co.n++;co.m+=m}
-    if(p.v)vc[p.v]=(vc[p.v]||0)+1;const dp=String(p.cp||"").slice(0,2);if(/^(75|77|78|91|92|93|94|95)$/.test(dp))dc[dp]=(dc[dp]||0)+1});
+    if(p.v)vc[p.v]=(vc[p.v]||0)+1;const dp=cpDept(p.cp);if(dp)dc[dp]=(dc[dp]||0)+1});
   Object.values(ans).forEach(a=>{a.ca=r2(a.ca);a.tp=r2(a.tp)});
   const A0=ans[y0]||{},A1=ans[y1]||{},f0=A0.nf>0,f1=A1.nf>0;
   const st=f1?(A0.np?"actif":"nouveau"):f0?(A1.np?"relance":"perdu"):(co.n?"cmd":"devis");
@@ -260,7 +260,7 @@ async function fillSto(){const el=$("#stoInfo");if(!el)return;let t=STORE==="idb
 async function getCopieV2(){try{const l=localStorage.getItem(BK_KEY);if(l)return l}catch(e){}try{return await appGet("copieV2")||null}catch(e){return null}}
 async function fillBk(){const box=$("#bkBox");if(!box)return;const txt=await getCopieV2();if(!txt||!$("#bkBox"))return;
   box.innerHTML='<div class="addv"><span class="lbl">Copie de l\'ancienne version (V2)</span><p class="hint">Conservée sur ce poste lors du passage en V3, telle qu\'elle était. Vous pouvez la télécharger, puis la supprimer.</p><div class="bar"><button class="btn" type="button" id="bkDl">Télécharger la copie V2</button><button class="btn ghost danger" type="button" id="bkDel">Supprimer la copie V2</button></div></div>';
-  $("#bkDl").onclick=()=>offer("PAC_copie_V2_"+todayISO()+".json",txt);
+  $("#bkDl").onclick=()=>offer("Registre_copie_V2_"+todayISO()+".json",txt);
   const bx=$("#bkDel");bx.onclick=async()=>{if(!bx.classList.contains("armed")){bx.classList.add("armed");bx.textContent="Confirmer : supprimer la copie V2";return}
     try{localStorage.removeItem(BK_KEY)}catch(e){}try{const db=await idb();db.transaction("app","readwrite").objectStore("app").delete("copieV2")}catch(e){}box.innerHTML="";toast("Copie V2 supprimée de ce navigateur")}}
 

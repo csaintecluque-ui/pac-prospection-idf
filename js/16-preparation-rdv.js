@@ -1,4 +1,4 @@
-/* PAC Prospection IDF · CSC — Fiche de préparation de RDV : une page imprimable par compte
+/* Registre · CSC — Fiche de préparation de RDV : une page imprimable par compte
    Fichier 16/18 : chargé avant le démarrage, partage les déclarations des fichiers précédents. */
 "use strict";
 

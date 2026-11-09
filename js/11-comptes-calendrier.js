@@ -1,4 +1,4 @@
-/* PAC Prospection IDF · CSC — Comptes à compléter (extraction / réintégration), glisser-déposer dans le calendrier
+/* Registre · CSC — Comptes à compléter (extraction / réintégration), glisser-déposer dans le calendrier
    Fichier 11/18 : les fichiers se chargent dans l'ordre et partagent leurs déclarations. */
 "use strict";
 
@@ -16,7 +16,7 @@ function enrRows(scope){const f=(ENRS.find(x=>x[0]===scope)||ENRS[0])[2];
     const v={id:k.id,nom:k.nom,type:k.type,famille:FNOM[famOf(k)]||"",segment:k.segment,typologie:k.typologie,siret:k.siret,adresse:k.adresse,cp:k.cp,ville:k.ville,dept:k.dept,tel:k.tel,web:k.web,agence:k.agence,
       ct_nom:p.nom,ct_fon:p.fonction,ct_mail:p.mail,ct_tel:p.tel,notes:k.notes,_dv:d?[d.numero,d.date?fdate(d.date):"",d.objet].filter(Boolean).join(" · "):"",_miss:enrMiss(k).map(x=>ENR_LBL[x]).join(", ")};
     return ENR_COLS.map(c=>v[c.k]==null?"":v[c.k])})}
-async function buildEnrXlsx(rows){await loadExcel();const wb=new ExcelJS.Workbook();wb.creator="PAC Prospection IDF · CSC";wb.created=new Date();
+async function buildEnrXlsx(rows){await loadExcel();const wb=new ExcelJS.Workbook();wb.creator="Registre · CSC";wb.created=new Date();
   /* Feuille simple (sans « tableau » Excel) : relisible quel que soit l'outil qui l'a enregistrée */
   const ws=wb.addWorksheet("Comptes à compléter",{properties:{tabColor:{argb:COPPER}},views:[{state:"frozen",ySplit:1,xSplit:2,activeCell:"C2"}]});
   ws.addRow(ENR_COLS.map(c=>c.h));rows.forEach(r=>ws.addRow(r));
@@ -53,7 +53,7 @@ function enrNorm(o){const v=Object.assign({},o);
   if(v.famille){const f=FAMILLES.find(x=>nh(x[1])===nh(v.famille)||nh(x[0])===nh(v.famille));v.famille=f?f[0]:""}
   if(v.cp){const m=v.cp.replace(/\s/g,"").match(/\d{5}/);v.cp=m?m[0]:v.cp}
   if(v.dept){const m=v.dept.match(/\b(\d{2}|2[AB])\b/);v.dept=m?m[1]:""}
-  if(!v.dept&&v.cp&&DNAME[v.cp.slice(0,2)])v.dept=v.cp.slice(0,2);
+  if(!v.dept&&cpDept(v.cp))v.dept=cpDept(v.cp);
   if(v.siret)v.siret=v.siret.replace(/\s/g,"");return v}
 const ENR_F=["type","famille","segment","typologie","siret","adresse","cp","ville","dept","tel","web","agence","notes"];
 /* Plan : quels champs changent (champs vides seulement, ou aussi les champs remplis si « Remplacer ») */

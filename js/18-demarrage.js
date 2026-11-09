@@ -1,4 +1,4 @@
-/* PAC Prospection IDF · CSC — Événements de l'interface et démarrage de l'application
+/* Registre · CSC — Événements de l'interface et démarrage de l'application
    Fichier 18/18 : les fichiers se chargent dans l'ordre et partagent leurs déclarations. */
 "use strict";
 

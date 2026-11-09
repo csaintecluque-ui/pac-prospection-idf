@@ -1,4 +1,4 @@
-/* PAC Prospection IDF · CSC — Socle : référentiels, utilitaires, modèle de données (comptes, contacts, actions, cibles), migration, enregistrement
+/* Registre · CSC — Socle : référentiels, utilitaires, modèle de données (comptes, contacts, actions, cibles), migration, enregistrement
    Fichier 1/18 : les fichiers se chargent dans l'ordre et partagent leurs déclarations. */
 "use strict";
 
@@ -17,9 +17,14 @@ const MOTIFS=["Accord-cadre concurrent","Pas de besoin","Prix","Pas de réponse"
 const VSTAT=["Planifiée","Réalisée","Annulée"];
 const OSTAT=["Ouvert","Conclue","Perdu"];
 const TYPES=["Client existant","Prospect","Prescripteur"];
-const DEPTS=[["75","Paris"],["77","Seine-et-Marne"],["78","Yvelines"],["91","Essonne"],["92","Hauts-de-Seine"],["93","Seine-Saint-Denis"],["94","Val-de-Marne"],["95","Val-d'Oise"]];
+/* Tous les départements français (métropole, Corse, outre-mer) */
+const DEPTS=[["01","Ain"],["02","Aisne"],["03","Allier"],["04","Alpes-de-Haute-Provence"],["05","Hautes-Alpes"],["06","Alpes-Maritimes"],["07","Ardèche"],["08","Ardennes"],["09","Ariège"],["10","Aube"],["11","Aude"],["12","Aveyron"],["13","Bouches-du-Rhône"],["14","Calvados"],["15","Cantal"],["16","Charente"],["17","Charente-Maritime"],["18","Cher"],["19","Corrèze"],["2A","Corse-du-Sud"],["2B","Haute-Corse"],["21","Côte-d'Or"],["22","Côtes-d'Armor"],["23","Creuse"],["24","Dordogne"],["25","Doubs"],["26","Drôme"],["27","Eure"],["28","Eure-et-Loir"],["29","Finistère"],["30","Gard"],["31","Haute-Garonne"],["32","Gers"],["33","Gironde"],["34","Hérault"],["35","Ille-et-Vilaine"],["36","Indre"],["37","Indre-et-Loire"],["38","Isère"],["39","Jura"],["40","Landes"],["41","Loir-et-Cher"],["42","Loire"],["43","Haute-Loire"],["44","Loire-Atlantique"],["45","Loiret"],["46","Lot"],["47","Lot-et-Garonne"],["48","Lozère"],["49","Maine-et-Loire"],["50","Manche"],["51","Marne"],["52","Haute-Marne"],["53","Mayenne"],["54","Meurthe-et-Moselle"],["55","Meuse"],["56","Morbihan"],["57","Moselle"],["58","Nièvre"],["59","Nord"],["60","Oise"],["61","Orne"],["62","Pas-de-Calais"],["63","Puy-de-Dôme"],["64","Pyrénées-Atlantiques"],["65","Hautes-Pyrénées"],["66","Pyrénées-Orientales"],["67","Bas-Rhin"],["68","Haut-Rhin"],["69","Rhône"],["70","Haute-Saône"],["71","Saône-et-Loire"],["72","Sarthe"],["73","Savoie"],["74","Haute-Savoie"],["75","Paris"],["76","Seine-Maritime"],["77","Seine-et-Marne"],["78","Yvelines"],["79","Deux-Sèvres"],["80","Somme"],["81","Tarn"],["82","Tarn-et-Garonne"],["83","Var"],["84","Vaucluse"],["85","Vendée"],["86","Vienne"],["87","Haute-Vienne"],["88","Vosges"],["89","Yonne"],["90","Territoire de Belfort"],["91","Essonne"],["92","Hauts-de-Seine"],["93","Seine-Saint-Denis"],["94","Val-de-Marne"],["95","Val-d'Oise"],["971","Guadeloupe"],["972","Martinique"],["973","Guyane"],["974","La Réunion"],["976","Mayotte"]];
+/* Pour retrouver un département dans un texte : les noms longs d'abord (« Seine-et-Marne » avant « Marne », « Haute-Loire » avant « Loire ») */
+const DEPTS_LONG=DEPTS.slice().sort((a,b)=>b[1].length-a[1].length);
+/* Code postal → département (Corse 2A/2B, outre-mer sur 3 chiffres) */
+function cpDept(cp){cp=String(cp||"").replace(/\s/g,"");if(!/^\d{5}$/.test(cp))return "";if(cp.startsWith("97"))return DNAME[cp.slice(0,3)]?cp.slice(0,3):"";if(cp.startsWith("20"))return Number(cp)<20200?"2A":"2B";return DNAME[cp.slice(0,2)]?cp.slice(0,2):""}
 const DNAME=Object.fromEntries(DEPTS);const dLabel=d=>d?(DNAME[d]?d+" · "+DNAME[d]:d):"";
-const CAMPAGNE_DEF="PAC IDF – Clients autres BU – T4 2026";
+const CAMPAGNE_DEF="Clients autres BU – T4 2026";
 
 /* ---------- Utilitaires ---------- */
 const $=s=>document.querySelector(s);
@@ -40,7 +45,7 @@ function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTi
 const nh=x=>String(x==null?"":x).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
 const now=()=>new Date().toISOString();
 const S={open:new Set(),mode:"wait",cibles:[],comptes:[],contacts:[],actions:[],plans:[],pac:[],mailing:[],devis:[],settings:{objectif:8},writable:true,view:"actives",tab:"tdb",kid:"",db:null,downloads:null,ver:0};
-const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.25";
+const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.26";
 let STORE="ls"; /* "idb" dès que les données sont dans la base du navigateur */
 const IN_FRAME=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 const TYPE_RANK={"Client existant":3,"Prescripteur":2,"Prospect":1};
@@ -52,7 +57,7 @@ function blank(){
 }
 function guessDept(c){
   const nx=x=>String(x||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
-  const camp=nx(c.campagne);for(const [code,name] of DEPTS){if(camp.includes(nx(name)))return code}
+  const camp=nx(c.campagne);for(const [code,name] of DEPTS_LONG){if(camp.includes(nx(name)))return code}
   const m=String(c.notes||"").match(/(?:Site|Siège)\s*:[^·]*?\b(7[5789]|9[1-5])\d{3}\b/);if(m)return m[1];
   const m2=String(c.notes||"").match(/\b(7[5789]|9[1-5])\d{3}\b/);if(m2)return m2[1];
   return ""}
@@ -170,7 +175,7 @@ function absorbMailing(m){
 /* ---------- Plans du PAC ---------- */
 const PAXES=[["secteur","Par secteur d'activité"],["theme","Par plan d'action"],["famille","Par famille de clients"],["autre","Autre"]];
 function ensurePlans(){
-  if(!S.plans.length){S.plans.push({id:uid(),nom:"PAC IDF "+(S.settings.pacPeriode||new Date().getFullYear()),axe:"theme",titre:S.settings.pacTitre||PAC_TITRE_DEF,periode:S.settings.pacPeriode||String(new Date().getFullYear()),ordre:1,creeLe:now()})}
+  if(!S.plans.length){S.plans.push({id:uid(),nom:"PAC "+(S.settings.pacPeriode||new Date().getFullYear()),axe:"theme",titre:S.settings.pacTitre||PAC_TITRE_DEF,periode:S.settings.pacPeriode||String(new Date().getFullYear()),ordre:1,creeLe:now()})}
   const ids=new Set(S.plans.map(p=>p.id));S.pac.forEach(l=>{if(!ids.has(l.planId))l.planId=S.plans[0].id});
   if(!ids.has(S.settings.planCourant))S.settings.planCourant=S.plans[0].id}
 function curPlan(){ensurePlans();return S.plans.find(p=>p.id===S.settings.planCourant)||S.plans[0]}

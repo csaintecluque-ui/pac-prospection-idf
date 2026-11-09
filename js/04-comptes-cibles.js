@@ -1,4 +1,4 @@
-/* PAC Prospection IDF · CSC — Liste des comptes, fiche compte, cibles et campagnes
+/* Registre · CSC — Liste des comptes, fiche compte, cibles et campagnes
    Fichier 4/18 : les fichiers se chargent dans l'ordre et partagent leurs déclarations. */
 "use strict";
 
@@ -25,7 +25,7 @@ function renderComptes(){
   h+='<div class="filters" style="grid-template-columns:minmax(0,2fr) repeat(5,minmax(0,1fr))"><div class="field-s"><label for="kQ">Rechercher</label><input type="search" id="kQ" value="'+esc(U.q)+'" placeholder="Compte, ville, contact, e-mail, notes…"></div>'+
     '<div class="field-s"><label for="kSec">Secteur</label><select id="kSec" data-kf="sec"><option value="">Tous</option>'+uniq(secteurOf).map(s=>'<option'+(U.sec===s?' selected':'')+'>'+esc(s)+'</option>').join("")+'</select></div>'+
     '<div class="field-s"><label for="kFam">Famille</label><select id="kFam" data-kf="fam"><option value="">Toutes</option>'+FAMILLES.map(([c,n])=>'<option value="'+c+'"'+(U.fam===c?' selected':'')+'>'+esc(n)+'</option>').join("")+'</select></div>'+
-    '<div class="field-s"><label for="kDp">Département</label><select id="kDp" data-kf="dp"><option value="">Tous</option>'+DEPTS.map(([d,n])=>'<option value="'+d+'"'+(U.dp===d?' selected':'')+'>'+esc(d+" · "+n)+'</option>').join("")+'</select></div>'+
+    '<div class="field-s"><label for="kDp">Département</label><select id="kDp" data-kf="dp"><option value="">Tous</option>'+DEPTS.filter(([d])=>d===U.dp||S.comptes.some(k=>k.dept===d)).map(([d,n])=>'<option value="'+d+'"'+(U.dp===d?' selected':'')+'>'+esc(d+" · "+n)+'</option>').join("")+'</select></div>'+
     '<div class="field-s"><label for="kAg">Agence</label><select id="kAg" data-kf="ag"><option value="">Toutes</option>'+uniq(k=>k.agence).map(s=>'<option'+(U.ag===s?' selected':'')+'>'+esc(s)+'</option>').join("")+'</select></div>'+
     '<div class="field-s"><label for="kSort">Trier par</label><select id="kSort" data-kf="sort"><option value="next"'+(so==="next"?' selected':'')+'>Prochaine action</option><option value="last"'+(so==="last"?' selected':'')+'>Dernière activité</option><option value="name"'+(so==="name"?' selected':'')+'>Nom</option><option value="ca"'+(so==="ca"?' selected':'')+'>CA facturé</option><option value="devis"'+(so==="devis"?' selected':'')+'>Devis en attente</option></select></div></div>';
   if(!L.length){h+='<div class="list-wrap"><div class="empty"><h3>Aucun compte dans cette vue</h3><p>Changez de vue ou retirez un filtre.</p></div></div>';el.innerHTML=h;return}

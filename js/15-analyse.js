@@ -1,4 +1,4 @@
-/* PAC Prospection IDF · CSC — Analyse des devis : objectif, tendances mois par mois (N / N-1), prévisionnel,
+/* Registre · CSC — Analyse des devis : objectif, tendances mois par mois (N / N-1), prévisionnel,
    répartition par famille de clients, prestation, département et type de compte
    Fichier 15/18 : chargé avant le démarrage, partage les déclarations des fichiers précédents. */
 "use strict";

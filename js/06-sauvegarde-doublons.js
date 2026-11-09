@@ -1,11 +1,11 @@
-/* PAC Prospection IDF · CSC — Exporter / sauvegarder / restaurer, copie de cibles vers d'autres campagnes, doublons
+/* Registre · CSC — Exporter / sauvegarder / restaurer, copie de cibles vers d'autres campagnes, doublons
    Fichier 6/18 : les fichiers se chargent dans l'ordre et partagent leurs déclarations. */
 "use strict";
 
 /* ---------- Export, sauvegarde, restauration ---------- */
-async function backupJSON(){const h=await hAll();return JSON.stringify(Object.assign({app:"PAC Prospection IDF",version:3,exportLe:now()},snapshot(),{histo:h||{}}))}
+async function backupJSON(){const h=await hAll();return JSON.stringify(Object.assign({app:"Registre",version:3,exportLe:now()},snapshot(),{histo:h||{}}))}
 function markBackup(){S.settings.lastBackup=now();if(S.settings.migrationV3)S.settings.migrationV3.vu=true;lsSave();renderNav()}
-async function doBackup(){if(IN_FRAME&&!$("#exBox"))exportMenu();await offer("PAC_sauvegarde_"+todayISO()+".json",await backupJSON());markBackup();if(S.tab==="tdb")renderTdb()}
+async function doBackup(){if(IN_FRAME&&!$("#exBox"))exportMenu();await offer("Registre_sauvegarde_"+todayISO()+".json",await backupJSON());markBackup();if(S.tab==="tdb")renderTdb()}
 async function restore(text){
   let j;try{j=JSON.parse(text);if(!j||!Array.isArray(j.cibles))throw 0}catch(e){toast("Sauvegarde illisible : choisissez le fichier exporté par cette application.");return}
   const before={c:S.cibles.length,k:S.comptes.length,ct:S.contacts.length,a:S.actions.length,m:S.mailing.length,p:S.pac.length};
@@ -65,23 +65,23 @@ function exportMenu(){
   if(IN_FRAME){xlsxHandoffURL().then(u=>{const a=$("#exX");if(a){a.href=u;a.textContent="Exporter en Excel (.xlsx)";a.removeAttribute("aria-disabled");a.classList.add("primary")}}).catch(()=>{const a=$("#exX");if(a)a.textContent="Export Excel indisponible ici"})}
   else $("#exX").onclick=exportXlsxHere;
   $("#exJ").onclick=doBackup;
-  $("#exC").onclick=()=>offer("PAC_cibles_"+stamp+".csv",csv(rows),tsv(rows));
-  $("#exA").onclick=()=>offer("PAC_actions_"+stamp+".csv",csv(arows),tsv(arows));
-  $("#exK").onclick=()=>offer("PAC_comptes_"+stamp+".csv",csv(krows),tsv(krows));
-  $("#exT").onclick=()=>offer("PAC_contacts_"+stamp+".csv",csv(crows),tsv(crows));
+  $("#exC").onclick=()=>offer("Registre_cibles_"+stamp+".csv",csv(rows),tsv(rows));
+  $("#exA").onclick=()=>offer("Registre_actions_"+stamp+".csv",csv(arows),tsv(arows));
+  $("#exK").onclick=()=>offer("Registre_comptes_"+stamp+".csv",csv(krows),tsv(krows));
+  $("#exT").onclick=()=>offer("Registre_contacts_"+stamp+".csv",csv(crows),tsv(crows));
   const em=$("#exM");if(em)em.onclick=()=>offer("Mailing_"+stamp+".csv",csv(mrows),tsv(mrows));
   $("#exCopy").onclick=async()=>{const t=$("#exOut");t.focus({preventScroll:true});t.select();
     try{await navigator.clipboard.writeText(t.value);toast("Copié")}
     catch(e){try{if(document.execCommand("copy")){toast("Copié");return}}catch(_){}toast("Le texte est sélectionné : faites Ctrl+C.")}};
   const im=$("#imJ");im.onchange=()=>{const f=im.files[0];if(!f)return;const r=new FileReader();r.onload=()=>restore(r.result);r.readAsText(f)};
   $("#imBtn").onclick=()=>{const v=$("#imTxt").value.trim();if(!v){toast("Collez d'abord le texte de la sauvegarde.");return}restore(v)};
-  const bd=$("#bkDl");if(bd)bd.onclick=()=>{try{offer("PAC_copie_V2_"+stamp+".json",localStorage.getItem(BK_KEY)||"")}catch(e){toast("Copie illisible.")}};
+  const bd=$("#bkDl");if(bd)bd.onclick=()=>{try{offer("Registre_copie_V2_"+stamp+".json",localStorage.getItem(BK_KEY)||"")}catch(e){toast("Copie illisible.")}};
   const bx=$("#bkDel");if(bx)bx.onclick=()=>{if(!bx.classList.contains("armed")){bx.classList.add("armed");bx.textContent="Confirmer : supprimer la copie V2";return}try{localStorage.removeItem(BK_KEY)}catch(e){}toast("Copie V2 supprimée de ce navigateur");exportMenu()};
 }
 
 /* ---------- Copie vers d'autres campagnes (clients multi-départements) ---------- */
 let CP=null;
-function deptFromCamp(name){const n=nh(name);for(const [code,dn] of DEPTS){if(n.includes(nh(dn))||new RegExp("(^| )"+code+"( |$)").test(n))return code}return ""}
+function deptFromCamp(name){const n=nh(name);for(const [code,dn] of DEPTS_LONG){if(n.includes(nh(dn)))return code}for(const [code] of DEPTS){if(new RegExp("(^| )"+code.toLowerCase()+"( |$)").test(n))return code}return ""}
 function copyMenu(src){
   CP=clone(src);const k=nh(src.compte);
   const camps=[...new Set([CAMPAGNE_DEF,...S.cibles.map(x=>x.campagne).filter(Boolean)])].filter(x=>x!==src.campagne).sort((a,b)=>a.localeCompare(b,"fr"));
@@ -92,7 +92,7 @@ function copyMenu(src){
    '<div class="f"><span class="lbl">Campagnes de destination</span>'+
     (camps.length?'<div class="cpl">'+camps.map((cp,i)=>{const dup=has(cp),dd=deptFromCamp(cp);return '<label'+(dup?' class="dis"':'')+'><input type="checkbox" data-cp="'+esc(cp)+'"'+(dup?' disabled':'')+'><span class="grow">'+esc(cp.replace(/^PAC IDF – /,""))+'</span>'+(dup?'<span class="sub">déjà présente</span>':(dd?'<span class="ty">'+esc(dd)+'</span>':''))+'</label>'}).join("")+'</div>':'<p class="hint">Aucune autre campagne pour l\'instant : saisissez-en une ci-dessous.</p>')+
    '</div>'+
-   '<div class="row"><div class="f"><label class="lbl" for="cp-new">Ou nouvelle campagne</label><input type="text" id="cp-new" placeholder="PAC IDF – Prescripteurs – Yvelines"></div>'+
+   '<div class="row"><div class="f"><label class="lbl" for="cp-new">Ou nouvelle campagne</label><input type="text" id="cp-new" placeholder="Prescripteurs – Yvelines"></div>'+
    '<div class="f"><label class="lbl" for="cp-dept">Département de la nouvelle campagne</label><select id="cp-dept"><option value="">Déduit du nom</option>'+DEPTS.map(([k2,n])=>'<option value="'+k2+'">'+esc(k2+" · "+n)+'</option>').join("")+'</select></div></div>'+
    '<div class="f"><span class="lbl">Reprendre</span><div class="checks">'+
     '<label><input type="checkbox" id="cp-notes" checked>Notes</label>'+

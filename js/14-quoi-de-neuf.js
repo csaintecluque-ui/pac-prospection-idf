@@ -1,4 +1,4 @@
-/* PAC Prospection IDF · CSC — « Quoi de neuf » après chaque import de l'export Excel des pièces
+/* Registre · CSC — « Quoi de neuf » après chaque import de l'export Excel des pièces
    Fichier 14/18 : chargé avant le démarrage, partage les déclarations des fichiers précédents. */
 "use strict";
 

@@ -1,10 +1,10 @@
-/* PAC Prospection IDF · CSC — Plan d'action commercial (PAC) : lignes, plans, import / export, impression
+/* Registre · CSC — Plan d'action commercial (PAC) : lignes, plans, import / export, impression
    Fichier 5/18 : les fichiers se chargent dans l'ordre et partagent leurs déclarations. */
 "use strict";
 
 /* ---------- PAC : plan d'action commercial (format PAC France : élément, objectif, actions T1-T4, suivi, résultats, correctif) ---------- */
 const PDEC=[["Continuer","ok"],["Modifier","warn"],["Reporter","info"],["Arrêter","bad"]];
-const PAC_TITRE_DEF="Plan d'action commercial Diagnostic – Île-de-France";
+const PAC_TITRE_DEF="Plan d'action commercial";
 let P=null,pIsNew=false,pDelArmed=false,PIMP=null;
 const PPRIO=[["1","P1","Haute"],["2","P2","Moyenne"],["3","P3","Basse"]],PCLS={"1":"A","2":"B","3":"C"};
 const toPrio=v=>{const n=nh(v);if(/^p ?1$|haute|forte|elevee/.test(n))return "1";if(/^p ?2$|moyenne|normale/.test(n))return "2";if(/^p ?3$|basse|faible/.test(n))return "3";return ""};
@@ -163,12 +163,12 @@ function pacPrint(){
   window.addEventListener("afterprint",off);window.print();setTimeout(off,1500);
 }
 
-/* Lignes types du PAC IDF (axes de conquête) — reliées automatiquement aux campagnes dont le nom correspond */
+/* Lignes types du PAC (axes de conquête) — reliées automatiquement aux campagnes dont le nom correspond */
 const PAC_SEED="axes-idf-1";
 const PAC_MODELES=[
  {element:"Industrie",re:/industri/,
   objectif:"Ouvrir des comptes industriels en gré à gré sur les diagnostics avant travaux et de maintenance",
-  descriptif:"Cibler les sites industriels d'Île-de-France, en priorité les clients des autres BU (Équipements, Environnement), sur l'amiante avant travaux et arrêts techniques, le DTA, le plomb et le PEMD avant démolition.",
+  descriptif:"Cibler les sites industriels du secteur, en priorité les clients des autres BU (Équipements, Environnement), sur l'amiante avant travaux et arrêts techniques, le DTA, le plomb et le PEMD avant démolition.",
   t1:"Constituer la liste des sites industriels clients des autres BU, par département\nIdentifier les responsables travaux / maintenance / HSE",
   t2:"Visites ciblées avec les chefs d'agence et les apporteurs BU\nPrésenter l'offre avant travaux et arrêts techniques",
   t3:"Proposer un BPU ou un accord-cadre annuel aux sites visités\nAnticiper les arrêts techniques d'été",
@@ -189,7 +189,7 @@ const PAC_MODELES=[
  {element:"Promoteurs",re:/promot/,
   objectif:"Devenir le diagnostiqueur de référence des promoteurs sur les opérations de démolition et de réhabilitation",
   descriptif:"Accompagner les promoteurs dès l'acquisition foncière : diagnostics avant acquisition, amiante avant démolition, plomb, PEMD. S'appuyer sur les clients promoteurs de la BU Construction.",
-  t1:"Identifier les promoteurs actifs en IDF et leurs opérations en cours avec la BU Construction",
+  t1:"Identifier les promoteurs actifs sur le secteur et leurs opérations en cours avec la BU Construction",
   t2:"Rendez-vous avec les directions techniques et de programmes\nProposer un BPU promoteur",
   t3:"Offre packagée « avant acquisition / avant démolition »\nRéponses aux consultations",
   t4:"Bilan des référencements obtenus, préparation des renouvellements",
@@ -199,7 +199,7 @@ const PAC_MODELES=[
  {element:"Foncières",re:/fonci|investiss|asset/,
   objectif:"Se référencer chez les foncières et gestionnaires d'actifs",
   descriptif:"Couvrir le patrimoine tertiaire, logistique et résidentiel des foncières : DTA et mises à jour, repérages avant travaux preneurs, DPE tertiaire, diagnostics avant cession d'actifs ou de portefeuilles. Modèle : contrat-cadre GECINA.",
-  t1:"Cartographier les foncières, asset et property managers présents en IDF\nFinaliser le contrat-cadre GECINA",
+  t1:"Cartographier les foncières, asset et property managers présents sur le secteur\nFinaliser le contrat-cadre GECINA",
   t2:"Rendez-vous directions techniques et property managers\nInscriptions sur les plateformes prestataires",
   t3:"Réponses aux consultations et BPU\nOffre data room pour les cessions de portefeuilles",
   t4:"Bilan des référencements, revue annuelle avec les comptes signés",

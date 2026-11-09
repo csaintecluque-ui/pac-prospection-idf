@@ -1,4 +1,4 @@
-/* PAC Prospection IDF · CSC — Suivi des devis : page, fenêtre, tableau de bord, bilan, imports Word / PDF / Excel
+/* Registre · CSC — Suivi des devis : page, fenêtre, tableau de bord, bilan, imports Word / PDF / Excel
    Fichier 10/18 : les fichiers se chargent dans l'ordre et partagent leurs déclarations. */
 "use strict";
 
@@ -484,7 +484,7 @@ function dvFromImport(r,fname){const mt=dvMatchCompte(r.client),k=mt&&mt.k;
   const d=Object.assign(dvblank(),{id:uid(),creeLe:now(),numero:r.numero,date:r.date||todayISO(),objet:[r.objet,r.site].filter(Boolean).join(" – "),statut:"attente",lignes:r.lignes.map(l=>Object.assign({},l))});
   d.notes=["Importé depuis « "+fname+" »",r.agence?r.agence.replace(/\s*[-–]\s*socotec.*$/i,""):"",r.client&&k&&!mt.sure?"Client du devis : "+r.client:""].filter(Boolean).join(" · ");
   d.compteId=k?k.id:"";d._k=k?k.nom:r.client;
-  d._imp={file:fname,client:r.client,match:k?(mt.sure?"exact":"proche"):"nouveau",ct:r.contact,init:{adresse:r.adresse,cp:r.cp,ville:r.ville,dept:r.cp&&DNAME[r.cp.slice(0,2)]?r.cp.slice(0,2):"",origine:"devis",siret:r.siret||""},prelSur:r.prelSur};
+  d._imp={file:fname,client:r.client,match:k?(mt.sure?"exact":"proche"):"nouveau",ct:r.contact,init:{adresse:r.adresse,cp:r.cp,ville:r.ville,dept:cpDept(r.cp),origine:"devis",siret:r.siret||""},prelSur:r.prelSur};
   if(k&&r.contact){const c=findContact(k.id,r.contact);if(c)d.contactId=c.id}
   return d}
 async function dvReadFile(f){if(/\.pdf$/i.test(f.name))return dvReadPdf(f);if(!/\.docx$/i.test(f.name))throw new Error("format");
@@ -636,7 +636,7 @@ function dvxSumHTML(){const X=DVX;if(!X.sel.size)return '<div class="empty" styl
    '<p class="hint" style="margin:0">Sans doublon : un n° de devis, de commande ou de facture déjà suivi met à jour le devis existant. Le détail des prestations n\'est pas dans l\'export : chaque devis porte son montant global, et vous pouvez ensuite importer le devis Word pour le détailler.</p>'}
 function dvxGo(){const X=DVX,P=dvxPlan(X.groups,[...X.sel]);S.settings.dvApporteurs=[...X.sel];
   let nk=0;const KI=dvxIndex(),QI=[],QK=[];
-  P.add.forEach(({g})=>{let k=KI.get(dvxKey(g.tiers));if(!k){k=ensureCompte(g.tiers||"Client sans nom",{type:g.st==="accepte"?"Client existant":"Prospect",ville:g.ville,cp:/^\d{5}$/.test(g.cp)?g.cp:"",dept:g.cp&&DNAME[g.cp.slice(0,2)]?g.cp.slice(0,2):"",origine:"devis excel"});QK.push(k.nom);KI.set(dvxKey(k.nom),k);nk++}
+  P.add.forEach(({g})=>{let k=KI.get(dvxKey(g.tiers));if(!k){k=ensureCompte(g.tiers||"Client sans nom",{type:g.st==="accepte"?"Client existant":"Prospect",ville:g.ville,cp:/^\d{5}$/.test(g.cp)?g.cp:"",dept:cpDept(g.cp),origine:"devis excel"});QK.push(k.nom);KI.set(dvxKey(k.nom),k);nk++}
     else if(g.st==="accepte"&&(TYPE_RANK[k.type]||0)<TYPE_RANK["Client existant"])k.type="Client existant";
     const o=dvxNew(g,k);put("devis",o);QI.push({id:o.id,n:1,e:qnDiff(null,o,true)})});
   P.upd.forEach(({d,g})=>{const o=dvxMerge(clone(d),g),e=qnDiff(dvnorm(clone(d)),o,false);put("devis",o);if(e.length)QI.push({id:o.id,e})});

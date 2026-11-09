@@ -1,4 +1,4 @@
-/* PAC Prospection IDF · CSC — feuille de style */
+/* Registre · CSC — feuille de style */
 /* Layout : bandeau d'en-tête encre (sceau CSC), onglets Cibles / Tableau de bord, liste dense + fiche cible en panneau latéral. */
 :root{
   --bg:#F6F6F4; --surface:#FFFFFF; --surface-2:#EFEEEB; --line:#E0DDD7; --fg:#1E1B18; --muted:#69625B;

@@ -1,10 +1,10 @@
-/* PAC Prospection IDF · CSC — Sauvegarde automatique dans un dossier du PC
+/* Registre · CSC — Sauvegarde automatique dans un dossier du PC
    (Chrome ou Edge sur ordinateur, appli ouverte dans un onglet : Notion n'autorise pas l'accès aux dossiers)
    Fichier chargé après 11 et avant 19-demarrage.
    Fichier 12/18 : chargé avant le démarrage, partage les déclarations des fichiers précédents. */
 "use strict";
 
-const AB_OK=!!window.showDirectoryPicker&&!IN_FRAME,AB_KEEP=10,AB_RE=/^PAC_sauvegarde_\d{4}-\d{2}-\d{2}_\d{2}h\d{2}\.json$/;
+const AB_OK=!!window.showDirectoryPicker&&!IN_FRAME,AB_KEEP=10,AB_RE=/^(Registre|PAC)_sauvegarde_\d{4}-\d{2}-\d{2}_\d{2}h\d{2}\.json$/;
 let abDir=null,abBusy=false,abChecked=false;
 const abCfg=()=>Object.assign({on:false,nom:"",le:"",fichier:""},S.settings.autoBk||{});
 async function abLoad(){if(!AB_OK)return null;if(abDir)return abDir;try{abDir=await appGet("bkDir")||null}catch(e){abDir=null}return abDir}
@@ -19,7 +19,7 @@ async function abRun(force){if(!AB_OK||abBusy)return false;const c=abCfg();if(!c
   if(!force&&c.le&&Date.now()-new Date(c.le).getTime()<20*3600e3)return false;
   if(await abPerm(!!force)!=="granted"){abWake(true);return false}
   abBusy=true;
-  try{const d=abDir,t=new Date(),nm="PAC_sauvegarde_"+todayISO()+"_"+pad(t.getHours())+"h"+pad(t.getMinutes())+".json";
+  try{const d=abDir,t=new Date(),nm="Registre_sauvegarde_"+todayISO()+"_"+pad(t.getHours())+"h"+pad(t.getMinutes())+".json";
     const fh=await d.getFileHandle(nm,{create:true}),w=await fh.createWritable();await w.write(await backupJSON());await w.close();
     const L=[];for await(const [n,h] of d.entries()){if(h.kind==="file"&&AB_RE.test(n))L.push(n)}
     L.sort();while(L.length>AB_KEEP){const n=L.shift();try{await d.removeEntry(n)}catch(e){}}

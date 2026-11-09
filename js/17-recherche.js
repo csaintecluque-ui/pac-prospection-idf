@@ -1,4 +1,4 @@
-/* PAC Prospection IDF · CSC — Recherche globale (Ctrl+K) : comptes, contacts, devis, actions, pages
+/* Registre · CSC — Recherche globale (Ctrl+K) : comptes, contacts, devis, actions, pages
    Fichier 17/18 : chargé avant le démarrage, partage les déclarations des fichiers précédents. */
 "use strict";
 

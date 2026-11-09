@@ -1,4 +1,4 @@
-/* PAC Prospection IDF · CSC — Mailing : listes, envoi, relances, import
+/* Registre · CSC — Mailing : listes, envoi, relances, import
    Fichier 7/18 : les fichiers se chargent dans l'ordre et partagent leurs déclarations. */
 "use strict";
 

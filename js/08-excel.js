@@ -1,4 +1,4 @@
-/* PAC Prospection IDF · CSC — Export Excel (.xlsx), liens d'export depuis Notion, import Excel / CSV des cibles
+/* Registre · CSC — Export Excel (.xlsx), liens d'export depuis Notion, import Excel / CSV des cibles
    Fichier 8/18 : les fichiers se chargent dans l'ordre et partagent leurs déclarations. */
 "use strict";
 
@@ -14,7 +14,7 @@ async function offer(filename,data,pasteText){
   }
   const box=$("#exBox");box.hidden=false;
   $("#exMsg").textContent=filename.endsWith(".json")
-    ?"Notion bloque les téléchargements. Copiez ce texte et collez-le dans un fichier texte que vous enregistrez (par exemple PAC_sauvegarde.txt). Pour restaurer, recollez-le plus bas."
+    ?"Notion bloque les téléchargements. Copiez ce texte et collez-le dans un fichier texte que vous enregistrez (par exemple Registre_sauvegarde.txt). Pour restaurer, recollez-le plus bas."
     :"Notion bloque les téléchargements. Copiez ce tableau et collez-le dans une feuille Excel vierge : les colonnes se placent toutes seules.";
   const ta=$("#exOut");ta.value=pasteText!=null?pasteText:data;ta.focus({preventScroll:true});ta.select();
 }
@@ -31,7 +31,7 @@ const STAGE_FILL={a_qualifier:"FFECEAE6",cible:"FFE0EAF6",rdv:"FFFBEED3",visite:
 const EUR='#,##0 "€"',DFMT="dd/mm/yyyy",PCT="0%";
 
 function pageSetup(ws,title){ws.pageSetup={orientation:"landscape",paperSize:9,fitToPage:true,fitToWidth:1,fitToHeight:0,margins:{left:.4,right:.4,top:.6,bottom:.6,header:.3,footer:.3},printTitlesRow:"1:1"};
-  ws.headerFooter={oddHeader:"&L&\"Calibri,Bold\"PAC Prospection IDF&R"+title,oddFooter:"&LExport du "+new Date().toLocaleDateString("fr-FR")+"&RPage &P / &N"}}
+  ws.headerFooter={oddHeader:"&L&\"Calibri,Bold\"Registre&R"+title,oddFooter:"&LExport du "+new Date().toLocaleDateString("fr-FR")+"&RPage &P / &N"}}
 function headStyle(ws,n){const r=ws.getRow(1);r.height=32;for(let i=1;i<=n;i++){const c=r.getCell(i);
   c.font={bold:true,color:{argb:PARCH},name:"Calibri",size:11};c.fill={type:"pattern",pattern:"solid",fgColor:{argb:INK}};
   c.alignment={vertical:"middle",horizontal:"center",wrapText:true};c.border={bottom:{style:"medium",color:{argb:COPPER}}}}
@@ -110,7 +110,7 @@ function addPacSheet(wb,name,plan,pac,cibles){
     row.height=Math.min(409,Math.max(30,Math.max(...est)*13.5+6));
   });
   wp.pageSetup={orientation:"landscape",paperSize:9,fitToPage:true,fitToWidth:1,fitToHeight:0,margins:{left:.3,right:.3,top:.5,bottom:.5,header:.25,footer:.25},printTitlesRow:"3:4"};
-  wp.headerFooter={oddFooter:"&LPAC Prospection IDF · CSC&RPage &P / &N"};
+  wp.headerFooter={oddFooter:"&LRegistre · CSC&RPage &P / &N"};
 }
 /* Sections du classeur : cochées dans « Exporter » (toutes par défaut) ; « depuis le » limite les actions et les devis */
 const XL_SEC=[["pac","Plan d'action (PAC)"],["syn","Synthèse des indicateurs"],["cib","Cibles et campagnes"],["act","Actions (RDV, appels, mails, rappels)"],["cpt","Comptes"],["ctc","Contacts"],["dev","Devis (une ligne par prestation)"],["dva","Analyse des devis (mois par mois)"],["mai","Mailing"]];
@@ -130,7 +130,7 @@ document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest
 async function buildXlsx(cibles,settings,pac,mailing){mailing=mailing||[];settings=settings||{};
   const SEC=xlSecs(settings),X=k=>SEC.has(k),DEP=settings.xlDepuis||"";if(!SEC.size)throw new Error("aucune section");
   await loadExcel();
-  const wb=new ExcelJS.Workbook();wb.creator="PAC Prospection IDF · CSC";wb.created=new Date();
+  const wb=new ExcelJS.Workbook();wb.creator="Registre · CSC";wb.created=new Date();
   /* ---- PAC : un onglet par plan ---- */
   const plans=S.plans.filter(p=>pac.some(l=>l.planId===p.id)),used=new Set();
   if(X("pac"))plans.forEach(p=>{let nm=plans.length>1?("PAC – "+p.nom).replace(/[\[\]:*?\/\\]/g," ").slice(0,31):"PAC";while(used.has(nm))nm=nm.slice(0,28)+" "+used.size;used.add(nm);addPacSheet(wb,nm,p,pac.filter(l=>l.planId===p.id),cibles)});
@@ -203,8 +203,8 @@ async function buildXlsx(cibles,settings,pac,mailing){mailing=mailing||[];settin
   const opps=order.filter(c=>c.opp.creee),sumOpp=st=>opps.filter(c=>c.opp.statut===st).reduce((s,c)=>s+(Number(c.opp.montant)||0),0);
   const visited=order.filter(c=>visitsDone(c)>0);
   sy.columns=[{width:3},{width:42},{width:16},{width:18},{width:18},{width:3}];
-  const T=sy.getCell("B2");T.value="PAC Prospection IDF";T.font={name:"Calibri",size:18,bold:true,color:{argb:INK}};
-  const ST=sy.getCell("B3");ST.value="Diagnostic Île-de-France · export du "+new Date().toLocaleDateString("fr-FR",{day:"2-digit",month:"long",year:"numeric"});ST.font={name:"Calibri",size:10,color:{argb:GREYTXT}};
+  const T=sy.getCell("B2");T.value="Registre";T.font={name:"Calibri",size:18,bold:true,color:{argb:INK}};
+  const ST=sy.getCell("B3");ST.value="Export du "+new Date().toLocaleDateString("fr-FR",{day:"2-digit",month:"long",year:"numeric"});ST.font={name:"Calibri",size:10,color:{argb:GREYTXT}};
   sy.getRow(2).height=28;
   let r=5;
   const section=(title,heads)=>{const row=sy.getRow(r);row.height=22;
@@ -253,7 +253,7 @@ async function buildXlsx(cibles,settings,pac,mailing){mailing=mailing||[];settin
     line("Reste à envoyer",[mailing.filter(m=>!m.envoye&&ok(m)&&m.mail).length]);line("Relances à faire",[mailing.filter(m=>m.envoye&&m.relance&&!m.relanceFaite&&m.relance<=t).length])}
   r++;const note=sy.getRow(r).getCell(2);note.value=(NF?"Les chiffres des cibles se recalculent si vous modifiez l'onglet Cibles. ":"")+"Onglets : "+wb.worksheets.map(w=>w.name).join(", ")+"."+(DEP?" Actions et devis depuis le "+fdate(DEP)+".":"");note.font={name:"Calibri",size:9.5,italic:true,color:{argb:GREYTXT}};note.alignment={wrapText:true};sy.getRow(r).height=42;
   sy.pageSetup={orientation:"portrait",paperSize:9,fitToPage:true,fitToWidth:1,fitToHeight:1,margins:{left:.5,right:.5,top:.6,bottom:.6,header:.3,footer:.3}};
-  sy.headerFooter={oddFooter:"&LPAC Prospection IDF · CSC&RExport du "+new Date().toLocaleDateString("fr-FR")};
+  sy.headerFooter={oddFooter:"&LRegistre · CSC&RExport du "+new Date().toLocaleDateString("fr-FR")};
   }
   if(!wb.worksheets.length){const w=wb.addWorksheet("Export");w.getCell("A1").value="Aucune donnée pour les onglets choisis."}
   const buf=await wb.xlsx.writeBuffer();
@@ -262,7 +262,7 @@ async function buildXlsx(cibles,settings,pac,mailing){mailing=mailing||[];settin
 function saveBlob(blob,filename){const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000)}
 const b64enc=str=>{const bytes=new TextEncoder().encode(str);let bin="";for(let i=0;i<bytes.length;i+=0x8000)bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));return btoa(bin).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")};
 const b64dec=s=>{s=s.replace(/-/g,"+").replace(/_/g,"/");while(s.length%4)s+="=";const bin=atob(s);const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new TextDecoder().decode(u)};
-const xlName=()=>"PAC_Prospection_IDF_"+todayISO()+".xlsx";
+const xlName=()=>"Registre_"+todayISO()+".xlsx";
 async function packData(obj){const txt=JSON.stringify(obj);
   if(window.CompressionStream){const buf=new Uint8Array(await new Response(new Blob([txt]).stream().pipeThrough(new CompressionStream("deflate-raw"))).arrayBuffer());let bin="";for(let i=0;i<buf.length;i+=0x8000)bin+=String.fromCharCode.apply(null,buf.subarray(i,i+0x8000));return "z"+btoa(bin).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}
   return "j"+b64enc(txt)}
@@ -291,7 +291,7 @@ async function handoffMode(){
     return true}
   if(location.hash==="#modele"){history.replaceState(null,"",location.pathname+location.search);bare();
     $("#app").innerHTML='<div class="empty" style="padding:60px 20px"><h3 id="hoT">Préparation du modèle…</h3><p id="hoP"></p><button class="btn primary" type="button" id="hoBtn" hidden>Télécharger à nouveau</button></div>';
-    try{const blob=await buildTemplate();const go=()=>saveBlob(blob,"PAC_modele_import.xlsx");go();$("#hoT").textContent="Modèle d'import téléchargé";
+    try{const blob=await buildTemplate();const go=()=>saveBlob(blob,"Registre_modele_import.xlsx");go();$("#hoT").textContent="Modèle d'import téléchargé";
       $("#hoP").textContent="Remplissez l'onglet Import, puis revenez dans Notion : Importer, et choisissez le fichier. Vous pouvez fermer cet onglet.";const b=$("#hoBtn");b.hidden=false;b.onclick=go}
     catch(e){$("#hoT").textContent="Modèle indisponible";$("#hoP").textContent="Vérifiez la connexion internet et réessayez."}
     return true}
@@ -386,7 +386,7 @@ function toCible(raw){const c={};
   ["compte","contact","fonction","tel","mail","agence","apporteur","campagne","prochaineLibelle","accompagnant","motif","notes"].forEach(k=>{const v=str(k);if(v)c[k]=v});
   if(raw.type)c.type=mapType(raw.type)||"";if(!c.type)delete c.type;
   {const dsrc=raw.dept!=null?raw.dept:null;let d="";
-   if(dsrc!=null){const t=String(dsrc).trim();const m=t.match(/^(\d{2})/);if(m)d=m[1];else{const hit=DEPTS.find(([k,n])=>nh(n)===nh(t));if(hit)d=hit[0]}}
+   if(dsrc!=null){const t=String(dsrc).trim();const m=t.match(/^(97\d|2[ab]|\d{2})\b/i);if(m&&DNAME[m[1].toUpperCase()])d=m[1].toUpperCase();else{const hit=DEPTS.find(([k,n])=>nh(n)===nh(t));if(hit)d=hit[0]}}
    if(!d&&raw.cp!=null){const m=String(raw.cp).trim().match(/^(\d{2})\d{3}$/);if(m)d=m[1]}
    if(d)c.dept=d}
   if(raw.segment)c.segment=mapSegment(raw.segment);if(raw.source)c.source=mapSource(raw.source);
@@ -410,7 +410,7 @@ function toCible(raw){const c={};
     c.notes=[c.notes,line].filter(Boolean).join("\n");
     c.source="Lead Athena";
     if(!c.type)c.type=str("compteAthena")?"Client existant":"Prospect";
-    if(!c.campagne)c.campagne="PAC IDF – Leads Athena";
+    if(!c.campagne)c.campagne="Leads Athena";
     if(!c.prochaineAction&&!c.prochaineLibelle){c.prochaineAction=todayISO();c.prochaineLibelle="Traiter le lead"+(titre?" : "+titre:"")}
     if(lid)c.leadIds=[lid];
   }
@@ -491,7 +491,7 @@ function importMenu(){
   '<div id="imPrev" hidden></div>'+
   '</div>';
   $("#scrim").hidden=false;d.hidden=false;
-  const mb=$("#imModel");if(mb)mb.onclick=async()=>{try{saveBlob(await buildTemplate(),"PAC_modele_import.xlsx");toast("Modèle téléchargé")}catch(e){toast("Modèle indisponible : vérifiez la connexion internet.")}};
+  const mb=$("#imModel");if(mb)mb.onclick=async()=>{try{saveBlob(await buildTemplate(),"Registre_modele_import.xlsx");toast("Modèle téléchargé")}catch(e){toast("Modèle indisponible : vérifiez la connexion internet.")}};
   $("#imFile").onchange=async e=>{const f=e.target.files[0];if(!f)return;const pv=$("#imPrev");pv.hidden=false;pv.innerHTML='<p class="hint">Lecture du fichier…</p>';
     try{IMP=await parseImportFile(f);drawImportPreview(f.name)}catch(err){pv.innerHTML='<div class="notice warn"><b>Fichier illisible.</b> Enregistrez-le au format .xlsx ou .csv et réessayez. Si le fichier est un .xlsx, vérifiez la connexion internet.</div>'}};
 }
@@ -579,7 +579,7 @@ async function runImport(){
   closeDrawer();S.view="toutes";render();
 }
 async function buildTemplate(){
-  await loadExcel();const wb=new ExcelJS.Workbook();wb.creator="PAC Prospection IDF · CSC";
+  await loadExcel();const wb=new ExcelJS.Workbook();wb.creator="Registre · CSC";
   const ws=wb.addWorksheet("Import",{properties:{tabColor:{argb:COPPER}}});
   const TC=[["Client *",32],["Type",16],["Segment",28],["Agence",15],["BU d'origine",22],["Apporteur interne",22],["Source",18],["Diagnostics visés",30],["Potentiel annuel",15],["Priorité",9],["Étape",17],["Prochaine action",14],["Action à faire",32],["Contact",22],["Fonction",20],["Téléphone",15],["E-mail",28],["Campagne",30],["Notes",45],["Département",18]];
   ws.columns=TC.map(([h,w])=>({header:h,width:w}));
@@ -592,7 +592,7 @@ async function buildTemplate(){
   for(let r=2;r<=500;r++){Object.entries(dv).forEach(([col,f])=>{ws.getCell(col+r).dataValidation={type:"list",allowBlank:true,formulae:f,showErrorMessage:false}});
     ws.getCell("I"+r).numFmt='#,##0 "€"';ws.getCell("L"+r).numFmt=DFMT}
   const g=wb.addWorksheet("Mode d'emploi",{views:[{showGridLines:false}]});g.getColumn(1).width=3;g.getColumn(2).width=110;
-  const lines=[["Modèle d'import — PAC Prospection IDF",{size:16,bold:true}],["Une ligne par entreprise dans l'onglet Import. Seule la colonne Client est obligatoire.",{}],["",{}],
+  const lines=[["Modèle d'import — Registre",{size:16,bold:true}],["Une ligne par entreprise dans l'onglet Import. Seule la colonne Client est obligatoire.",{}],["",{}],
    ["Client : le nom exact du compte dans Athena. Il sert à reconnaître une entreprise déjà présente dans l'application.",{}],
    ["Type : Client existant, Prospect ou Prescripteur (liste déroulante). Vide = Prospect.",{}],
    ["BU d'origine et Diagnostics visés : plusieurs valeurs possibles, séparées par des virgules (ex. Amiante, Plomb, DPE).",{}],
