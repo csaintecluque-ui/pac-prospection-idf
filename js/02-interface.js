@@ -70,12 +70,15 @@ function routeFromHash(){const h=location.hash;if(!h.startsWith("#!")){S.tab="td
   const [k,arg]=h.slice(2).split(":");S.tab=VIEWS_ALL.includes(k)?k:"tdb";if(S.tab==="compte")S.kid=arg||"";
   VIEWS_ALL.forEach(n=>{const v=$("#view-"+n);if(v)v.hidden=n!==S.tab})}
 window.addEventListener("popstate",()=>{routeFromHash();render()});
+/* Le rafraîchissement d'une page ne doit jamais faire bouger le défilement (seul showTab remonte en haut) */
 function render(){
   if(!$("#nav"))return;
+  const sy=window.scrollY;
   renderNav();
   const t=S.tab;
   if(t==="tdb")renderTdb();else if(t==="agenda")renderAgenda();else if(t==="comptes")renderComptes();else if(t==="compte")renderCompte();
   else if(t==="cibles")renderCibles();else if(t==="mailing")renderMailing();else if(t==="pac")renderPac();else if(t==="bilan")renderBilan();else if(t==="devis")renderDevis();else if(t==="analyse")renderAnalyse();
+  if(window.scrollY!==sy)window.scrollTo(0,sy);
 }
 const pageH=(crumb,title,sub,tools)=>'<div class="page-h"><div class="grow">'+(crumb?'<span class="crumb">'+crumb+'</span>':'')+'<h2>'+title+'</h2>'+(sub?'<p class="sub">'+sub+'</p>':'')+'</div>'+(tools?'<div class="bar">'+tools+'</div>':'')+'</div>';
 const qBtns=(kid,cid)=>{const d=(k)=>' data-anew="'+k+'"'+(kid?' data-k="'+esc(kid)+'"':'')+(cid?' data-c="'+esc(cid)+'"':'');
@@ -125,7 +128,7 @@ function openAction(o){o=o||{};
       statut:ty==="note"?"fait":(isRdv(ty)||ty==="tache")?"afaire":(d>todayISO()?"afaire":"fait")});
     if(k){const p=principal(k.id);if(p)AM.contactId=p.id;const cs=cibOf(k.id);if(!AM.cibleId&&cs.length===1)AM.cibleId=cs[0].id}}
   AM._k=(kOf(AM.compteId)||{}).nom||"";AM._suite=null;AM._crOpen=!!(o.cr||AM.cr);if(o.cr&&amNew){AM.statut="fait";AM.objet=AM.objet||"Compte rendu de RDV"}
-  drawAction();setTimeout(()=>{const f=amNew&&!AM._k?$("#am-k"):$("#am-obj");if(f)f.focus()},40);
+  drawAction();setTimeout(()=>{const f=amNew&&!AM._k?$("#am-k"):$("#am-obj");if(f)f.focus({preventScroll:true})},40);
 }
 function amRead(){if(!AM||!$("#am-obj"))return;
   AM._k=vOf("am-k");const k=findCompte(AM._k);if(k&&k.id!==AM.compteId){AM.compteId=k.id;AM.contactId="";AM.cibleId=""}if(!k)AM.compteId="";
@@ -162,7 +165,7 @@ function drawAction(){
 }
 async function amSave(){
   amRead();const a=AM;
-  if(!a._k){toast("Indiquez le compte.");$("#am-k").focus();return}
+  if(!a._k){toast("Indiquez le compte.");$("#am-k").focus({preventScroll:true});return}
   let k=findCompte(a._k),created=false;
   if(!k){k=ensureCompte(a._k,{origine:"action"});created=true}
   a.compteId=k.id;if(!a.objet&&a.type!=="note")a.objet=ALBL[a.type];
@@ -199,11 +202,11 @@ function openContact(o){o=o||{};const src=o.id?S.contacts.find(c=>c.id===o.id):n
    '<label class="toggle"><input type="checkbox" id="cm-pr"'+(CM.principal?' checked':'')+'> Contact principal du compte</label>'+
    ta("cm-not","Notes",CM.notes,3,"Rôle dans les décisions, disponibilités, historique…")+
   '</form></div><div class="df">'+(cmNew?'':'<button class="btn danger" type="button" data-act="ctdel">Supprimer</button>')+'<span class="grow"></span><button class="btn" type="button" data-act="ctback">Annuler</button><button class="btn primary" type="button" data-act="ctsave">Enregistrer</button></div>',"contact");
-  setTimeout(()=>{const f=$("#cm-nom");if(f)f.focus()},40)}
+  setTimeout(()=>{const f=$("#cm-nom");if(f)f.focus({preventScroll:true})},40)}
 function ctBack(){const back=CM&&CM._am;if(back){AM=back;CM=null;drawAction()}else closeModal()}
 function ctSave(){const c=CM;c.nom=vOf("cm-nom");c.fonction=vOf("cm-fon");c.tel=vOf("cm-tel");c.mail=vOf("cm-mail");c.notes=vOf("cm-not");c.principal=$("#cm-pr").checked;
-  if(!c.nom&&!c.mail){toast("Renseignez au moins le nom ou l'e-mail.");$("#cm-nom").focus();return}
-  if(c.mail&&!/^[^\s@;,]+@[^\s@;,]+\.[^\s@;,]+$/.test(c.mail)){toast("Adresse e-mail incomplète ou mal écrite.");$("#cm-mail").focus();return}
+  if(!c.nom&&!c.mail){toast("Renseignez au moins le nom ou l'e-mail.");$("#cm-nom").focus({preventScroll:true});return}
+  if(c.mail&&!/^[^\s@;,]+@[^\s@;,]+\.[^\s@;,]+$/.test(c.mail)){toast("Adresse e-mail incomplète ou mal écrite.");$("#cm-mail").focus({preventScroll:true});return}
   const back=c._am;delete c._am;
   if(c.principal)ctOf(c.compteId).forEach(x=>{if(x.id!==c.id&&x.principal){x.principal=false;x.majLe=now()}});
   put("contacts",c);lsSave();
@@ -232,10 +235,10 @@ function openCompte(id,preset){const src=id?kOf(id):null;kmNew=!src;kmDel=false;
    '<div class="row"><div class="f"><label class="lbl" for="km-ag">Agence</label><input type="text" id="km-ag" list="kmAg" value="'+esc(KM.agence)+'"><datalist id="kmAg">'+ag.map(a=>'<option value="'+esc(a)+'">').join("")+'</datalist></div>'+fld("km-app","Apporteur interne",KM.apporteur)+'</div>'+fld("km-siret","SIRET",KM.siret,"text",' inputmode="numeric"')+
    ta("km-not","Notes sur le compte",KM.notes,4,"Organisation, patrimoine, contrats en place, concurrence…")+
   '</form></div><div class="df">'+(kmNew?'':'<button class="btn danger" type="button" data-act="kdel">Supprimer</button><button class="btn ghost" type="button" data-act="kmerge">Fusionner avec…</button>')+'<span class="grow"></span><button class="btn" type="button" data-act="mclose">Annuler</button><button class="btn primary" type="button" data-act="ksave">'+(kmNew?'Créer le compte':'Enregistrer')+'</button></div>',"compte");
-  setTimeout(()=>{const f=$("#km-nom");if(f&&kmNew)f.focus()},40)}
+  setTimeout(()=>{const f=$("#km-nom");if(f&&kmNew)f.focus({preventScroll:true})},40)}
 function kmRead(){const k=KM;k.nom=vOf("km-nom");k.segment=$("#km-seg").value;k.typologie=vOf("km-typo");const kf=$("#km-fam");if(kf)k.famille=kf.value;k.dept=$("#km-dept").value;k.ville=vOf("km-ville");k.tel=vOf("km-tel");k.adresse=vOf("km-adr");k.web=vOf("km-web");k.cp=vOf("km-cp");k.siret=vOf("km-siret").replace(/\s/g,"");if(!k.dept&&/^\d{5}$/.test(k.cp)&&DNAME[k.cp.slice(0,2)])k.dept=k.cp.slice(0,2);k.agence=vOf("km-ag");k.apporteur=vOf("km-app");k.notes=vOf("km-not")}
 function kSave(){kmRead();const k=KM;
-  if(!k.nom){toast("Renseignez le nom du compte.");$("#km-nom").focus();return}
+  if(!k.nom){toast("Renseignez le nom du compte.");$("#km-nom").focus({preventScroll:true});return}
   const other=findCompte(k.nom);
   if(other&&other.id!==k.id){const n=$("#kmDup");n.hidden=false;n.innerHTML='<b>Un compte porte déjà ce nom</b> : '+esc(other.nom)+'. <button class="btn" type="button" data-kopen="'+esc(other.id)+'">Ouvrir ce compte</button>'+(kmNew?'':' <button class="btn" type="button" data-act="kmergeto" data-to="'+esc(other.id)+'">Fusionner dans ce compte</button>');return}
   const wasNew=kmNew;put("comptes",k);
@@ -252,7 +255,7 @@ function kMergeMenu(){kmRead();const k=KM;
   '<div class="db"><p class="hint">Les contacts, actions, cibles, devis et lignes de mailing de « '+esc(k.nom)+' » rejoignent le compte choisi. Les informations vides du compte choisi sont complétées, puis « '+esc(k.nom)+' » est supprimé.</p>'+
    '<div class="f"><label class="lbl" for="km-to">Compte qui reste</label><input type="text" id="km-to" list="kList" placeholder="Nom du compte" autocomplete="off">'+comptesDL()+'</div></div>'+
   '<div class="df"><span class="grow"></span><button class="btn" type="button" data-act="mclose">Annuler</button><button class="btn primary" type="button" data-act="kmergego">Fusionner</button></div>',"merge");
-  setTimeout(()=>{const f=$("#km-to");if(f)f.focus()},40)}
+  setTimeout(()=>{const f=$("#km-to");if(f)f.focus({preventScroll:true})},40)}
 function mergeComptes(srcId,dstId){const a=kOf(srcId),b=kOf(dstId);if(!a||!b||a.id===b.id)return false;
   Object.keys(kblank()).forEach(f=>{if(f==="notes"){if(a.notes&&!String(b.notes).includes(a.notes))b.notes=[b.notes,a.notes].filter(Boolean).join("\n")}else if(!b[f]&&a[f])b[f]=a[f]});
   if((TYPE_RANK[a.type]||0)>(TYPE_RANK[b.type]||0))b.type=a.type;if(a.contrat)b.contrat=true;

@@ -181,7 +181,7 @@ document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest
     else DVUI.sorts=[{k,dir:i===0&&DVUI.sorts.length===1?(DVUI.sorts[0].dir==="asc"?"desc":"asc"):def}];
     dvUiSave();renderDevis();return}
   if(d.dvc){const k=d.dvc;if(k==="tous")DVUI.vs=[];else DVUI.vs=DVUI.vs.includes(k)?DVUI.vs.filter(x=>x!==k):DVUI.vs.concat(k);DVUI.lim=400;dvUiSave();renderDevis();return}
-  if(d.dvms){DVOPEN=DVOPEN===d.dvms?"":d.dvms;renderDevis();const q=document.querySelector(".dv-msp .dv-msq");if(q)q.focus();return}
+  if(d.dvms){DVOPEN=DVOPEN===d.dvms?"":d.dvms;renderDevis();const q=document.querySelector(".dv-msp .dv-msq");if(q)q.focus({preventScroll:true});return}
   if(d.dvmok){DVOPEN="";renderDevis();return}
   if(d.dvmclr){DVUI[d.dvmclr]=[];dvUiSave();renderDevis();return}
   if(d.dvdir){const x=DVUI.sorts.find(y=>y.k===d.dvdir);if(x)x.dir=x.dir==="asc"?"desc":"asc";dvUiSave();renderDevis();return}});
@@ -192,7 +192,7 @@ document.addEventListener("mousedown",e=>{if(!DVOPEN||S.tab!=="devis")return;if(
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&DVOPEN&&S.tab==="devis"&&$("#modal").hidden){e.stopImmediatePropagation();DVOPEN="";renderDevis()}},true);
 function dvMsKeep(fn){const p=document.querySelector(".dv-msl"),sc=p?p.scrollTop:0;fn();const n=document.querySelector(".dv-msl");if(n)n.scrollTop=sc}
 document.addEventListener("input",e=>{const t=e.target;if(t&&t.dataset&&t.dataset.msq){MSQ[t.dataset.msq]=t.value;const f=t.dataset.msq;keepFocusSel('.dv-msq[data-msq="'+f+'"]',renderDevis)}});
-function keepFocusSel(sel,fn){const el=document.querySelector(sel),pos=el?el.selectionStart:0;fn();const n=document.querySelector(sel);if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(_){}}}
+function keepFocusSel(sel,fn){const el=document.querySelector(sel),pos=el?el.selectionStart:0;fn();const n=document.querySelector(sel);if(n){n.focus({preventScroll:true});try{n.setSelectionRange(pos,pos)}catch(_){}}}
 document.addEventListener("change",e=>{const t=e.target;if(!t||!t.dataset)return;
   if(t.dataset.dvm){const f=t.dataset.dvm,v=t.value;DVUI[f]=t.checked?DVUI[f].concat(v):DVUI[f].filter(x=>x!==v);DVUI.lim=400;dvUiSave();dvMsKeep(renderDevis);return}
   if(t.dataset.dvso){const k=t.dataset.dvso;if(t.checked){if(!DVUI.sorts.some(x=>x.k===k))DVUI.sorts.push({k,dir:(DVSORT.find(x=>x[0]===k)||[])[2]||"desc"})}else{DVUI.sorts=DVUI.sorts.filter(x=>x.k!==k);if(!DVUI.sorts.length)DVUI.sorts=[{k:"date",dir:"desc"}]}dvUiSave();dvMsKeep(renderDevis);return}
@@ -233,7 +233,7 @@ function openDevis(id,preset){if(MODAL&&MODAL!=="devis")closeModal();
   DV._k=(kOf(DV.compteId)||{}).nom||"";
   if(dvNew&&DV.compteId&&!DV.contactId){const p=principal(DV.compteId);if(p)DV.contactId=p.id}
   DVCAT=dvNew;dvDraw(true);
-  setTimeout(()=>{const f=dvNew&&!DV._k?$("#dv-k"):null;if(f)f.focus()},40)}
+  setTimeout(()=>{const f=dvNew&&!DV._k?$("#dv-k"):null;if(f)f.focus({preventScroll:true})},40)}
 function dvKcHTML(d,k){return '<div class="f s2"><label class="lbl" for="dv-k">Compte <span class="req">*</span></label><div class="kc"><input type="search" id="dv-k" value="'+esc(d._k)+'" placeholder="Rechercher un compte : nom, ville, contact, e-mail…" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="dvkList" aria-autocomplete="list"><div class="kc-list" id="dvkList" role="listbox" hidden></div></div>'+
   (k?'<p class="hint kc-sel">'+esc(kInfo(k))+'</p>':d._k?'<p class="hint">Nouveau compte : il sera créé à l\'enregistrement.</p>':'')+'</div>'}
 function dvLineHTML(l,i){const hp=lHasP(l),c=l.def?"def":"est";
@@ -292,7 +292,7 @@ function dvRead(){if(!DV||!$("#dvForm"))return;const d=DV;
 function dvLineRefresh(le,l){const hp=lHasP(l),c=l.def?"def":"est",a=le.querySelector("[data-lt]"),p=le.querySelector("[data-lp]");
   if(a){a.textContent=eur2(lTot(l));a.className="num"+(hp?" "+c:"")}if(p){p.textContent=hp?"dont "+eur2(lPrel(l)):"";p.className="sub"+(hp?" "+c:"")}}
 function dvSave(){dvRead();const d=DV;
-  if(!d._k){toast("Indiquez le compte.");const f=$("#dv-k");if(f)f.focus();return null}
+  if(!d._k){toast("Indiquez le compte.");const f=$("#dv-k");if(f)f.focus({preventScroll:true});return null}
   d.lignes=d.lignes.filter(l=>l.presta||nb0(l.prix)||(l.pOn&&nb0(l.nb)));
   if(!d.lignes.length){dvDraw();toast("Ajoutez au moins une prestation.");return null}
   if(d.numero){const o=S.devis.find(x=>x.id!==d.id&&nh(x.numero)===nh(d.numero));if(o){toast("Le devis n° "+d.numero+" est déjà suivi ("+((kOf(o.compteId)||{}).nom||"")+") : pas de doublon.");return null}}
@@ -313,7 +313,7 @@ function dvRenderKc(){const inp=$("#dv-k"),box=$("#dvkList");if(!inp||!box)retur
 function dvPick(id){if(!DV)return;const typed=vOf("dv-k");dvRead();
   if(id==="__new"){DV._k=typed;DV.compteId="";DV.contactId=""}
   else{const k=kOf(id);if(!k)return;DV.compteId=id;DV._k=k.nom;const p=principal(id);DV.contactId=p?p.id:""}
-  dvDraw();setTimeout(()=>{const f=$("#dv-num");if(f)f.focus()},20)}
+  dvDraw();setTimeout(()=>{const f=$("#dv-num");if(f)f.focus({preventScroll:true})},20)}
 
 /* ---------- Événements du suivi des devis ---------- */
 document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("button,tr[data-dvid]");if(!t)return;const d=t.dataset;
@@ -327,11 +327,11 @@ document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest
   if(d.dvst){dvRead();DV.statut=d.dvst;if(d.dvst==="attente"||d.dvst==="brouillon")DV.dateRep="";else if(!DV.dateRep)DV.dateRep=todayISO();dvDraw();return}
   if(d.act==="dvcat"){dvRead();DVCAT=!DVCAT;dvDraw();return}
   if(d.dvadd){dvRead();DV.lignes.push(dvLblank(d.dvadd));dvDraw();return}
-  if(d.act==="dvfree"){dvRead();DV.lignes.push(dvLblank(""));dvDraw();setTimeout(()=>{const L=document.querySelectorAll('#dvForm .dv-l [data-lf="presta"]');if(L.length)L[L.length-1].focus()},30);return}
+  if(d.act==="dvfree"){dvRead();DV.lignes.push(dvLblank(""));dvDraw();setTimeout(()=>{const L=document.querySelectorAll('#dvForm .dv-l [data-lf="presta"]');if(L.length)L[L.length-1].focus({preventScroll:true})},30);return}
   const le=t.closest(".dv-l"),li=le?+le.dataset.li:-1,l=li>=0?DV.lignes[li]:null;
-  if(d.dvdef!=null&&l){dvRead();l.def=d.dvdef==="1";dvDraw();if(l.def&&!nb0(l.nb))setTimeout(()=>{const x=document.querySelector('#dvForm .dv-l[data-li="'+li+'"] [data-lf="nb"]');if(x)x.focus()},30);return}
+  if(d.dvdef!=null&&l){dvRead();l.def=d.dvdef==="1";dvDraw();if(l.def&&!nb0(l.nb))setTimeout(()=>{const x=document.querySelector('#dvForm .dv-l[data-li="'+li+'"] [data-lf="nb"]');if(x)x.focus({preventScroll:true})},30);return}
   if(d.dvpon!=null&&l){dvRead();l.pOn=d.dvpon==="1";if(!l.pOn){l.nb="";l.pu="";l.def=false}dvDraw();
-    if(l.pOn)setTimeout(()=>{const x=document.querySelector('#dvForm .dv-l[data-li="'+li+'"] [data-lf="nb"]');if(x)x.focus()},30);return}
+    if(l.pOn)setTimeout(()=>{const x=document.querySelector('#dvForm .dv-l[data-li="'+li+'"] [data-lf="nb"]');if(x)x.focus({preventScroll:true})},30);return}
   if(d.dvldel!=null){dvRead();DV.lignes.splice(+d.dvldel,1);dvDraw();return}
   if(d.act==="dvsave"){dvSave();return}
   if(d.act==="dvdel"){dvDelete(t);return}

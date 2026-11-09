@@ -53,7 +53,7 @@ function openPac(id){
   const src=id?S.pac.find(p=>p.id===id):null;pIsNew=!src;
   P=src?clone(src):Object.assign(pblank(),{id:uid(),creeLe:new Date().toISOString(),ordre:pacNextOrdre(),planId:curPlan().id});
   pDelArmed=false;drawPac();$("#scrim").hidden=false;$("#drawer").hidden=false;
-  setTimeout(()=>{const f=$("#p-element");if(f&&pIsNew)f.focus()},30);
+  setTimeout(()=>{const f=$("#p-element");if(f&&pIsNew)f.focus({preventScroll:true})},30);
 }
 function drawPac(){
   const p=P,ro=!S.writable,dis=ro?" disabled":"";
@@ -308,10 +308,10 @@ function planMenu(isNewPlan){const p=isNewPlan?{nom:"",axe:"secteur",titre:"",pe
     '<div class="f"><span class="lbl">Secteurs</span><div class="checks" id="plSecs">'+secs.map(s=>'<label><input type="checkbox" data-plsec value="'+esc(s)+'">'+esc(s)+'</label>').join("")+'</div></div>'
    :'<p class="hint">Le titre et la période sont repris à l\'impression et dans l\'export Excel.</p>')+
   '</div><div class="df">'+(isNewPlan?'':'<button class="btn danger" type="button" data-act="pplandel">Supprimer ce plan</button><button class="btn ghost" type="button" data-plm="arch" data-id="'+esc(p.id)+'">'+(p.archive?'Réactiver':'Archiver')+'</button><button class="btn ghost" type="button" data-act="pplandup">Dupliquer</button>')+'<span class="grow"></span><button class="btn" type="button" data-act="close">Annuler</button><button class="btn primary" type="button" data-act="'+(isNewPlan?'pplancreate':'pplansave')+'">'+(isNewPlan?'Créer le plan':'Enregistrer')+'</button></div>';
-  $("#scrim").hidden=false;d.hidden=false;setTimeout(()=>$("#pl-nom").focus(),30)}
+  $("#scrim").hidden=false;d.hidden=false;setTimeout(()=>$("#pl-nom").focus({preventScroll:true}),30)}
 function planRead(){const axe=(document.querySelector('input[name="plAxe"]:checked')||{}).value||"theme";return {nom:vOf("pl-nom"),axe,famille:axe==="famille"?$("#pl-fam").value:"",titre:vOf("pl-t"),periode:vOf("pl-p")}}
 function lineForSecteur(s,pid,o){return Object.assign(pblank(),{id:uid(),creeLe:now(),planId:pid,ordre:o,element:s,secteurs:[s],objectif:"",qui:"CSC + chefs d'agence"})}
-async function planCreate(){const v=planRead();if(!v.nom){toast("Donnez un nom au plan.");$("#pl-nom").focus();return}
+async function planCreate(){const v=planRead();if(!v.nom){toast("Donnez un nom au plan.");$("#pl-nom").focus({preventScroll:true});return}
   const start=(document.querySelector('input[name="plStart"]:checked')||{}).value||"vide",src=curPlan();
   const p=Object.assign({id:uid(),creeLe:now(),ordre:S.plans.length+1},v);S.plans.push(p);
   let o=0;

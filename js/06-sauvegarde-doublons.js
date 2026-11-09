@@ -70,7 +70,7 @@ function exportMenu(){
   $("#exK").onclick=()=>offer("PAC_comptes_"+stamp+".csv",csv(krows),tsv(krows));
   $("#exT").onclick=()=>offer("PAC_contacts_"+stamp+".csv",csv(crows),tsv(crows));
   const em=$("#exM");if(em)em.onclick=()=>offer("Mailing_"+stamp+".csv",csv(mrows),tsv(mrows));
-  $("#exCopy").onclick=async()=>{const t=$("#exOut");t.focus();t.select();
+  $("#exCopy").onclick=async()=>{const t=$("#exOut");t.focus({preventScroll:true});t.select();
     try{await navigator.clipboard.writeText(t.value);toast("Copié")}
     catch(e){try{if(document.execCommand("copy")){toast("Copié");return}}catch(_){}toast("Le texte est sélectionné : faites Ctrl+C.")}};
   const im=$("#imJ");im.onchange=()=>{const f=im.files[0];if(!f)return;const r=new FileReader();r.onload=()=>restore(r.result);r.readAsText(f)};

@@ -77,7 +77,7 @@ document.addEventListener("click",async e=>{
   if(d.view){S.view=d.view;renderCibles();return}
   if(d.tog){toggleRow(d.tog);return}
   if(d.togall){const ids=[...document.querySelectorAll("#listWrap tr[data-id]")].map(r=>r.dataset.id);const ao=ids.every(id=>S.open.has(id));
-    ids.forEach(id=>ao?S.open.delete(id):S.open.add(id));renderList();const b=$("#listWrap [data-togall]");if(b)b.focus();return}
+    ids.forEach(id=>ao?S.open.delete(id):S.open.add(id));renderList();const b=$("#listWrap [data-togall]");if(b)b.focus({preventScroll:true});return}
   if(d.open){openDrawer(d.open);return}
   if(t.matches("tr[data-id]")){openDrawer(d.id);return}
   if(t.id==="btnNew"||d.act==="new"){openDrawer(null);return}
@@ -144,7 +144,7 @@ document.addEventListener("click",async e=>{
   if(P){
     if(d.ppr){pReadForm();P.prio=P.prio===d.ppr?"":d.ppr;drawPac();return}
     if(d.pdec){pReadForm();P.decision=P.decision===d.pdec?"":d.pdec;drawPac();return}
-    if(d.act==="psave"){pReadForm();if(!P.element){toast("Renseignez l'élément de la ligne.");$("#p-element").focus();return}
+    if(d.act==="psave"){pReadForm();if(!P.element){toast("Renseignez l'élément de la ligne.");$("#p-element").focus({preventScroll:true});return}
       if(await savePac(clone(P))){toast(pIsNew?"Ligne ajoutée au plan":"Ligne enregistrée");closeDrawer()}return}
     if(d.act==="pdel"){if(!pDelArmed){pDelArmed=true;t.classList.add("armed");t.textContent="Confirmer la suppression";return}
       if(await deletePac(P.id)){toast("Ligne supprimée du plan");closeDrawer()}return}
@@ -173,7 +173,7 @@ document.addEventListener("change",e=>{const t=e.target;
   if(t.dataset&&t.dataset.kf){UI.kv[t.dataset.kf]=t.value;UI.kv.lim=150;uiSave();render();return}
 });
 /* Recherche : la saisie reste dans le champ pendant le rafraîchissement */
-function keepFocus(id,fn){const el=document.getElementById(id),pos=el?el.selectionStart:0;fn();const n=document.getElementById(id);if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(_){}}}
+function keepFocus(id,fn){const el=document.getElementById(id),pos=el?el.selectionStart:0;fn();const n=document.getElementById(id);if(n){n.focus({preventScroll:true});try{n.setSelectionRange(pos,pos)}catch(_){}}}
 let qT=null;
 document.addEventListener("input",e=>{const t=e.target;
   if(t.id==="am-k"){renderKc();return}

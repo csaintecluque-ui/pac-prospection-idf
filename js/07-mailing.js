@@ -71,7 +71,7 @@ function renderMNote(){const n=$("#mNote");if(!n)return;const c=MUI.copied;
   n.innerHTML='<div><b>'+pl(c.ids.length,"adresse copiée","adresses copiées")+'</b> : collez-les dans le champ Cci de votre mail.'+(c.ids.length>400?' <b>Attention</b> : au-delà de 400 destinataires environ, la messagerie peut refuser l\'envoi ; filtrez par liste, famille ou agence pour envoyer par lots.':'')+'</div>'+
    (MUI.showCopy?'<textarea class="exout" id="mCopyTxt" readonly>'+esc(MUI.showCopy)+'</textarea><p class="hint">La copie automatique est bloquée ici : le texte est sélectionné, faites Ctrl+C.</p>':'')+
    (S.writable?'<div class="bar"><span>Une fois le mail envoyé :</span><button class="btn primary" type="button" data-act="mmark">Marquer ces '+pl(c.ids.length,"contact")+' comme envoyés aujourd\'hui</button><button class="btn ghost" type="button" data-act="mnoteclose">Fermer</button></div>':'');
-  const ta=$("#mCopyTxt");if(ta){ta.focus();ta.select()}}
+  const ta=$("#mCopyTxt");if(ta){ta.focus({preventScroll:true});ta.select()}}
 function renderMailing(){
   const el=$("#view-mailing");if(!el)return;const M=S.mailing,ro=!S.writable;
   if(!M.length){el.innerHTML=pageH("Actions commerciales","Mailing","","")+'<div class="empty"><h3>Aucune liste de mailing</h3><p>Importez votre fichier de contacts (Excel ou CSV) : une ligne par contact, avec au minimum le client et l\'adresse e-mail. Vous pouvez aussi ajouter les contacts un par un. Vous suivez ensuite chaque envoi, sa date, la relance et vos commentaires.</p>'+(ro?'':'<div class="bar" style="justify-content:center"><button class="btn primary" type="button" data-act="mimport">Importer une liste</button><button class="btn" type="button" data-act="mnew">Ajouter un contact à la main</button></div>')+'</div>';return}
@@ -130,7 +130,7 @@ function mEditMenu(id){
   const src=id?S.mailing.find(x=>x.id===id):null;meNew=!src;meDel=false;
   ME=src?clone(src):Object.assign(mblank(),{id:uid(),creeLe:new Date().toISOString(),envoyer:"Oui",liste:MUI.liste||"Ajouts manuels"});
   mDrawEdit();$("#scrim").hidden=false;$("#drawer").hidden=false;
-  setTimeout(()=>{const f=$("#me-client");if(f&&meNew)f.focus()},30)}
+  setTimeout(()=>{const f=$("#me-client");if(f&&meNew)f.focus({preventScroll:true})},30)}
 function mDrawEdit(){
   const m=ME,uniq=k=>[...new Set(S.mailing.map(x=>x[k]).concat(k==="famille"?(S.settings.mailTypes||[]).map(t=>t.famille):[]).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
   const dl=(id,k)=>'<datalist id="'+id+'">'+uniq(k).map(v=>'<option value="'+esc(v)+'">').join("")+'</datalist>';
@@ -170,8 +170,8 @@ function mReadEdit(){document.querySelectorAll("#meForm [data-me]").forEach(i=>{
 function mTplHint(){const h=$("#meTpl");if(!h||!ME)return;mReadEdit();const t=mTpl(ME);
   h.textContent=t?"Mail type de la famille : « "+t.objet+" »":"Aucun mail type pour cette famille : le bouton Mail ouvrira un mail vide adressé au contact."}
 async function mSaveEdit(){mReadEdit();const m=ME;
-  if(!m.client){toast("Renseignez le client.");$("#me-client").focus();return}
-  if(m.mail&&!/^[^\s@;,]+@[^\s@;,]+\.[^\s@;,]+$/.test(m.mail)){toast("Adresse e-mail incomplète ou mal écrite.");$("#me-mail").focus();return}
+  if(!m.client){toast("Renseignez le client.");$("#me-client").focus({preventScroll:true});return}
+  if(m.mail&&!/^[^\s@;,]+@[^\s@;,]+\.[^\s@;,]+$/.test(m.mail)){toast("Adresse e-mail incomplète ou mal écrite.");$("#me-mail").focus({preventScroll:true});return}
   if(mDupCheck()){toast("Ce contact existe déjà : ouvrez sa fiche, en haut du panneau.");const db=document.querySelector("#drawer .db");if(db)db.scrollTop=0;return}
   if(m.envoye){if(!m.dateEnvoi)m.dateEnvoi=todayISO();if(!m.relance&&relJ())m.relance=addDaysTo(m.dateEnvoi,relJ())}else{m.dateEnvoi="";m.relance=""}
   const saved=mnorm(m);if(!(await mBulk([saved])))return;

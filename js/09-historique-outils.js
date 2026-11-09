@@ -322,7 +322,7 @@ function kcHide(){const b=$("#kcList");if(b)b.hidden=true;const i=$("#am-k");if(
 function kPick(id){if(!AM)return;const typed=vOf("am-k");amRead();
   if(id==="__new"){AM._k=typed;AM.compteId="";AM.contactId="";AM.cibleId=""}
   else{const k=kOf(id);if(!k)return;AM.compteId=id;AM._k=k.nom;const p=principal(id);AM.contactId=p?p.id:"";const cs=cibOf(id);AM.cibleId=cs.length===1?cs[0].id:""}
-  drawAction();setTimeout(()=>{const f=$("#am-obj");if(f)f.focus()},20)}
+  drawAction();setTimeout(()=>{const f=$("#am-obj");if(f)f.focus({preventScroll:true})},20)}
 function kcKey(e){const box=$("#kcList");if(!box||box.hidden){if(e.key==="ArrowDown"){renderKc();e.preventDefault()}return false}
   const o=[...box.querySelectorAll(".kc-o")];if(!o.length)return false;
   if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();o[KC_I].classList.remove("act");KC_I=(KC_I+(e.key==="ArrowDown"?1:-1)+o.length)%o.length;o[KC_I].classList.add("act");o[KC_I].scrollIntoView({block:"nearest"});return true}
@@ -487,16 +487,16 @@ function nbRefresh(focusCtx){
   if(MODAL==="nb"){const db=$("#modal .db");if(db)db.innerHTML=nbHTML("m")}
   const w=document.querySelector('#dgrid [data-dw="notes"] .dw-c');if(w&&S.tab==="tdb")w.innerHTML=nbPanel();
   nbGrowAll();nbBadge();
-  if(focusCtx){const i=document.querySelector('[data-nbin="'+focusCtx+'"]');if(i)i.focus()}}
+  if(focusCtx){const i=document.querySelector('[data-nbin="'+focusCtx+'"]');if(i)i.focus({preventScroll:true})}}
 function nbAdd(ctx){const i=document.querySelector('[data-nbin="'+ctx+'"]');if(!i)return;const t=i.value.replace(/\s+$/,"");
-  if(!t.trim()){i.focus();return}
+  if(!t.trim()){i.focus({preventScroll:true});return}
   nbList().push({id:uid(),t,c:now(),m:now(),p:false});lsSave();nbRefresh(ctx)}
 function nbDel(id){S.settings.notes=nbList().filter(n=>n.id!==id);lsSave();nbRefresh()}
 function nbOpen(){showModal('<div class="dh"><div class="grow"><span class="lbl">Notes personnelles · sans compte</span><h2 id="mTitle">Bloc-notes</h2></div><button class="btn ghost" type="button" data-act="mclose">Fermer</button></div><div class="db nb-db">'+nbHTML("m")+'</div>',"nb");
-  nbGrowAll($("#modal"));const i=$('#modal [data-nbin="m"]');if(i)i.focus()}
+  nbGrowAll($("#modal"));const i=$('#modal [data-nbin="m"]');if(i)i.focus({preventScroll:true})}
 function nbToCompte(id){const n=nbOf(id);if(!n)return;
   openAction({type:"note"});NLINK=id;const d=$("#am-det");if(d){d.value=n.t}
-  const k=$("#am-k");if(k)k.focus();toast("Choisissez le compte, puis enregistrez : la note quittera le bloc-notes.")}
+  const k=$("#am-k");if(k)k.focus({preventScroll:true});toast("Choisissez le compte, puis enregistrez : la note quittera le bloc-notes.")}
 function nbDone(id){if(!nbOf(id))return;S.settings.notes=nbList().filter(n=>n.id!==id);lsSave();nbBadge();if(S.tab==="tdb")renderTdb();toast("Note versée dans le compte")}
 
 document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("button");if(!t)return;const d=t.dataset;

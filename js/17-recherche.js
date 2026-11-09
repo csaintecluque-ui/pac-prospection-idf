@@ -14,7 +14,7 @@ function gsFind(q){const w=nh(q).split(" ").filter(Boolean),R=[];if(!w.length)re
   return R}
 function gsOpen(){if(MODAL&&MODAL!=="gs")closeModal();GS={q:"",i:0,R:[]};
   showModal('<div class="gs"><div class="gs-in">'+I_GS+'<input type="search" id="gsQ" placeholder="Rechercher un compte, un contact, un devis, une action…" autocomplete="off" aria-label="Rechercher partout"><kbd>Échap</kbd></div><div class="gs-r" id="gsR"><p class="hint">Tapez quelques lettres : nom de compte, ville, contact, e-mail, n° de devis ou de facture, mot d\'une note…</p></div></div>',"gs");
-  const m=$("#modal");m.classList.add("gs-m");setTimeout(()=>{const i=$("#gsQ");if(i)i.focus()},20)}
+  const m=$("#modal");m.classList.add("gs-m");setTimeout(()=>{const i=$("#gsQ");if(i)i.focus({preventScroll:true})},20)}
 function gsDraw(){const box=$("#gsR");if(!box)return;const R=GS.R;if(!GS.q.trim()){box.innerHTML='<p class="hint">Tapez quelques lettres : nom de compte, ville, contact, e-mail, n° de devis ou de facture, mot d\'une note…</p>';return}
   if(!R.length){box.innerHTML='<p class="hint">Aucun résultat pour « '+esc(GS.q)+' ».</p>';return}
   let h="",g="";R.forEach((r,i)=>{if(r.g!==g){g=r.g;h+='<div class="gs-g">'+esc(g)+'</div>'}h+='<button type="button" class="gs-o'+(i===GS.i?' act':'')+'" data-gsi="'+i+'"><b>'+esc(r.l)+'</b><span class="sub">'+esc(r.s||"")+'</span></button>'});box.innerHTML=h}

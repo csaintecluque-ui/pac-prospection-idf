@@ -210,7 +210,7 @@ function openDrawer(id,preset){
   D._k={type:k?k.type:"Prospect",segment:k?k.segment:""};D._ct={nom:"",fonction:"",tel:"",mail:""};
   delArmed=false;$("#drawer").classList.add("wide");drawDrawer();$("#scrim").hidden=false;$("#drawer").hidden=false;
   const db=document.querySelector("#drawer .db");if(db)db.scrollTop=0;
-  setTimeout(()=>{const f=$("#d-compte");if(f&&isNew&&!D.compteId)f.focus()},30);
+  setTimeout(()=>{const f=$("#d-compte");if(f&&isNew&&!D.compteId)f.focus({preventScroll:true})},30);
 }
 function closeDrawer(){$("#scrim").hidden=true;$("#drawer").hidden=true;$("#drawer").classList.remove("wide");D=null;P=null;ME=null;CP=null;PIMP=null;DUP=null;MIMP=null;IMP=null}
 function opts(list,cur,empty){if(cur&&!list.includes(cur))list=list.concat([cur]);return (empty!=null?'<option value="">'+esc(empty)+'</option>':'')+list.map(o=>'<option'+(o===cur?' selected':'')+'>'+esc(o)+'</option>').join("")}
@@ -283,7 +283,7 @@ function readForm(){
 async function doSave(keepOpen){
   readForm();
   let k=kOf(D.compteId);
-  if(!k){if(!D.compte){toast("Renseignez le nom du compte.");const f=$("#d-compte");if(f)f.focus();return false}
+  if(!k){if(!D.compte){toast("Renseignez le nom du compte.");const f=$("#d-compte");if(f)f.focus({preventScroll:true});return false}
     k=findCompte(D.compte)||ensureCompte(D.compte,{origine:"cible",dept:D.dept||""})}
   k.type=D._k.type||k.type;k.segment=D._k.segment;if(!k.dept&&D.dept)k.dept=D.dept;k.majLe=now();
   if(D._ct&&(D._ct.nom||D._ct.mail||D._ct.tel))ensureContact(k.id,D._ct);

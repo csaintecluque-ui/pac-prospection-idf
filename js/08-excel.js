@@ -16,7 +16,7 @@ async function offer(filename,data,pasteText){
   $("#exMsg").textContent=filename.endsWith(".json")
     ?"Notion bloque les téléchargements. Copiez ce texte et collez-le dans un fichier texte que vous enregistrez (par exemple PAC_sauvegarde.txt). Pour restaurer, recollez-le plus bas."
     :"Notion bloque les téléchargements. Copiez ce tableau et collez-le dans une feuille Excel vierge : les colonnes se placent toutes seules.";
-  const ta=$("#exOut");ta.value=pasteText!=null?pasteText:data;ta.focus();ta.select();
+  const ta=$("#exOut");ta.value=pasteText!=null?pasteText:data;ta.focus({preventScroll:true});ta.select();
 }
 
 /* ---------- Export Excel (.xlsx) ---------- */
