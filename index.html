@@ -960,6 +960,13 @@ body.dv-drop #view-devis,body.dv-drop #modal{outline:3px dashed var(--accent);ou
 .enr-sum{display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--line);padding-top:10px}.enr-sum ul{margin:0;padding-left:18px}
 .enr-det{max-height:240px;overflow:auto;font-size:12.5px;display:flex;flex-direction:column;gap:4px;margin-top:6px}
 .enr-g a.btn,.enr-g button.btn{width:max-content}
+
+/* V3.21 · glisser-déposer dans le calendrier */
+.cal .ev[data-aid]{cursor:grab;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.ev-ghost{position:fixed;z-index:300;pointer-events:none;opacity:.92;box-shadow:var(--shadow);transform:rotate(-2deg);margin:0}
+.ev-src{opacity:.3}
+body.cal-dragging,body.cal-dragging *{cursor:grabbing!important;user-select:none}
+.cal-d.drop{background:var(--accent-soft)!important;box-shadow:inset 0 0 0 2px var(--accent)}
 </style>
 </head>
 <body>
@@ -979,7 +986,7 @@ body.dv-drop #view-devis,body.dv-drop #modal{outline:3px dashed var(--accent);ou
   <div class="side-f">
     <span class="sync" id="sync" data-s="wait"><i></i><span id="syncTxt">Chargement…</span></span>
     <button class="btn" type="button" data-act="export" title="Exporter, sauvegarder, restaurer"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11"/></svg><span>Exporter / sauvegarder</span></button>
-    <span class="ver">V3.20 · CSC</span>
+    <span class="ver">V3.21 · CSC</span>
   </div>
 </aside>
 
@@ -1070,7 +1077,7 @@ function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTi
 const nh=x=>String(x==null?"":x).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
 const now=()=>new Date().toISOString();
 const S={open:new Set(),mode:"wait",cibles:[],comptes:[],contacts:[],actions:[],plans:[],pac:[],mailing:[],devis:[],settings:{objectif:8},writable:true,view:"actives",tab:"tdb",kid:"",db:null,downloads:null,ver:0};
-const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.20";
+const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.21";
 let STORE="ls"; /* "idb" dès que les données sont dans la base du navigateur */
 const IN_FRAME=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 const TYPE_RANK={"Client existant":3,"Prescripteur":2,"Prospect":1};
@@ -1570,7 +1577,7 @@ function calHTML(key){const st=UI.cal[key],t=todayISO();if(!st.ref)st.ref=t;
     h+='<div class="cal-d'+(we?' we':'')+(d===t?' today':'')+(month&&dd.getMonth()!==mm?' out':'')+'" data-cday="'+d+'" title="Ajouter une action le '+fdate(d)+'"><div class="dn"><b>'+dd.getDate()+'</b>'+(!month?'<span>'+esc(dd.toLocaleDateString("fr-FR",{month:"short"}).replace(".",""))+'</span>':'')+'</div><span class="add" aria-hidden="true">+</span>'+
       items.slice(0,max).map(a=>evBtn(a,!month)).join("")+(items.length>max?'<span class="nmore">+ '+(items.length-max)+' autre'+(items.length-max>1?'s':'')+'</span>':'')+
       (mailsOn(d)?'<button type="button" class="ev k-rel" data-mailday="'+d+'">'+pl(mailsOn(d),"mail envoyé","mails envoyés")+' (mailing)</button>':'')+(nr?'<button type="button" class="ev k-rel" data-relday="'+d+'">'+I_MAIL.replace('aria-hidden="true"','aria-hidden="true" style="width:11px;height:11px;vertical-align:-1px;margin-right:3px"')+pl(nr,"relance")+' mailing</button>':'')+'</div>'}
-  h+='</div><div class="cal-leg"><span><i style="background:var(--ok)"></i>RDV, visio</span><span><i style="background:var(--info)"></i>Appel</span><span><i style="background:var(--accent)"></i>Mail</span><span><i style="background:var(--warn)"></i>Rappel / tâche</span><span><i style="background:var(--bad)"></i>En retard</span><span>Cliquez sur un jour pour ajouter une action.</span></div>';
+  h+='</div><div class="cal-leg"><span><i style="background:var(--ok)"></i>RDV, visio</span><span><i style="background:var(--info)"></i>Appel</span><span><i style="background:var(--accent)"></i>Mail</span><span><i style="background:var(--warn)"></i>Rappel / tâche</span><span><i style="background:var(--bad)"></i>En retard</span><span>Cliquez sur un jour pour ajouter une action · glissez une action pour la déplacer.</span></div>';
   return h}
 function calNav(key,dir){const st=UI.cal[key];if(dir===0)st.ref=todayISO();else if(st.mode==="mois"){const d=dObj(st.ref);st.ref=isoOf(new Date(d.getFullYear(),d.getMonth()+dir,1))}else st.ref=addD(st.ref,7*dir);uiSave();render()}
 
@@ -4768,6 +4775,37 @@ document.addEventListener("change",async e=>{const t=e.target;if(!t||MODAL!=="en
   if(t.name==="enrS"){ENR.scope=t.value;enrMenu();return}
   if(t.id==="enrRp"){ENR.repl=t.checked;enrMenu();return}
   if(t.id==="enrF"&&t.files[0]){const f=t.files[0];try{ENR.imp={file:f.name,list:await enrRead(f)};enrMenu()}catch(x){console.error("enr",x);toast(x.message==="colonnes"?"Fichier non reconnu : il faut au moins la colonne « Compte » ou « ID ».":"Lecture impossible (vérifiez la connexion internet pour la lecture Excel).")}}});
+
+
+/* ================= V3.21 · Glisser une action dans le calendrier pour la déplacer ================= */
+/* Souris : glisser dès quelques pixels. Tactile : appui long, puis glisser. */
+let CDR=null,CDRsup=0,CDRundo=null;
+document.addEventListener("pointerdown",e=>{const ev=e.target.closest&&e.target.closest(".cal .ev[data-aid]");if(!ev||e.button>0)return;
+  const a=S.actions.find(x=>x.id===ev.dataset.aid);if(!a)return;
+  CDR={ev,a,x:e.clientX,y:e.clientY,touch:e.pointerType!=="mouse",on:false,t:null,over:null};
+  if(CDR.touch)CDR.t=setTimeout(()=>{if(CDR&&!CDR.on)cdrStart()},380)});
+function cdrStart(){const c=CDR,r=c.ev.getBoundingClientRect(),g=c.ev.cloneNode(true);c.on=true;
+  g.classList.add("ev-ghost");g.removeAttribute("data-aid");g.style.width=r.width+"px";g.style.left=r.left+"px";g.style.top=r.top+"px";document.body.appendChild(g);
+  c.g=g;c.dx=c.x-r.left;c.dy=c.y-r.top;c.ev.classList.add("ev-src");document.body.classList.add("cal-dragging");
+  if(c.touch&&navigator.vibrate)try{navigator.vibrate(12)}catch(_){}}
+function cdrEnd(){const c=CDR;CDR=null;if(!c)return null;clearTimeout(c.t);if(!c.on)return null;
+  if(c.g)c.g.remove();c.ev.classList.remove("ev-src");document.body.classList.remove("cal-dragging");if(c.over)c.over.classList.remove("drop");CDRsup=Date.now();return c}
+document.addEventListener("pointermove",e=>{const c=CDR;if(!c)return;const dist=Math.hypot(e.clientX-c.x,e.clientY-c.y);
+  if(!c.on){if(c.touch){if(dist>8){clearTimeout(c.t);CDR=null}return}if(dist<6)return;cdrStart()}
+  e.preventDefault();c.g.style.left=(e.clientX-c.dx)+"px";c.g.style.top=(e.clientY-c.dy)+"px";
+  const el=document.elementFromPoint(e.clientX,e.clientY),day=el&&el.closest?el.closest(".cal-d[data-cday]"):null;
+  if(c.over&&c.over!==day)c.over.classList.remove("drop");if(day)day.classList.add("drop");c.over=day});
+document.addEventListener("pointerup",()=>{const c=cdrEnd();if(!c)return;const d=c.over&&c.over.dataset.cday;if(!d||d===c.a.date)return;
+  const a=c.a;CDRundo={id:a.id,date:a.date};a.date=d;a.majLe=now();bump();commit();
+  toast("Déplacé au "+dObj(d).toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"})+" : "+(a.objet||ALBL[a.type])+" · Ctrl+Z pour annuler")});
+document.addEventListener("pointercancel",()=>{cdrEnd()});
+document.addEventListener("touchmove",e=>{if(CDR&&CDR.on)e.preventDefault()},{passive:false});
+document.addEventListener("contextmenu",e=>{if(CDR||(e.target.closest&&e.target.closest(".cal .ev")))e.preventDefault()});
+/* Le clic qui suit un dépôt n'ouvre ni l'action ni une nouvelle action */
+document.addEventListener("click",e=>{if(Date.now()-CDRsup<400){e.stopImmediatePropagation();e.preventDefault()}},true);
+/* Annuler le dernier déplacement */
+document.addEventListener("keydown",e=>{if(!CDRundo||!(e.ctrlKey||e.metaKey)||e.key.toLowerCase()!=="z")return;const t=e.target;if(t&&(t.matches("input,textarea,select")||t.isContentEditable))return;
+  const a=S.actions.find(x=>x.id===CDRundo.id);if(!a)return;e.preventDefault();a.date=CDRundo.date;a.majLe=now();CDRundo=null;bump();commit();toast("Déplacement annulé : "+(a.objet||ALBL[a.type])+" revient au "+fdate(a.date))});
 
 /* ================= V3 · Événements ================= */
 document.addEventListener("click",async e=>{
