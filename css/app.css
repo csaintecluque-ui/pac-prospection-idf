@@ -959,9 +959,6 @@ body.cal-dragging,body.cal-dragging *{cursor:grabbing!important;user-select:none
 .cal-d.drop{background:var(--accent-soft)!important;box-shadow:inset 0 0 0 2px var(--accent)}
 
 /* ===== V3.23 ===== */
-/* Sauvegarde automatique : bouton de réactivation dans le menu */
-.side-f .btn.ab-wake{background:#5A3A1E;border-color:#C9804F;color:#F3E9D6}
-.ab-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 /* Relances de devis */
 .dvr-b{display:grid;place-items:center;width:22px;height:22px;border-radius:6px;background:var(--bad-soft);color:var(--bad)}
 .dvr-b svg{width:13px;height:13px}
@@ -1025,7 +1022,7 @@ body.cal-dragging,body.cal-dragging *{cursor:grabbing!important;user-select:none
 .xl-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .xl-bar .grow{flex:1}
 .xl-bar input[type=date]{padding:3px 6px;font-size:12.5px}
-@media print{.gs-btn,.ab-wake{display:none!important}}
+@media print{.gs-btn{display:none!important}}
 #view-analyse .bl-k{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
 /* « Devis à relancer » dans À faire : 3 colonnes (icône, texte, ancienneté) */
 .ti.dvr-ti{grid-template-columns:26px minmax(0,1fr) auto}

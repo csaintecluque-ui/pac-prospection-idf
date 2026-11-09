@@ -229,6 +229,9 @@ function upgrade31(){if(S.settings.upg31)return false;
 /* Les données vivent dans la base du navigateur (IndexedDB) : pas de limite pratique, contrairement au stockage local (~5 Mo partagés entre les applis du même site) */
 async function appGet(key){const db=await idb();return await new Promise((res,rej)=>{const q=db.transaction("app").objectStore("app").get(key);q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)})}
 async function appPut(key,val){const db=await idb();await new Promise((res,rej)=>{const tx=db.transaction("app","readwrite");tx.objectStore("app").put(val,key);tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error);tx.onabort=()=>rej(tx.error)})}
+async function appDel(key){const db=await idb();await new Promise((res,rej)=>{const tx=db.transaction("app","readwrite");tx.objectStore("app").delete(key);tx.oncomplete=res;tx.onerror=()=>rej(tx.error)})}
+/* La sauvegarde automatique dans un dossier du PC a été retirée (V3.29) : on oublie l'accès au dossier mémorisé */
+setTimeout(()=>{appDel("bkDir").catch(()=>{});if(S.settings&&S.settings.autoBk){delete S.settings.autoBk;lsSave()}},4000);
 let saving=null,dirty=false,saveErr=false;
 function idbQueue(){dirty=true;if(saving)return;
   saving=(async()=>{while(dirty){dirty=false;try{await appPut("state",snapshot());if(saveErr){saveErr=false;setSync("local","Enregistré sur ce poste")}}
