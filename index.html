@@ -869,6 +869,15 @@ body.dsz,body.dsz *{cursor:nwse-resize!important}
 .modal.compact .dv-l>.dv-amt{grid-area:a;align-items:flex-start;text-align:left}.modal.compact .dv-l>.dv-fa{grid-area:f;align-items:flex-end}.modal.compact .dv-l>.dv-del{grid-area:d}
 .modal.compact .dv-m{display:block}.modal.compact .dv-tot{grid-template-columns:repeat(2,minmax(0,1fr))}
 .qk .qk-nb{grid-column:span 2}
+
+/* V3.9 · devis dans le bilan */
+.bl-dv{margin-bottom:16px}
+.bl-dv .bl-dvk{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.bl-dv .bl-dvl{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:6px 18px}
+.bl-dv .bl-dvl h4{margin:4px 0 2px;font:600 11.5px var(--f-label);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);display:flex;gap:6px}
+.bl-dv .dv-wr .bl-dd{font-size:12px;color:var(--muted);width:50px;flex:none}
+.bl-dv .bl-enc{margin:0;font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
+.bl-dv .bl-enc b{color:var(--fg);font-weight:600}
 </style>
 </head>
 <body>
@@ -888,7 +897,7 @@ body.dsz,body.dsz *{cursor:nwse-resize!important}
   <div class="side-f">
     <span class="sync" id="sync" data-s="wait"><i></i><span id="syncTxt">Chargement…</span></span>
     <button class="btn" type="button" data-act="export" title="Exporter, sauvegarder, restaurer"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11"/></svg><span>Exporter / sauvegarder</span></button>
-    <span class="ver">V3.8 · CSC</span>
+    <span class="ver">V3.9 · CSC</span>
   </div>
 </aside>
 
@@ -979,7 +988,7 @@ function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTi
 const nh=x=>String(x==null?"":x).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
 const now=()=>new Date().toISOString();
 const S={open:new Set(),mode:"wait",cibles:[],comptes:[],contacts:[],actions:[],plans:[],pac:[],mailing:[],devis:[],settings:{objectif:8},writable:true,view:"actives",tab:"tdb",kid:"",db:null,downloads:null,ver:0};
-const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.8";
+const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.9";
 let STORE="ls"; /* "idb" dès que les données sont dans la base du navigateur */
 const IN_FRAME=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 const TYPE_RANK={"Client existant":3,"Prescripteur":2,"Prospect":1};
@@ -3784,7 +3793,7 @@ document.addEventListener("focusout",e=>{const t=e.target;if(!t||!t.dataset||!t.
 
 /* ================= V3.7 · Bilan d'activité : réalisé sur N semaines et à venir ================= */
 const BLK="pac-idf-bilan";
-const BL=(()=>{const d={past:2,next:2,depuis:"",types:[],q:"",det:true,mailing:false,notes:false,retard:true};
+const BL=(()=>{const d={past:2,next:2,depuis:"",types:[],q:"",det:true,mailing:false,notes:false,retard:true,devis:true};
   try{return Object.assign(d,JSON.parse(localStorage.getItem(BLK)||"{}"),{q:""})}catch(e){return d}})();
 const blSave=()=>{try{const o=Object.assign({},BL);delete o.q;localStorage.setItem(BLK,JSON.stringify(o))}catch(e){}};
 const BLT=[["rdv","RDV / visio",["visite","visio"]],["appel","Appels",["appel"]],["mail","Mails",["mail"]],["tache","Rappels / tâches",["tache"]],["note","Notes",["note"]],["autre","Événements / autres",["evenement","autre"]]];
@@ -3842,10 +3851,10 @@ function renderBilan(){const el=$("#view-bilan");if(!el)return;const R=blRange()
     '<span class="lbl" style="margin-left:10px">À venir</span>'+seg("bln",[[0,"Non"],[1,"1 sem."],[2,"2 sem."],[4,"4 sem."],[8,"8 sem."]],BL.next,"Nombre de semaines à venir")+'</div>'+
     '<div class="bl-line"><div class="chips"><button type="button" class="chip" data-blt="" aria-pressed="'+!BL.types.length+'">Tout</button>'+BLT.map(([k,l])=>'<button type="button" class="chip" data-blt="'+k+'" aria-pressed="'+BL.types.includes(k)+'">'+esc(l)+'</button>').join("")+'</div>'+
     '<input type="search" id="blQ" value="'+esc(BL.q)+'" placeholder="Filtrer : compte, ville, contact, mot dans les notes…" style="width:280px"></div>'+
-    '<div class="bl-line">'+ck("det","Afficher le détail des notes et comptes rendus")+ck("retard","Actions en retard")+ck("mailing","Détailler les mails de mailing")+ck("notes","Inclure mon bloc-notes")+'</div></div>';
+    '<div class="bl-line">'+ck("det","Afficher le détail des notes et comptes rendus")+ck("retard","Actions en retard")+ck("mailing","Détailler les mails de mailing")+ck("notes","Inclure mon bloc-notes")+ck("devis","Inclure les devis")+'</div></div>';
   h+='<div id="blBody"></div>';el.innerHTML=h;blBody()}
 function blBody(){const b=$("#blBody");if(!b)return;const D=blData(),R=D.R;
-  let h=blKpis(D);
+  let h=blKpis(D)+blDevisHTML(blDevis(R));
   const past=blSection("Réalisé",esc(pl(D.done.length,"élément"))+(D.mail.length&&!BL.mailing?' · '+pl(D.mail.length,"mail")+' de mailing':''),blWeeks(D.done,true,D.mail),"","Aucune action réalisée sur la période"+(BL.types.length||BL.q?" avec ces filtres":"")+".");
   let side="";
   if(BL.next)side+=blSection("À venir",esc(pl(D.next.length,"action"))+' jusqu\'au '+esc(blF(R.to,{day:"numeric",month:"short"})),blWeeks(D.next,false),"fut","Rien de planifié sur cette période.");
@@ -3863,6 +3872,7 @@ function blText(){const D=blData(),R=D.R,by=g=>D.real.filter(a=>blGrp(a.type)===
   sec("Réalisé",blWeeks(D.done,true,D.mail));
   if(BL.next)sec("À venir (jusqu'au "+blF(R.to)+")",blWeeks(D.next,false));
   if(BL.retard&&D.late.length)s+="\nEN RETARD\n"+D.late.map(blTxtRow).join("\n")+"\n";
+  s+=blDevisTxt(blDevis(R));
   return s}
 async function blCopy(){const t=blText();try{await navigator.clipboard.writeText(t);toast("Bilan copié : collez-le dans votre mail")}catch(e){const ta=document.createElement("textarea");ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");toast("Bilan copié")}catch(x){toast("Copie impossible")}ta.remove()}}
 function blPrint(){const D=blData(),R=D.R,by=g=>D.real.filter(a=>blGrp(a.type)===g).length;
@@ -3874,7 +3884,7 @@ function blPrint(){const D=blData(),R=D.R,by=g=>D.real.filter(a=>blGrp(a.type)==
     '<h1>Bilan d\'activité</h1><p class="s">'+esc(blPeriod(R))+(BL.next?' · à venir jusqu\'au '+esc(blF(R.to)):'')+(BL.types.length?' · '+esc(BL.types.map(k=>BLT.find(x=>x[0]===k)[1]).join(", ")):'')+(BL.q?' · filtre « '+esc(BL.q)+' »':'')+'</p>'+
     '<div class="k">'+[["RDV / visio",by("rdv")],["Appels",by("appel")],["Mails",by("mail")],["Mailing",D.mail.length],["Rappels traités",by("tache")],["Comptes rendus",D.real.filter(a=>a.cr).length],["Comptes travaillés",new Set(D.real.map(a=>a.compteId).filter(Boolean)).size]].concat(BL.next?[["À venir",D.next.length]]:[]).map(([l,v])=>'<div><b>'+v+'</b><span>'+esc(l)+'</span></div>').join("")+'</div>'+
     sec("Réalisé",blWeeks(D.done,true,D.mail))+(BL.next?sec("À venir",blWeeks(D.next,false)):'')+(BL.retard&&D.late.length?'<h2>En retard</h2><table>'+D.late.map(row).join("")+'</table>':'')+
-    '<footer>Édité le '+new Date().toLocaleDateString("fr-FR")+' · CSC</footer><script>setTimeout(()=>print(),300)<\/script></body></html>';
+    blDevisPrint(blDevis(R))+'<footer>Édité le '+new Date().toLocaleDateString("fr-FR")+' · CSC</footer><script>setTimeout(()=>print(),300)<\/script></body></html>';
   const w=window.open("","_blank");if(!w){toast("Fenêtre bloquée : autorisez les fenêtres, ou utilisez « Copier pour un mail ».");return}w.document.write(html);w.document.close()}
 
 document.addEventListener("click",e=>{if(S.tab!=="bilan")return;const t=e.target.closest&&e.target.closest("button");if(!t)return;const d=t.dataset;
@@ -4146,6 +4156,52 @@ document.addEventListener("keydown",e=>{const t=e.target;if(!t)return;
 document.addEventListener("focusin",e=>{if(e.target.id==="dv-k"){const el=e.target;if(DV&&DV.compteId&&el.value)setTimeout(()=>{if(document.activeElement===el)el.select()},0);dvRenderKc()}});
 document.addEventListener("focusout",e=>{if(e.target.id==="dv-k")setTimeout(()=>{if(document.activeElement&&document.activeElement.id==="dv-k")return;const b=$("#dvkList");if(b)b.hidden=true},120)});
 
+
+
+/* ================= V3.9 · Devis dans le bilan d'activité ================= */
+function blDevis(R){if(!BL.devis||!S.devis.length)return null;const q=nh(BL.q),inR=x=>!!x&&x>=R.from&&x<=R.t;
+  const L=S.devis.filter(d=>{if(!q)return true;const k=kOf(d.compteId);return nh([k&&k.nom,k&&k.ville,d.numero,d.objet,d.notes,d.lignes.map(l=>l.presta).join(" ")].join(" ")).includes(q)});
+  const byRep=(a,b)=>(b.dateRep||"").localeCompare(a.dateRep||"");
+  const env=L.filter(d=>d.statut!=="brouillon"&&inR(d.date)).sort(dvSortD),acc=L.filter(d=>d.statut==="accepte"&&inR(d.dateRep)).sort(byRep),lost=L.filter(d=>!dvLive(d)&&inR(d.dateRep)).sort(byRep);
+  const real=[];L.forEach(d=>d.lignes.forEach(l=>{if(l.faite&&inR(l.faiteLe))real.push({d,l})}));real.sort((a,b)=>b.l.faiteLe.localeCompare(a.l.faiteLe));
+  const tot=a=>a.reduce((x,d)=>x+dvSum(d).tot,0);
+  return {env,acc,lost,real,envM:tot(env),accM:tot(acc),lostM:tot(lost),realM:real.reduce((x,r)=>x+lTot(r.l),0),K:dvKpis(L)}}
+const blDd=d=>blF(d,{day:"numeric",month:"short"}).replace(/\./g,"");
+function blDevisHTML(V){if(!V)return "";const K=V.K;
+  const tile=(lbl,v,sub,cls)=>'<div class="kpi"><span class="lbl">'+lbl+'</span><span class="v'+(cls?' '+cls:'')+'">'+v+'</span><span class="d">'+sub+'</span></div>';
+  const row=(d,date,txt,amt,cls)=>{const k=kOf(d.compteId);return '<button type="button" class="dv-wr" data-dvid="'+esc(d.id)+'"><span class="bl-dd num">'+esc(blDd(date))+'</span><span class="grow"><b>'+esc(k?k.nom:"Compte ?")+'</b><span class="sub">'+esc(txt)+'</span></span><span class="r"><b class="num'+(cls||"")+'">'+eur(amt)+'</b></span></button>'};
+  const dtx=d=>[d.numero?"N° "+d.numero:"",d.objet||d.lignes.map(l=>dvShort(l.presta)).join(", ")].filter(Boolean).join(" · ");
+  const list=(title,arr,f,empty)=>'<div><h4>'+title+' <span class="num">'+arr.length+'</span></h4>'+(arr.length?arr.slice(0,8).map(f).join("")+(arr.length>8?'<button type="button" class="more" data-dvv="tous">+ '+(arr.length-8)+' autres dans le suivi des devis</button>':''):'<p class="hint">'+empty+'</p>')+'</div>';
+  return '<div class="panel bl-dv"><div class="ph"><h2>Devis</h2><span class="sub">sur la période</span><button type="button" class="more" data-dvv="tous">Suivi des devis</button></div>'+
+   '<div class="bl-dvk">'+tile("Devis envoyés",'<span class="num">'+V.env.length+'</span>',eur(V.envM)+" HT")+tile("Devis acceptés",'<span class="num">'+V.acc.length+'</span>',eur(V.accM)+" HT")+
+    tile("Refusés / sans suite",'<span class="num">'+V.lost.length+'</span>',eur(V.lostM)+" HT")+tile("Prestations réalisées",'<span class="num">'+eur(V.realM)+'</span>',pl(V.real.length,"prestation"))+'</div>'+
+   '<div class="bl-dvl">'+list("Envoyés",V.env,d=>{const s=dvSum(d);return row(d,d.date,dtx(d),s.tot,dvTotCls(s))},"Aucun devis envoyé sur la période.")+
+    list("Acceptés",V.acc,d=>{const s=dvSum(d);return row(d,d.dateRep,dtx(d),s.tot,dvTotCls(s))},"Aucun devis accepté sur la période.")+
+    (V.lost.length?list("Refusés / sans suite",V.lost,d=>{const s=dvSum(d);return row(d,d.dateRep,DVL[d.statut]+" · "+dtx(d),s.tot,"")},""):'')+
+    list("Prestations réalisées",V.real,r=>row(r.d,r.l.faiteLe,r.l.presta+(lHasP(r.l)?" · "+nb0(r.l.nb)+" prél. "+(r.l.def?"définitifs":"estimatifs"):""),lTot(r.l),lHasP(r.l)?(r.l.def?" def":" est"):""),"Aucune prestation réalisée sur la période.")+'</div>'+
+   '<p class="bl-enc">En cours aujourd\'hui : <b>'+pl(K.att,"devis","devis")+' en attente</b> ('+eur(K.attM)+(K.rel?', dont <span class="late">'+K.rel+' à relancer</span>':'')+') · <b>reste à réaliser '+eur(K.reste)+'</b> sur '+pl(K.todo,"devis","devis")+' accepté'+(K.todo>1?'s':'')+(K.est?' · prélèvements estimatifs <span class="est">'+eur(K.est)+'</span>':'')+'</p></div>'}
+function blDevisTxt(V){if(!V)return "";const K=V.K,k=d=>(kOf(d.compteId)||{}).nom||"Compte ?";
+  const ln=(date,d,txt,amt)=>"• "+blDd(date)+" – "+k(d)+(txt?" – "+txt:"")+" – "+eur(amt)+" HT";
+  const dtx=d=>[d.numero?"n° "+d.numero:"",d.objet].filter(Boolean).join(" – ");
+  let s="\nDEVIS\nSynthèse : "+[pl(V.env.length,"envoyé")+" ("+eur(V.envM)+")",pl(V.acc.length,"accepté")+" ("+eur(V.accM)+")",pl(V.lost.length,"refusé ou sans suite","refusés ou sans suite"),pl(V.real.length,"prestation réalisée","prestations réalisées")+" ("+eur(V.realM)+")"].join(" · ")+"\n";
+  s+="En cours : "+pl(K.att,"devis","devis")+" en attente ("+eur(K.attM)+(K.rel?", dont "+K.rel+" à relancer":"")+") · reste à réaliser "+eur(K.reste)+(K.est?" · prélèvements estimatifs "+eur(K.est):"")+"\n";
+  const sec=(t,L)=>{if(L.length)s+="\n"+t+"\n"+L.join("\n")+"\n"};
+  sec("Envoyés",V.env.map(d=>ln(d.date,d,dtx(d),dvSum(d).tot)+(dvSum(d).estN?" (prélèvements estimatifs)":"")));
+  sec("Acceptés",V.acc.map(d=>ln(d.dateRep,d,dtx(d),dvSum(d).tot)));
+  sec("Refusés / sans suite",V.lost.map(d=>ln(d.dateRep,d,DVL[d.statut]+(dtx(d)?" – "+dtx(d):""),dvSum(d).tot)));
+  sec("Prestations réalisées",V.real.map(r=>ln(r.l.faiteLe,r.d,r.l.presta+(lHasP(r.l)?" ("+nb0(r.l.nb)+" prélèvements "+(r.l.def?"définitifs":"estimatifs")+")":""),lTot(r.l))));
+  return s}
+function blDevisPrint(V){if(!V)return "";const K=V.K,k=d=>(kOf(d.compteId)||{}).nom||"Compte ?";
+  const RED="#C62828",BLUE="#1F5FBF",col=c=>c==="est"?';color:'+RED:c==="def"?';color:'+BLUE:'';
+  const tr=(date,d,txt,amt,c)=>'<tr><td class="d">'+esc(blDd(date))+'</td><td><b>'+esc(k(d))+'</b>'+(txt?'<div>'+esc(txt)+'</div>':'')+'</td><td style="text-align:right;white-space:nowrap'+col(c)+'">'+esc(eur(amt))+' HT</td></tr>';
+  const dtx=d=>[d.numero?"N° "+d.numero:"",d.objet||d.lignes.map(l=>dvShort(l.presta)).join(", ")].filter(Boolean).join(" · ");
+  const cl=s=>s.estN?"est":s.nbD?"def":"";
+  const tb=(t,rows)=>rows.length?'<h3>'+esc(t)+' <span>'+rows.length+'</span></h3><table>'+rows.join("")+'</table>':'';
+  return '<h2>Devis</h2><div class="k">'+[["Envoyés",V.env.length+" · "+eur(V.envM)],["Acceptés",V.acc.length+" · "+eur(V.accM)],["Refusés / sans suite",String(V.lost.length)],["Réalisé",eur(V.realM)],["En attente à date",K.att+" · "+eur(K.attM)],["Reste à réaliser",eur(K.reste)]].map(([l,v])=>'<div><b>'+esc(v)+'</b><span>'+esc(l)+'</span></div>').join("")+'</div>'+
+   tb("Envoyés",V.env.map(d=>{const s=dvSum(d);return tr(d.date,d,dtx(d),s.tot,cl(s))}))+tb("Acceptés",V.acc.map(d=>{const s=dvSum(d);return tr(d.dateRep,d,dtx(d),s.tot,cl(s))}))+
+   tb("Refusés / sans suite",V.lost.map(d=>tr(d.dateRep,d,DVL[d.statut]+" · "+dtx(d),dvSum(d).tot,"")))+
+   tb("Prestations réalisées",V.real.map(r=>tr(r.l.faiteLe,r.d,r.l.presta+(lHasP(r.l)?" · "+nb0(r.l.nb)+" prélèvements "+(r.l.def?"définitifs":"estimatifs"):""),lTot(r.l),lHasP(r.l)?(r.l.def?"def":"est"):"")))+
+   (K.est?'<p style="font-size:8.5pt;color:#69625B">Montants en rouge : prélèvements estimatifs · en bleu : prélèvements définitifs.</p>':'')}
 
 /* ================= V3 · Événements ================= */
 document.addEventListener("click",async e=>{
