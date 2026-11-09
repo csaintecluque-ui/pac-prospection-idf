@@ -39,7 +39,7 @@ function dvrDone(){const d=S.devis.find(x=>x.id===DVR.id);if(!d)return;const t=t
   closeModal();commit();toast("Relance notée"+(d.numero?" pour le devis n° "+d.numero:"")+" · prochaine dans "+pl(dvRelJ(),"jour")+" sans réponse")}
 async function dvrCopy(){const t="Objet : "+vOf("dvr-obj")+"\n\n"+$("#dvr-txt").value;try{await navigator.clipboard.writeText(t);toast("Mail copié : collez-le dans Outlook")}catch(e){const x=$("#dvr-txt");x.focus();x.select();toast("Copie bloquée ici : le texte est sélectionné, faites Ctrl+C")}}
 /* capture : le bouton « Relancer » est parfois posé dans une ligne qui ouvre le devis */
-document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("[data-dvrel]");if(!t)return;e.stopPropagation();e.preventDefault();dvRelOpen(t.dataset.dvrel)},true);
+document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("[data-dvrel]");if(!t||(e.target.closest("[data-kopen]")&&t.contains(e.target.closest("[data-kopen]"))))return;e.stopPropagation();e.preventDefault();dvRelOpen(t.dataset.dvrel)},true);
 document.addEventListener("keydown",e=>{if(e.key!=="Enter")return;const t=e.target.closest&&e.target.closest("span[data-dvrel]");if(t){e.stopPropagation();e.preventDefault();dvRelOpen(t.dataset.dvrel)}},true);
 document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("button,a");if(!t)return;const d=t.dataset;
   if(MODAL!=="dvrel"||!DVR)return;

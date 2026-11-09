@@ -1027,3 +1027,8 @@ body.cal-dragging,body.cal-dragging *{cursor:grabbing!important;user-select:none
 .xl-bar input[type=date]{padding:3px 6px;font-size:12.5px}
 @media print{.gs-btn,.ab-wake{display:none!important}}
 #view-analyse .bl-k{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+/* « Devis à relancer » dans À faire : 3 colonnes (icône, texte, ancienneté) */
+.ti.dvr-ti{grid-template-columns:26px minmax(0,1fr) auto}
+.ti.dvr-ti .o,.ti.dvr-ti .m{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ti.dvr-ti .m .lk{background:none;border:0;padding:0;font:inherit;cursor:pointer}
+.ti.dvr-ti .m .lk:hover{text-decoration:underline}
