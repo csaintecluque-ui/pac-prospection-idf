@@ -117,11 +117,18 @@ function dvGHead(G,lvl){const open=dvGOpen(G.key,G.def),X=G.items.map(d=>[d,dvSu
   const acc=X.filter(([d])=>d.statut==="accepte").reduce((a,[,s])=>a+s.tot,0),real=X.reduce((a,[,s])=>a+s.real,0);
   return '<tr class="dv-gh l'+lvl+'"><td colspan="6"><button type="button" class="dv-gb" data-dvg="'+esc(G.key)+'" aria-expanded="'+open+'"><span class="dv-ch">'+CHEV+'</span><b>'+esc(G.label)+'</b>'+
     '<span class="sub">'+pl(G.items.length,"devis","devis")+' · '+eur(tot)+' HT'+[n("attente")?n("attente")+" en attente":"",n("accepte")?n("accepte")+" accepté"+(n("accepte")>1?"s":"")+" ("+eur(acc)+")":"",n("refuse")?n("refuse")+" refusé"+(n("refuse")>1?"s":""):"",real?eur(real)+" réalisé":""].filter(Boolean).map(x=>" · "+x).join("")+'</span></button></td></tr>'}
+/* Vue rapide : une ligne par prestation, prix de la prestation puis prix des analyses (prélèvements) */
+function dvBreak(d,max){const L=d.lignes;max=max||4;if(!L.length)return '<span class="sub">—</span>';
+  const tag=l=>'<span class="dv-tg'+(l.faite?' ok':'')+'" title="'+esc((l.presta||"Prestation")+(l.faite?" · réalisée"+(l.faiteLe?" le "+fdate(l.faiteLe):""):" · non réalisée"))+'">'+(l.faite?I_CHECK:'')+esc(dvShort(l.presta))+'</span>';
+  return '<div class="dv-bk">'+L.slice(0,max).map(l=>{const hp=lHasP(l),c=l.def?"def":"est";
+    return tag(l)+'<span class="num p">'+(nb0(l.prix)||!hp?eur(nb0(l.prix)):'')+'</span>'+
+      '<span class="num a '+(hp?c:'')+'"'+(hp?' title="'+nb0(l.nb)+' prélèvement'+(nb0(l.nb)>1?'s':'')+' '+(l.def?'définitif':'estimatif')+(nb0(l.nb)>1?'s':'')+' × '+esc(eur2(nb0(l.pu)))+'"':'')+'>'+(hp?'+ '+nb0(l.nb)+' × '+eur(nb0(l.pu))+' = '+eur(lPrel(l)):'')+'</span>'}).join("")+
+    (L.length>max?'<span class="sub" style="grid-column:1/-1">+ '+pl(L.length-max,"autre prestation","autres prestations")+'</span>':'')+'</div>'}
 function dvRow(d,inK){const k=kOf(d.compteId),s=dvSum(d),age=dvAge(d);
   return '<tr data-dvid="'+esc(d.id)+'" tabindex="0"'+(inK?' class="dv-in"':'')+'><td class="nw"><span class="num">'+(d.date?fdate(d.date):"—")+'</span>'+(d.numero?'<div class="sub">N° '+esc(d.numero)+'</div>':'')+'</td>'+
     '<td>'+(inK?'':'<div class="co"><b>'+esc(k?k.nom:"Compte introuvable")+'</b></div>')+(d.objet?'<div class="sub dv-obj'+(inK?' in':'')+'" title="'+esc(d.objet)+'">'+esc(d.objet)+'</div>':(inK?'<span class="sub">—</span>':''))+'</td>'+
-    '<td>'+dvTags(d,4)+'</td>'+
-    '<td class="r"><span class="num dv-tt'+dvTotCls(s)+'">'+eur(s.tot)+'</span>'+(s.prel?'<div class="sub dv-pl">'+dvPrelTxt(s)+'</div>':'')+'</td>'+
+    '<td>'+dvBreak(d,4)+'</td>'+
+    '<td class="r"><span class="num dv-tt'+dvTotCls(s)+'">'+eur(s.tot)+'</span>'+(s.prel?'<div class="sub dv-pl">prestations '+eur(s.presta)+'<br><span class="'+(s.estN?'est':'def')+'">analyses '+eur(s.prel)+'</span></div>':'')+'</td>'+
     '<td>'+dvPill(d)+(d.statut==="attente"&&age!=null?'<div class="sub'+(dvRel(d)?' late':'')+'">depuis '+pl(age,"jour")+((d.relances||[]).length?' · relancé le '+fdate(d.relances.slice(-1)[0]):'')+'</div>'+(dvRel(d)?'<button type="button" class="dv-rl" data-dvrel="'+esc(d.id)+'">'+I_MAIL+'Relancer</button>':''):d.dateRep&&d.statut!=="brouillon"?'<div class="sub">le '+fdate(d.dateRep)+'</div>':'')+'</td>'+
     '<td>'+dvRealHTML(d,s)+'</td></tr>'}
 function renderDevis(){const el=$("#view-devis");if(!el)return;
@@ -168,7 +175,7 @@ function renderDevis(){const el=$("#view-devis");if(!el)return;
   h+='<div class="dv-gt"><div class="seg" role="group" aria-label="Affichage"><button type="button" data-dvaff="mois" aria-pressed="'+(aff==="mois")+'">Par mois</button><button type="button" data-dvaff="compte" aria-pressed="'+(aff==="compte")+'">Par compte</button><button type="button" data-dvaff="liste" aria-pressed="'+(aff==="liste")+'">Liste</button></div>'+
     (DVUI.grp==="compte"?'<span class="sub">'+pl(tree.length,"compte")+' · '+pl(L.length,"dossier")+' · '+eur(T)+' HT · ouvrez un compte pour voir ses devis</span>':'')+'<span class="grow"></span>'+
     (tree?'<button type="button" class="more" data-act="dvgall" data-o="1">Tout déplier</button><button type="button" class="more" data-act="dvgall" data-o="0">Tout replier</button>':'')+'</div>'+
-   '<div class="list-wrap"><table class="tbl dv-tbl"><thead><tr>'+(DVUI.grp==="compte"?th("compte","Compte","",2)+th("nb","Dossiers")+th("mt","Montant global HT","r")+th("taux","Statut · transformation")+th("real","Réalisé"):th("date","Date · N°")+th("compte","Compte · objet")+th("presta","Prestations")+th("mt","Montant HT","r")+th("statut","Statut")+th("real","Réalisation"))+'</tr></thead><tbody>'+body+'</tbody></table></div>'+
+   '<div class="list-wrap"><table class="tbl dv-tbl"><thead><tr>'+(DVUI.grp==="compte"?th("compte","Compte","",2)+th("nb","Dossiers")+th("mt","Montant global HT","r")+th("taux","Statut · transformation")+th("real","Réalisé"):th("date","Date · N°")+th("compte","Compte · objet")+th("presta","Prestations · analyses")+th("mt","Montant HT","r")+th("statut","Statut")+th("real","Réalisation"))+'</tr></thead><tbody>'+body+'</tbody></table></div>'+
    '<div class="pager">'+(shown>=lim?'<button class="btn" type="button" data-act="dvmore">Afficher plus</button>':'')+'<span class="sub">'+pl(L.length,"devis","devis")+' · '+eur(T)+' HT</span></div>';
   el.innerHTML=h}
 document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("button");if(!t||S.tab!=="devis")return;const d=t.dataset;
