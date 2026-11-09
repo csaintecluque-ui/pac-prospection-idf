@@ -972,7 +972,7 @@ body.dv-drop #view-devis,body.dv-drop #modal{outline:3px dashed var(--accent);ou
   <div class="side-f">
     <span class="sync" id="sync" data-s="wait"><i></i><span id="syncTxt">Chargement…</span></span>
     <button class="btn" type="button" data-act="export" title="Exporter, sauvegarder, restaurer"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11"/></svg><span>Exporter / sauvegarder</span></button>
-    <span class="ver">V3.17 · CSC</span>
+    <span class="ver">V3.18 · CSC</span>
   </div>
 </aside>
 
@@ -1063,7 +1063,7 @@ function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTi
 const nh=x=>String(x==null?"":x).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
 const now=()=>new Date().toISOString();
 const S={open:new Set(),mode:"wait",cibles:[],comptes:[],contacts:[],actions:[],plans:[],pac:[],mailing:[],devis:[],settings:{objectif:8},writable:true,view:"actives",tab:"tdb",kid:"",db:null,downloads:null,ver:0};
-const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.17";
+const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.18";
 let STORE="ls"; /* "idb" dès que les données sont dans la base du navigateur */
 const IN_FRAME=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 const TYPE_RANK={"Client existant":3,"Prescripteur":2,"Prospect":1};
@@ -1083,7 +1083,7 @@ function norm(c){const b=blank();const o=Object.assign(b,c||{});o.opp=Object.ass
   o.bu=Array.isArray(o.bu)?o.bu:[];o.prestations=Array.isArray(o.prestations)?o.prestations:[];o.leadIds=Array.isArray(o.leadIds)?o.leadIds:[];
   if(!SIDX.hasOwnProperty(o.etape))o.etape="a_qualifier";if(!o.dept)o.dept=guessDept(o);return o}
 /* Compte, contact, action */
-function kblank(){return {nom:"",type:"Prospect",segment:"",typologie:"",dept:"",adresse:"",ville:"",web:"",tel:"",agence:"",apporteur:"",notes:"",origine:"",contrat:false,sousTypo:"",fiab:"",histo:null}}
+function kblank(){return {nom:"",type:"Prospect",segment:"",typologie:"",famille:"",dept:"",adresse:"",ville:"",web:"",tel:"",agence:"",apporteur:"",notes:"",origine:"",contrat:false,sousTypo:"",fiab:"",histo:null}}
 const knorm=x=>Object.assign(kblank(),x||{});
 function ctblank(){return {compteId:"",nom:"",fonction:"",tel:"",mail:"",notes:"",principal:false}}
 const ctnorm=x=>{const o=Object.assign(ctblank(),x||{});o.principal=!!o.principal;return o};
@@ -1495,13 +1495,14 @@ function openCompte(id,preset){const src=id?kOf(id):null;kmNew=!src;kmDel=false;
    '<div class="f"><span class="lbl">Type</span><div class="seg" role="group" aria-label="Type">'+TYPES.map(t=>'<button type="button" data-ktype="'+esc(t)+'" aria-pressed="'+(KM.type===t)+'">'+esc(t)+'</button>').join("")+'</div></div>'+
    '<div class="row"><div class="f"><label class="lbl" for="km-seg">Segment</label><select id="km-seg">'+opts(SEGMENTS,KM.segment,"—")+'</select></div>'+
     '<div class="f"><label class="lbl" for="km-typo">Typologie (mailing)</label><input type="text" id="km-typo" list="kmTy" value="'+esc(KM.typologie)+'"><datalist id="kmTy">'+typos.map(t=>'<option value="'+esc(t)+'">').join("")+'</datalist></div></div>'+
+   (()=>{const au=famAuto(KM);return '<div class="f"><label class="lbl" for="km-fam">Famille de clients</label><select id="km-fam"><option value="">'+esc("Automatique"+(au?" : "+FNOM[au]:" (aucune trouvée)"))+'</option>'+FAMILLES.map(([c,n])=>'<option value="'+c+'"'+(KM.famille===c?' selected':'')+'>'+esc(n)+'</option>').join("")+'</select><p class="hint" style="margin:0">Par défaut, la famille est déduite de la typologie ou du segment. Choisissez-en une pour l\'imposer.</p></div>'})()+
    '<div class="row3"><div class="f"><label class="lbl" for="km-dept">Département</label><select id="km-dept"><option value="">—</option>'+DEPTS.map(([d,n])=>'<option value="'+d+'"'+(KM.dept===d?' selected':'')+'>'+esc(d+" · "+n)+'</option>').join("")+'</select></div>'+fld("km-ville","Ville",KM.ville)+fld("km-tel","Téléphone (standard)",KM.tel,"tel")+'</div>'+
    '<div class="row">'+fld("km-adr","Adresse",KM.adresse)+fld("km-web","Site web",KM.web,"text",' placeholder="www…"')+'</div>'+
    '<div class="row"><div class="f"><label class="lbl" for="km-ag">Agence</label><input type="text" id="km-ag" list="kmAg" value="'+esc(KM.agence)+'"><datalist id="kmAg">'+ag.map(a=>'<option value="'+esc(a)+'">').join("")+'</datalist></div>'+fld("km-app","Apporteur interne",KM.apporteur)+'</div>'+
    ta("km-not","Notes sur le compte",KM.notes,4,"Organisation, patrimoine, contrats en place, concurrence…")+
   '</form></div><div class="df">'+(kmNew?'':'<button class="btn danger" type="button" data-act="kdel">Supprimer</button><button class="btn ghost" type="button" data-act="kmerge">Fusionner avec…</button>')+'<span class="grow"></span><button class="btn" type="button" data-act="mclose">Annuler</button><button class="btn primary" type="button" data-act="ksave">'+(kmNew?'Créer le compte':'Enregistrer')+'</button></div>',"compte");
   setTimeout(()=>{const f=$("#km-nom");if(f&&kmNew)f.focus()},40)}
-function kmRead(){const k=KM;k.nom=vOf("km-nom");k.segment=$("#km-seg").value;k.typologie=vOf("km-typo");k.dept=$("#km-dept").value;k.ville=vOf("km-ville");k.tel=vOf("km-tel");k.adresse=vOf("km-adr");k.web=vOf("km-web");k.agence=vOf("km-ag");k.apporteur=vOf("km-app");k.notes=vOf("km-not")}
+function kmRead(){const k=KM;k.nom=vOf("km-nom");k.segment=$("#km-seg").value;k.typologie=vOf("km-typo");const kf=$("#km-fam");if(kf)k.famille=kf.value;k.dept=$("#km-dept").value;k.ville=vOf("km-ville");k.tel=vOf("km-tel");k.adresse=vOf("km-adr");k.web=vOf("km-web");k.agence=vOf("km-ag");k.apporteur=vOf("km-app");k.notes=vOf("km-not")}
 function kSave(){kmRead();const k=KM;
   if(!k.nom){toast("Renseignez le nom du compte.");$("#km-nom").focus();return}
   const other=findCompte(k.nom);
@@ -1749,7 +1750,7 @@ function renderCompte(){
   /* Colonne 1 : informations et contacts */
   const kv=(l,v)=>v?'<dt>'+l+'</dt><dd>'+v+'</dd>':'';
   const c1='<div class="panel"><div class="ph"><h2>Informations</h2><button type="button" class="more" data-kedit="'+esc(k.id)+'">Modifier</button></div><dl class="kvl">'+
-     kv("Type",esc(k.type))+kv("Famille",esc(FNOM[famOf(k)]||""))+kv("Segment",esc(k.segment))+kv("Typologie",esc(k.typologie)+(k.sousTypo&&k.sousTypo!==k.typologie?' · '+esc(k.sousTypo):''))+kv("Département",esc(dLabel(k.dept)))+kv("Adresse",esc([k.adresse,k.ville].filter(Boolean).join(", ")))+
+     kv("Type",esc(k.type))+kv("Famille",esc(FNOM[famOf(k)]||"")+(famOf(k)&&!k.famille?' <span class="sub">(déduite)</span>':''))+kv("Segment",esc(k.segment))+kv("Typologie",esc(k.typologie)+(k.sousTypo&&k.sousTypo!==k.typologie?' · '+esc(k.sousTypo):''))+kv("Département",esc(dLabel(k.dept)))+kv("Adresse",esc([k.adresse,k.ville].filter(Boolean).join(", ")))+
      kv("Téléphone",k.tel?'<a class="dl num" href="tel:'+esc(k.tel.replace(/[^\d+]/g,""))+'">'+esc(k.tel)+'</a>':"")+kv("Site web",k.web?'<a class="dl" href="'+esc(/^https?:/.test(k.web)?k.web:"https://"+k.web)+'" target="_blank" rel="noopener">'+esc(k.web)+'</a>':"")+
      kv("Agence",esc(k.agence))+kv("Apporteur",esc(k.apporteur))+'</dl>'+(k.notes?'<p class="dnotes" style="border-top:1px solid var(--line);padding-top:10px">'+esc(k.notes)+'</p>':'<p class="hint">Aucune note. Ajoutez l\'organisation, le patrimoine, les contrats en place…</p>')+'</div>'+
    '<div class="panel"><div class="ph"><h2>Contacts</h2><span class="sub num">'+cts.length+'</span><button type="button" class="more" data-ctnew="'+esc(k.id)+'">+ Ajouter</button></div>'+
@@ -3367,7 +3368,9 @@ const FAMILLES=[["F1","Foncières, gestionnaires & prescripteurs",["Investisseur
 const FNOM=Object.fromEntries(FAMILLES.map(f=>[f[0],f[1]]));
 const SEG2FAM={"Industriel":"F4","Logistique / entrepôts":"F4","Tertiaire / bureaux":"F4","Bailleur social":"F3","Foncière / investisseur":"F1","Promoteur":"F6","Syndic / administrateur de biens":"F1","Property / facility management":"F1","Collectivité / établissement public":"F2","Maîtrise d'œuvre / architecte / BET":"F1","Entreprise de travaux (prescripteur)":"F6","Expert d'assurance / après sinistre":"F1"};
 const FAM_BY_TYPO={};FAMILLES.forEach(([c,,t])=>t.forEach(x=>{FAM_BY_TYPO[nh(x)]=c}));
-function famOf(k){if(!k)return "";const t=FAM_BY_TYPO[nh(k.typologie)];if(t)return t;
+function famOf(k){if(!k)return "";if(k.famille&&FNOM[k.famille])return k.famille;return famAuto(k)}
+/* Famille déduite (typologie, liste de mailing, segment), utilisée tant qu'aucune famille n'est choisie sur le compte */
+function famAuto(k){if(!k)return "";const t=FAM_BY_TYPO[nh(k.typologie)];if(t)return t;
   const ml=mlOf(k.id).find(m=>m.famille);if(ml){const f=FAMILLES.find(x=>nh(x[1])===nh(ml.famille));if(f)return f[0]}
   return SEG2FAM[k.segment]||""}
 
