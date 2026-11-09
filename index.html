@@ -754,6 +754,121 @@ body.dsz,body.dsz *{cursor:nwse-resize!important}
 .bl-mail:hover{color:var(--accent)}
 .bl-mail svg{width:14px;height:14px}
 @media (max-width:640px){.bl-r{grid-template-columns:64px minmax(0,1fr)}.bl-r .eic{display:none}.bl-mail{padding-left:6px}}
+
+/* V3.8 · Suivi des devis : rouge = prélèvements estimatifs, bleu = définitifs */
+:root{--est:#C62828;--est-soft:#FDE6E3;--def:#1F5FBF;--def-soft:#E2ECFA}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--est:#FF8A7A;--est-soft:#3F1F1B;--def:#86B4FF;--def-soft:#1A2842}}
+:root[data-theme="dark"]{--est:#FF8A7A;--est-soft:#3F1F1B;--def:#86B4FF;--def-soft:#1A2842}
+.est{color:var(--est)!important}.def{color:var(--def)!important}
+.sub.late,span.late{color:var(--bad)!important;font-weight:600}
+.pill.dvs-brouillon{background:var(--grey-soft);color:var(--grey)}.pill.dvs-attente{background:var(--warn-soft);color:var(--warn)}
+.pill.dvs-accepte{background:var(--ok-soft);color:var(--ok)}.pill.dvs-refuse{background:var(--bad-soft);color:var(--bad)}.pill.dvs-sansuite{background:var(--grey-soft);color:var(--muted)}
+.dv-k{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.dv-k .kpi.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.dv-k .kpi .v .num{font-size:22px}
+@media (max-width:1100px){.dv-k{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}}
+.dv-tbl td.nw{white-space:nowrap}
+.dv-tbl .dv-tt{font-size:14.5px;font-weight:500}
+.dv-tbl .dv-pl{line-height:1.35;white-space:nowrap}
+.dv-tags{display:flex;flex-wrap:wrap;gap:4px;max-width:420px}
+.dv-tg{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:4px;padding:1px 6px;font:500 12px var(--f-label);color:var(--muted);background:var(--surface);max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dv-tg.ok{border-color:color-mix(in srgb,var(--ok) 45%,transparent);background:var(--ok-soft);color:var(--ok)}
+.dv-tg svg{width:11px;height:11px;flex:none}
+.dv-tg i{font:600 10.5px var(--f-num);font-style:normal;border-radius:3px;padding:0 4px;color:var(--accent-ink)!important}
+.dv-tg i.est{background:var(--est)}.dv-tg i.def{background:var(--def)}
+.dv-rm{display:flex;flex-direction:column;gap:2px;min-width:90px}
+.dv-rm .meter{margin-top:2px}
+/* Tableau de bord */
+.dv-wks{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.dv-wk{display:flex;flex-direction:column;gap:2px;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:9px 11px;cursor:pointer;font:inherit;color:inherit;min-width:0}
+.dv-wk:hover{border-color:var(--muted)}
+.dv-wk b{font:500 19px/1.2 var(--f-num)}
+.dv-wk .sub{font-size:12px}
+.dv-wl{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:6px 18px}
+.dv-wl h4{margin:4px 0 2px;font:600 11.5px var(--f-label);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);display:flex;gap:6px}
+.dv-wr{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:7px 2px;cursor:pointer;font:inherit;color:inherit}
+.dv-wr:hover b{color:var(--accent)}
+.dv-wr .grow{flex:1;min-width:0}.dv-wr .grow b{font-weight:600;font-size:13.5px}
+.dv-wr .grow .sub{display:block;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dv-wr .r{display:flex;flex-direction:column;align-items:flex-end;white-space:nowrap}
+.dv-wr .r .sub{font-size:11.5px}
+/* Fiche compte */
+.dv-card{border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;cursor:pointer;background:var(--surface);text-align:left;font:inherit;color:inherit;width:100%}
+.dv-card:hover{border-color:var(--muted)}
+.dv-card .ctop{display:flex;align-items:center;gap:8px}.dv-card .grow{flex:1}
+.dv-card .dv-cl{display:flex;flex-direction:column;gap:2px}
+.dv-card .dv-rm{flex-direction:row;align-items:center;gap:8px}.dv-card .dv-rm .meter{flex:1;margin:0}
+/* Fenêtre devis */
+.dv-form{display:flex;flex-direction:column;gap:18px}
+.dv-head{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 14px}
+.dv-head .s2{grid-column:span 2}.dv-head .s4{grid-column:1/-1}
+.dv-seg{flex-wrap:wrap}
+.dv-sec{display:flex;flex-direction:column;gap:12px;border-top:1px solid var(--line);padding-top:14px}
+.dv-sh{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.dv-sh h3{margin:0;flex:1;font:600 13px var(--f-label);letter-spacing:.06em;text-transform:uppercase}
+.dv-cat{border:1px solid var(--line);border-radius:var(--r);background:var(--surface-2);padding:12px 14px;display:flex;flex-direction:column;gap:12px}
+.dv-cat .g{display:flex;flex-direction:column;gap:6px}
+.dv-cat .g>span{font:600 11px var(--f-label);letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.dv-cat .chip{text-align:left}.dv-cat .chip svg{width:13px;height:13px;flex:none}
+.filters.dv-f{grid-template-columns:minmax(0,2fr) minmax(0,.7fr) minmax(0,1.6fr) auto}
+@media (max-width:760px){.filters.dv-f{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.filters.dv-f .field-s:first-child{grid-column:1/-1}}
+.dv-cat .chip[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--fg)}
+.dv-cat .chip[aria-pressed="true"] svg{color:var(--accent)}
+.dv-lines{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.dv-l,.dv-lh{display:grid;grid-template-columns:minmax(200px,2.3fr) 118px minmax(330px,3fr) 112px 132px 32px;gap:10px;align-items:center;padding:10px 12px}
+.dv-l{border-top:1px solid var(--line)}
+.dv-lh{background:var(--surface-2);font:600 11px var(--f-label);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);padding:7px 12px;border-radius:var(--r) var(--r) 0 0}
+.dv-lh .r{text-align:right}
+.dv-l.done{background:color-mix(in srgb,var(--ok-soft) 60%,var(--surface))}
+.dv-c{display:flex;flex-direction:column;gap:3px;min-width:0}
+.dv-m{display:none}
+.dv-eu{position:relative;display:block}
+.dv-eu input{width:100%;padding-right:22px!important;text-align:right}
+.dv-eu i{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-style:normal;color:var(--muted);font-size:12.5px;pointer-events:none}
+.dv-pr{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.dv-pr .dv-nb{width:64px;text-align:right}
+.dv-pr .dv-eu{width:96px}
+.dv-pr input.est{color:var(--est);border-color:color-mix(in srgb,var(--est) 55%,var(--line));background:var(--est-soft);font-weight:600}
+.dv-pr input.def{color:var(--def);border-color:color-mix(in srgb,var(--def) 55%,var(--line));background:var(--def-soft);font-weight:600}
+.dv-pr .x{color:var(--muted)}
+.dv-ed{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.dv-ed button{border:0;background:var(--surface);padding:5px 8px;font:600 11.5px var(--f-label);letter-spacing:.02em;cursor:pointer;color:var(--muted)}
+.dv-ed button+button{border-left:1px solid var(--line)}
+.dv-ed button.e.on{background:var(--est);color:var(--accent-ink)}.dv-ed button.d.on{background:var(--def);color:var(--accent-ink)}
+.dv-x{border:0;background:none;color:var(--muted);font-size:18px;line-height:1;cursor:pointer;padding:2px 4px}
+.dv-x:hover{color:var(--bad)}
+.dv-addp{display:inline-flex;align-items:center;gap:5px;border:1px dashed var(--line);background:none;border-radius:6px;padding:5px 10px;color:var(--muted);cursor:pointer;font:500 12.5px var(--f-ui);width:max-content}
+.dv-addp:hover{border-color:var(--accent);color:var(--accent)}
+.dv-addp svg{width:13px;height:13px}
+.dv-amt{align-items:flex-end;text-align:right}
+.dv-amt .num{font-size:14px;font-weight:500}
+.dv-amt .sub{font-size:11.5px}
+.dv-fa input[type=date]{padding:4px 6px;font-size:12.5px}
+.dv-del{border:0;background:none;color:var(--muted);cursor:pointer;padding:4px;border-radius:5px;display:flex}
+.dv-del svg{width:16px;height:16px}
+.dv-del:hover{color:var(--bad);background:var(--bad-soft)}
+.dv-tot{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;background:var(--surface-2);border-radius:var(--r);padding:12px 14px}
+.dv-tot>div{display:flex;flex-direction:column;gap:2px}
+.dv-tot b{font:500 17px/1.25 var(--f-num)}
+.dv-tot .t b{font-size:21px}
+.dv-tot .sub{font-size:12px}
+.dv-leg{margin:0}
+@media (max-width:1180px){
+  .dv-lh{display:none}
+  .dv-l{grid-template-columns:minmax(0,1fr) 120px 32px;grid-template-areas:"p p d" "x x x" "pr pr pr" "a f f";row-gap:10px}
+  .dv-l>.dv-c:nth-child(1){grid-area:p}.dv-l>.dv-c:nth-child(2){grid-area:x}.dv-l>.dv-c:nth-child(3){grid-area:pr}
+  .dv-l>.dv-amt{grid-area:a;align-items:flex-start;text-align:left}.dv-l>.dv-fa{grid-area:f;align-items:flex-end}.dv-l>.dv-del{grid-area:d}
+  .dv-l>.dv-c:nth-child(2) .dv-eu{max-width:160px}
+  .dv-m{display:block}
+}
+@media (max-width:760px){.dv-head{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.dv-head .dv-sp{display:none}.dv-tot{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.modal.compact .dv-head{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.modal.compact .dv-head .dv-sp{display:none}
+.modal.compact .dv-lh{display:none}
+.modal.compact .dv-l{grid-template-columns:minmax(0,1fr) 120px 32px;grid-template-areas:"p p d" "x x x" "pr pr pr" "a f f";row-gap:10px}
+.modal.compact .dv-l>.dv-c:nth-child(1){grid-area:p}.modal.compact .dv-l>.dv-c:nth-child(2){grid-area:x}.modal.compact .dv-l>.dv-c:nth-child(3){grid-area:pr}
+.modal.compact .dv-l>.dv-amt{grid-area:a;align-items:flex-start;text-align:left}.modal.compact .dv-l>.dv-fa{grid-area:f;align-items:flex-end}.modal.compact .dv-l>.dv-del{grid-area:d}
+.modal.compact .dv-m{display:block}.modal.compact .dv-tot{grid-template-columns:repeat(2,minmax(0,1fr))}
+.qk .qk-nb{grid-column:span 2}
 </style>
 </head>
 <body>
@@ -773,7 +888,7 @@ body.dsz,body.dsz *{cursor:nwse-resize!important}
   <div class="side-f">
     <span class="sync" id="sync" data-s="wait"><i></i><span id="syncTxt">Chargement…</span></span>
     <button class="btn" type="button" data-act="export" title="Exporter, sauvegarder, restaurer"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11"/></svg><span>Exporter / sauvegarder</span></button>
-    <span class="ver">V3.7 · CSC</span>
+    <span class="ver">V3.8 · CSC</span>
   </div>
 </aside>
 
@@ -785,6 +900,7 @@ body.dsz,body.dsz *{cursor:nwse-resize!important}
   <section id="view-comptes" hidden></section>
   <section id="view-compte" hidden></section>
   <section id="view-bilan" hidden></section>
+  <section id="view-devis" hidden></section>
 
   <section id="view-cibles" hidden>
     <div class="page-h"><div class="grow"><span class="crumb">Suivi de prospection</span><h2>Cibles &amp; campagnes</h2><p class="sub" id="cibSub"></p></div>
@@ -862,8 +978,8 @@ function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTi
 /* ================= V3 · État, modèle Comptes / Contacts / Actions, migration ================= */
 const nh=x=>String(x==null?"":x).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
 const now=()=>new Date().toISOString();
-const S={open:new Set(),mode:"wait",cibles:[],comptes:[],contacts:[],actions:[],plans:[],pac:[],mailing:[],settings:{objectif:8},writable:true,view:"actives",tab:"tdb",kid:"",db:null,downloads:null,ver:0};
-const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.7";
+const S={open:new Set(),mode:"wait",cibles:[],comptes:[],contacts:[],actions:[],plans:[],pac:[],mailing:[],devis:[],settings:{objectif:8},writable:true,view:"actives",tab:"tdb",kid:"",db:null,downloads:null,ver:0};
+const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.8";
 let STORE="ls"; /* "idb" dès que les données sont dans la base du navigateur */
 const IN_FRAME=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 const TYPE_RANK={"Client existant":3,"Prescripteur":2,"Prospect":1};
@@ -1014,11 +1130,12 @@ function repairLinks(){
   const kids=new Set(S.comptes.map(k=>k.id));
   S.contacts.forEach(ct=>{if(!kids.has(ct.compteId)){const k=ensureCompte("Contacts sans compte");ct.compteId=k.id}});
   S.actions.forEach(a=>{if(!kids.has(a.compteId)){const k=ensureCompte("Actions sans compte");a.compteId=a.compteId&&kids.has(a.compteId)?a.compteId:k.id}});
+  S.devis.forEach(d=>{if(!kids.has(d.compteId)){const k=ensureCompte("Devis sans compte");d.compteId=k.id}});
   S.cibles.forEach(c=>{const k=kOf(c.compteId);if(k&&c.compte!==k.nom)c.compte=k.nom});bump()}
 
 /* ---------- Persistance (navigateur) ---------- */
 function setSync(mode,txt){S.mode=mode;const a=$("#sync"),b=$("#syncTxt");if(a)a.dataset.s=mode;if(b)b.textContent=txt}
-const snapshot=()=>({schema:SCHEMA,cibles:S.cibles,comptes:S.comptes,contacts:S.contacts,actions:S.actions,plans:S.plans,pac:S.pac,mailing:S.mailing,settings:S.settings});
+const snapshot=()=>({schema:SCHEMA,cibles:S.cibles,comptes:S.comptes,contacts:S.contacts,actions:S.actions,plans:S.plans,pac:S.pac,mailing:S.mailing,devis:S.devis,settings:S.settings});
 let saveWarned=false;
 function lsSave(){bump();
   if(STORE==="idb"){idbQueue();return true}
@@ -1049,7 +1166,7 @@ function lsLoad(){
   if(r&&r.storage==="idb"){ensurePlans();return {lost:true}}
   if(r&&r.schema===SCHEMA){
     S.cibles=(r.cibles||[]).map(norm);S.comptes=(r.comptes||[]).map(knorm);S.contacts=(r.contacts||[]).map(ctnorm);S.actions=(r.actions||[]).map(anorm);
-    S.plans=Array.isArray(r.plans)?r.plans:[];S.pac=(r.pac||[]).map(pnorm);S.mailing=(r.mailing||[]).map(mnorm);S.settings=Object.assign({objectif:8},r.settings||{});
+    S.plans=Array.isArray(r.plans)?r.plans:[];S.pac=(r.pac||[]).map(pnorm);S.mailing=(r.mailing||[]).map(mnorm);S.devis=(r.devis||[]).map(dvnorm);S.settings=Object.assign({objectif:8},r.settings||{});
     bump();ensurePlans();repairLinks();if(upgrade31())lsSave();return {}}
   /* Données de la V2 : copie de sécurité conservée telle quelle, puis conversion */
   let copie=false;try{if(!localStorage.getItem(BK_KEY))localStorage.setItem(BK_KEY,raw);copie=true}catch(e){}
@@ -1107,9 +1224,11 @@ function whenLbl(a){if(!a.date)return "Sans date";const t=todayISO();
 const tyTag=ty=>ty?'<span class="ty ty-'+esc(ty.slice(0,4).toLowerCase())+'">'+esc(ty)+'</span>':'';
 
 /* ---------- Navigation ---------- */
+const I_DVN=SV+'<path d="M4 1.8h6l2.5 2.5v9.9H4z"/><path d="M10 1.8v2.5h2.5"/><path d="M10.4 7.4a2.2 2.2 0 1 0 0 3.2M6.4 8.4h3.1M6.4 9.7h3.1"/></svg>';
 const NAV=[["tdb","Tableau de bord",SV+'<rect x="2" y="2" width="5" height="6" rx="1"/><rect x="9" y="2" width="5" height="4" rx="1"/><rect x="2" y="10" width="5" height="4" rx="1"/><rect x="9" y="8" width="5" height="6" rx="1"/></svg>',""],
  ["comptes","Comptes",SV+'<path d="M2.5 14V4.5l5-2v11.5M7.5 6.5h6V14M2 14h12M4.5 6h1M4.5 8.5h1M4.5 11h1M10 9h1.5M10 11.5h1.5"/></svg>',"Suivi de prospection"],
  ["cibles","Cibles & campagnes",SV+'<circle cx="8" cy="8" r="6"/><circle cx="8" cy="8" r="3.2"/><circle cx="8" cy="8" r=".6" fill="currentColor"/></svg>',""],
+ ["devis","Suivi des devis",I_DVN,""],
  ["agenda","Agenda & actions",SV+'<rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M2 6.5h12M5.5 1.8v2.4M10.5 1.8v2.4M5 9.5h2M9 9.5h2M5 12h2"/></svg>',"Actions commerciales"],
  ["mailing","Mailing",SV+'<path d="M14 2 7 9M14 2l-4.5 12L7 9 2 6.5z"/></svg>',""],
  ["pac","Plan d'action (PAC)",SV+'<path d="M3 14.5V2M3 2.5h8.5l-1.5 3 1.5 3H3"/></svg>',"Pilotage"],
@@ -1118,12 +1237,12 @@ function renderNav(){
   renderQk();
   const t=todayISO(),late=S.actions.filter(a=>isOpen(a)&&a.date&&a.date<t).length,tod=S.actions.filter(a=>isOpen(a)&&a.date===t).length;
   const rel=S.mailing.filter(m=>m.envoye&&m.relance&&m.relance<=t&&!m.relanceFaite).length;
-  const cnt={tdb:"",comptes:S.comptes.length,cibles:S.cibles.filter(isActive).length,agenda:late?[late,1]:tod?[tod,0]:"",mailing:rel?[rel,1]:"",pac:S.pac.filter(p=>p.planId===curPlan().id).length};
+  const cnt={tdb:"",comptes:S.comptes.length,cibles:S.cibles.filter(isActive).length,agenda:late?[late,1]:tod?[tod,0]:"",mailing:rel?[rel,1]:"",devis:(()=>{const a=S.devis.filter(d=>d.statut==="attente").length,r=S.devis.filter(dvRel).length;return r?[a,1]:a||""})(),pac:S.pac.filter(p=>p.planId===curPlan().id).length};
   const cur=S.tab==="compte"?"comptes":S.tab;
   $("#nav").innerHTML=NAV.map(([k,l,ic,g])=>{const c=cnt[k],hot=Array.isArray(c)&&c[1],n=Array.isArray(c)?c[0]:c;
     return (g?'<div class="nav-g">'+esc(g)+'</div>':'')+'<button type="button" data-nav="'+k+'"'+(cur===k?' aria-current="page"':'')+' title="'+esc(l)+'">'+ic+'<span class="l">'+esc(l)+'</span>'+(n!==""&&n!=null?'<span class="nb'+(hot?' hot':'')+'">'+n+'</span>':'')+'</button>'}).join("");
 }
-const VIEWS_ALL=["tdb","agenda","comptes","compte","cibles","mailing","pac","bilan"];
+const VIEWS_ALL=["tdb","agenda","comptes","compte","cibles","mailing","pac","bilan","devis"];
 function showTab(k,arg,noPush){
   if(!VIEWS_ALL.includes(k))k="tdb";
   S.tab=k;if(k==="compte")S.kid=arg||S.kid;
@@ -1141,7 +1260,7 @@ function render(){
   renderNav();
   const t=S.tab;
   if(t==="tdb")renderTdb();else if(t==="agenda")renderAgenda();else if(t==="comptes")renderComptes();else if(t==="compte")renderCompte();
-  else if(t==="cibles")renderCibles();else if(t==="mailing")renderMailing();else if(t==="pac")renderPac();else if(t==="bilan")renderBilan();
+  else if(t==="cibles")renderCibles();else if(t==="mailing")renderMailing();else if(t==="pac")renderPac();else if(t==="bilan")renderBilan();else if(t==="devis")renderDevis();
 }
 const pageH=(crumb,title,sub,tools)=>'<div class="page-h"><div class="grow">'+(crumb?'<span class="crumb">'+crumb+'</span>':'')+'<h2>'+title+'</h2>'+(sub?'<p class="sub">'+sub+'</p>':'')+'</div>'+(tools?'<div class="bar">'+tools+'</div>':'')+'</div>';
 const qBtns=(kid,cid)=>{const d=(k)=>' data-anew="'+k+'"'+(kid?' data-k="'+esc(kid)+'"':'')+(cid?' data-c="'+esc(cid)+'"':'');
@@ -1169,7 +1288,7 @@ function modalCtl(m){const dh=m.querySelector(".dh");if(!dh)return;dh.title="Gli
   if(!dh.querySelector(".mgrip")){const g=document.createElement("span");g.className="mgrip";g.setAttribute("aria-hidden","true");g.textContent="⠿";dh.insertBefore(g,dh.firstChild)}
   const cl=dh.querySelector('[data-act="mclose"]');if(cl&&!dh.querySelector('[data-act="msize"]')){const b=document.createElement("button");b.type="button";b.className="btn ghost";b.dataset.act="msize";b.innerHTML='<span class="l-big">Réduire</span><span class="l-cmp">Agrandir</span>';dh.insertBefore(b,cl)}}
 function showModal(html,kind){MODAL=kind||"x";const m=$("#modal");m.classList.remove("big","compact");m.innerHTML=html;modalCtl(m);m.hidden=false;$("#mscrim").hidden=false}
-function closeModal(){if(MODAL==="nb")setTimeout(()=>{if(S.tab==="tdb")renderTdb()},0);NLINK=null;MODAL=null;AM=null;CM=null;KM=null;RV=null;const m=$("#modal");m.classList.remove("big","compact","moved");m.style.left=m.style.top="";$("#mscrim").classList.remove("light");$("#modal").hidden=true;$("#mscrim").hidden=true}
+function closeModal(){if(MODAL==="nb")setTimeout(()=>{if(S.tab==="tdb")renderTdb()},0);NLINK=null;MODAL=null;DV=null;AM=null;CM=null;KM=null;RV=null;const m=$("#modal");m.classList.remove("big","compact","moved");m.style.left=m.style.top="";$("#mscrim").classList.remove("light");$("#modal").hidden=true;$("#mscrim").hidden=true}
 const mHead=(lbl,title)=>'<div class="dh"><div class="grow"><span class="lbl">'+lbl+'</span><h2 id="mTitle">'+title+'</h2></div><button class="btn ghost" type="button" data-act="mclose">Fermer</button></div>';
 const fld=(id,lab,val,type,extra)=>'<div class="f"><label class="lbl" for="'+id+'">'+lab+'</label><input type="'+(type||"text")+'" id="'+id+'" value="'+esc(val==null?"":val)+'"'+(extra||"")+'></div>';
 const ta=(id,lab,val,rows,ph)=>'<div class="f"><label class="lbl" for="'+id+'">'+lab+'</label><textarea id="'+id+'" rows="'+(rows||3)+'"'+(ph?' placeholder="'+esc(ph)+'"':'')+'>'+esc(val||"")+'</textarea></div>';
@@ -1307,14 +1426,14 @@ function kSave(){kmRead();const k=KM;
   cibOf(k.id).forEach(c=>{c.compte=k.nom});bump();
   closeModal();lsSave();
   if(wasNew){showTab("compte",k.id);toast("Compte créé")}else{render();if(D)drawDrawer();toast("Compte enregistré")}}
-function kDelete(btn){const k=KM,nc=cibOf(k.id).length,nm=mlOf(k.id).length;
-  if(nc||nm){toast("Ce compte a "+[nc?pl(nc,"cible"):"",nm?pl(nm,"ligne")+" de mailing":""].filter(Boolean).join(" et ")+" : supprimez-les ou fusionnez le compte.");return}
+function kDelete(btn){const k=KM,nc=cibOf(k.id).length,nm=mlOf(k.id).length,nd=dvOf(k.id).length;
+  if(nc||nm||nd){toast("Ce compte a "+[nc?pl(nc,"cible"):"",nm?pl(nm,"ligne")+" de mailing":"",nd?pl(nd,"devis","devis"):""].filter(Boolean).join(" et ")+" : supprimez-les ou fusionnez le compte.");return}
   if(!kmDel){kmDel=true;btn.classList.add("armed");btn.textContent="Supprimer le compte, ses contacts et ses actions";return}
   const id=k.id;hDel(id);S.contacts=S.contacts.filter(c=>c.compteId!==id);S.actions=S.actions.filter(a=>a.compteId!==id);drop("comptes",id);
   closeModal();lsSave();showTab("comptes");toast("Compte supprimé")}
 function kMergeMenu(){kmRead();const k=KM;
   showModal(mHead("Fusionner","Fusionner « "+esc(k.nom)+" » dans un autre compte")+
-  '<div class="db"><p class="hint">Les contacts, actions, cibles et lignes de mailing de « '+esc(k.nom)+' » rejoignent le compte choisi. Les informations vides du compte choisi sont complétées, puis « '+esc(k.nom)+' » est supprimé.</p>'+
+  '<div class="db"><p class="hint">Les contacts, actions, cibles, devis et lignes de mailing de « '+esc(k.nom)+' » rejoignent le compte choisi. Les informations vides du compte choisi sont complétées, puis « '+esc(k.nom)+' » est supprimé.</p>'+
    '<div class="f"><label class="lbl" for="km-to">Compte qui reste</label><input type="text" id="km-to" list="kList" placeholder="Nom du compte" autocomplete="off">'+comptesDL()+'</div></div>'+
   '<div class="df"><span class="grow"></span><button class="btn" type="button" data-act="mclose">Annuler</button><button class="btn primary" type="button" data-act="kmergego">Fusionner</button></div>',"merge");
   setTimeout(()=>{const f=$("#km-to");if(f)f.focus()},40)}
@@ -1325,6 +1444,7 @@ function mergeComptes(srcId,dstId){const a=kOf(srcId),b=kOf(dstId);if(!a||!b||a.
   S.actions.forEach(x=>{if(x.compteId===a.id){x.compteId=b.id;if(map[x.contactId])x.contactId=map[x.contactId]}});
   S.mailing.forEach(m=>{if(m.compteId===a.id){m.compteId=b.id;if(map[m.contactId])m.contactId=map[m.contactId]}});
   S.cibles.forEach(c=>{if(c.compteId===a.id){c.compteId=b.id;c.compte=b.nom}});
+  S.devis.forEach(d=>{if(d.compteId===a.id){d.compteId=b.id;if(map[d.contactId])d.contactId=map[d.contactId]}});
   S.comptes=S.comptes.filter(x=>x.id!==a.id);b.majLe=now();bump();restage(b.id);return true}
 function kMergeGo(toId){const dst=toId?kOf(toId):findCompte(vOf("km-to"));const src=KM;
   if(!dst){toast("Choisissez un compte existant dans la liste.");return}
@@ -1431,11 +1551,11 @@ function renderTdb(){
   let gH="";const KH=S.comptes.filter(k=>k.histo);
   if(KH.length){const yp=String(new Date().getFullYear()-1),dv=KH.filter(k=>k.histo.dv.n).sort((a,b)=>b.histo.dv.m-a.histo.dv.m),lost=KH.filter(k=>k.histo.st==="perdu"||k.histo.st==="relance").sort((a,b)=>hCA(b,yp)-hCA(a,yp));
     const row=(k,v,s,ob)=>'<div class="mi"><div class="grow"><button type="button" class="lk strong" data-kopen="'+esc(k.id)+'">'+esc(k.nom)+'</button><div class="sub">'+s+'</div></div><span class="num" style="white-space:nowrap">'+v+'</span><button class="btn" type="button" data-anew="appel" data-k="'+esc(k.id)+'" data-obj="'+esc(ob)+'">'+I_EV.appel+'Appel</button></div>';
-    W.devis='<div class="panel"><div class="ph"><h2>Devis en attente</h2><span class="sub num">'+dv.length+' · '+eur(dv.reduce((s,k)=>s+k.histo.dv.m,0))+'</span><button type="button" class="more" data-famgo="" data-kvset="devis">Tous</button></div>'+
+    W.devis='<div class="panel"><div class="ph"><h2>Devis en attente (historique importé)</h2><span class="sub num">'+dv.length+' · '+eur(dv.reduce((s,k)=>s+k.histo.dv.m,0))+'</span><button type="button" class="more" data-famgo="" data-kvset="devis">Tous</button></div>'+
       (dv.length?'<div class="mini">'+dv.slice(0,8).map(k=>row(k,eur(k.histo.dv.m),pl(k.histo.dv.n,"devis","devis")+(k.histo.dv.d?" · dernier le "+fdate(k.histo.dv.d):"")+(FNOM[famOf(k)]?" · "+esc(FNOM[famOf(k)]):""),"Relance devis en attente")).join("")+'</div>':'<p class="hint">Aucun devis en attente.</p>')+'</div>';W.perdus=
       '<div class="panel"><div class="ph"><h2>Clients perdus à reconquérir</h2><span class="sub num">'+lost.length+' · '+eur(lost.reduce((s,k)=>s+hCA(k,yp),0))+' en '+yp+'</span><button type="button" class="more" data-famgo="" data-kvset="perdus">Tous</button></div>'+
       (lost.length?'<div class="mini">'+lost.slice(0,8).map(k=>row(k,eur(hCA(k,yp)),"Dernière facture le "+fdate(k.histo.last)+(k.histo.st==="relance"?" · pièce "+k.histo.y1+" sans facture":"")+(FNOM[famOf(k)]?" · "+esc(FNOM[famOf(k)]):""),"Reconquête client")).join("")+'</div>':'<p class="hint">Aucun client perdu.</p>')+'</div>'}
-  W.notes=nbPanel();h+=dashHTML(W);
+  W.notes=nbPanel();W.suividevis=dvWidget();h+=dashHTML(W);
   el.innerHTML=h;dashFit();dashObs();nbGrowAll(el);nbBadge();
   const oi=$("#objIn");if(oi)oi.addEventListener("change",()=>{S.settings.objectif=Math.max(0,parseInt(oi.value,10)||0);saveSettings();renderTdb()});
 }
@@ -1560,7 +1680,7 @@ function renderCompte(){
     (hist.length?'<div class="chips echips">'+HF.filter(([f])=>!f||hist.some(x=>hm(x,f))).map(([f,l])=>'<button type="button" class="chip" data-hf="'+f+'" aria-pressed="'+(hf===f)+'">'+l+'<span class="n num">'+(f?hist.filter(x=>hm(x,f)).length:hist.length)+'</span></button>').join("")+'</div>':'')+
     (H.length?'<div class="tl">'+H.map(x=>tlItem(x,cs)).join("")+'</div>':'<p class="hint">'+(hist.length?'Rien pour ce filtre.':'Aucun échange enregistré. Les appels, RDV et mails faits apparaissent ici, avec les mails envoyés depuis le mailing.')+'</p>')+'</div>';
   /* Colonne 3 : prospection, opportunités, mailing */
-  const c3='<div class="panel"><div class="ph"><h2>Prospection</h2><button type="button" class="more" data-cibnew="'+esc(k.id)+'">+ Campagne</button></div>'+
+  const c3=dvAccPanel(k)+'<div class="panel"><div class="ph"><h2>Prospection</h2><button type="button" class="more" data-cibnew="'+esc(k.id)+'">+ Campagne</button></div>'+
     (cs.length?'<div class="cards">'+cs.map(c=>'<div class="cibc" data-cib="'+esc(c.id)+'"><div class="ctop"><span class="prio prio-'+esc(c.priorite)+'">'+esc(c.priorite)+'</span><span class="grow">'+esc(campShort(c))+'</span><span class="pill st-'+c.etape+'">'+esc(SL[c.etape])+'</span></div>'+
       '<div class="tags">'+c.prestations.map(p=>'<span class="tag" title="'+esc(PLABEL[p]||p)+'">'+esc(p)+'</span>').join("")+c.bu.map(b=>'<span class="tag bu">'+esc(b)+'</span>').join("")+'</div>'+
       '<div class="sub">'+esc([c.potentiel?"Potentiel "+eur(c.potentiel)+" / an":"",c.apporteur?"via "+c.apporteur:"",c.source].filter(Boolean).join(" · "))+'</div>'+
@@ -2142,7 +2262,7 @@ async function restore(text){
   const before={c:S.cibles.length,k:S.comptes.length,ct:S.contacts.length,a:S.actions.length,m:S.mailing.length,p:S.pac.length};
   if(j.schema===SCHEMA){
     const up=(coll,list,nf)=>{(list||[]).forEach(x=>{const o=nf(x);if(!o.id)o.id=uid();const i=S[coll].findIndex(y=>y.id===o.id);if(i>=0)S[coll][i]=o;else S[coll].push(o)})};
-    up("comptes",j.comptes,knorm);up("contacts",j.contacts,ctnorm);up("actions",j.actions,anorm);up("cibles",j.cibles,norm);up("mailing",j.mailing,mnorm);
+    up("comptes",j.comptes,knorm);up("contacts",j.contacts,ctnorm);up("actions",j.actions,anorm);up("cibles",j.cibles,norm);up("mailing",j.mailing,mnorm);up("devis",j.devis,dvnorm);
     (j.plans||[]).forEach(p=>{if(!S.plans.some(x=>x.id===p.id))S.plans.push(p)});up("pac",j.pac,pnorm);
     if(j.settings)S.settings=Object.assign({},j.settings,{lastBackup:S.settings.lastBackup||j.settings.lastBackup,migrationV3:S.settings.migrationV3});
     bump();ensurePlans();repairLinks()}
@@ -2724,6 +2844,16 @@ async function buildXlsx(cibles,settings,pac,mailing){mailing=mailing||[];settin
   const CC=[{h:"Compte",w:32,bold:true},{h:"Contact",w:24},{h:"Fonction",w:22},{h:"Téléphone",w:15},{h:"E-mail",w:30},{h:"Principal",w:9,al:"center"},{h:"Notes",w:40,wrap:true}];
   const cs=S.contacts.slice().sort((a,b)=>((kOf(a.compteId)||{}).nom||"").localeCompare((kOf(b.compteId)||{}).nom||"","fr")||(b.principal-a.principal));
   xlTable(wb,"Contacts","Contacts","FFA49B91",CC,cs.map(c=>[(kOf(c.compteId)||{}).nom||"",c.nom,c.fonction,c.tel,c.mail,c.principal?"Oui":"",c.notes]),1);
+  /* ---- Devis (une ligne par prestation ; prélèvements en rouge si estimatifs, en bleu si définitifs) ---- */
+  const dvs=(S.devis||[]).slice().sort(dvSortD);
+  if(dvs.length){
+    const DC=[{h:"Date",w:12,fmt:DFMT,al:"center"},{h:"N° devis",w:14},{h:"Compte",w:30,bold:true},{h:"Contact",w:22},{h:"Objet / site",w:30,wrap:true},{h:"Statut",w:12,al:"center"},{h:"Réponse le",w:12,fmt:DFMT,al:"center"},{h:"Prestation",w:40,wrap:true},{h:"Prix HT",w:12,fmt:EUR},{h:"Nb prélèvements",w:12,al:"center"},{h:"PU prélèvement",w:13,fmt:EUR},{h:"Montant prélèvements",w:14,fmt:EUR},{h:"Prélèvements",w:12,al:"center"},{h:"Montant ligne HT",w:14,fmt:EUR},{h:"Réalisée",w:9,al:"center"},{h:"Réalisée le",w:12,fmt:DFMT,al:"center"},{h:"Notes",w:40,wrap:true}];
+    const rows=[],tone=[];
+    dvs.forEach(d=>{const k=kOf(d.compteId)||{},ct=ctById(d.contactId);d.lignes.forEach(l=>{const hp=lHasP(l);
+      rows.push([toDate(d.date),d.numero,k.nom||"",ct?ct.nom:"",d.objet,DVL[d.statut],toDate(d.dateRep),l.presta,nb0(l.prix)||null,hp?nb0(l.nb):null,hp?nb0(l.pu):null,hp?lPrel(l):null,hp?(l.def?"Définitif":"Estimatif"):"",lTot(l),l.faite?"Oui":"Non",toDate(l.faiteLe),d.notes]);
+      tone.push(hp?(l.def?"FF1F5FBF":"FFC62828"):null)})});
+    const wd=xlTable(wb,"Devis","Devis","FFC62828",DC,rows,3);
+    tone.forEach((c,i)=>{const r=wd.getRow(i+2);if(c)[10,11,12,13].forEach(n=>{r.getCell(n).font={name:"Calibri",size:10,bold:true,color:{argb:c}}});if(rows[i][14]==="Oui")r.getCell(15).fill={type:"pattern",pattern:"solid",fgColor:{argb:"FFE2F0E6"}}})}
   /* ---- Mailing ---- */
   if(mailing.length){
     const MC=[{h:"Envoyé",w:9,al:"center"},{h:"Date d'envoi",w:12,fmt:DFMT,al:"center"},{h:"Relance le",w:12,fmt:DFMT,al:"center"},{h:"Relance faite",w:12,fmt:DFMT,al:"center"},{h:"Commentaire",w:40,wrap:true},{h:"Client",w:32,bold:true},{h:"Typologie",w:24},{h:"Famille",w:26,wrap:true},{h:"Contact",w:24},{h:"E-mail",w:32},{h:"Agence",w:18},{h:"Apporteur",w:18},{h:"Liste",w:18},{h:"Envoyer ?",w:22,wrap:true},{h:"Point d'attention",w:30,wrap:true}];
@@ -2831,7 +2961,7 @@ async function handoffMode(){
   const raw=location.hash.slice(6);history.replaceState(null,"",location.pathname+location.search);bare();
   $("#app").innerHTML='<div class="empty" style="padding:60px 20px"><h3 id="hoT">Préparation du fichier Excel…</h3><p id="hoP">Le téléchargement démarre dans un instant.</p><button class="btn primary" type="button" id="hoBtn" hidden>Télécharger à nouveau</button></div>';
   try{const d=await unpackData(raw);
-    S.cibles=(d.cibles||[]).map(norm);S.comptes=(d.comptes||[]).map(knorm);S.contacts=(d.contacts||[]).map(ctnorm);S.actions=(d.actions||[]).map(anorm);S.plans=d.plans||[];S.pac=(d.pac||[]).map(pnorm);S.mailing=(d.mailing||[]).map(mnorm);S.settings=Object.assign({objectif:8},d.settings||{});bump();ensurePlans();
+    S.cibles=(d.cibles||[]).map(norm);S.comptes=(d.comptes||[]).map(knorm);S.contacts=(d.contacts||[]).map(ctnorm);S.actions=(d.actions||[]).map(anorm);S.plans=d.plans||[];S.pac=(d.pac||[]).map(pnorm);S.mailing=(d.mailing||[]).map(mnorm);S.devis=(d.devis||[]).map(dvnorm);S.settings=Object.assign({objectif:8},d.settings||{});bump();ensurePlans();
     const blob=await buildXlsx(S.cibles,S.settings,S.pac,S.mailing);const go=()=>saveBlob(blob,xlName());go();
     $("#hoT").textContent="Fichier Excel téléchargé";
     $("#hoP").textContent=pl(S.cibles.length,"cible")+", "+pl(S.comptes.length,"compte")+" et "+pl(S.actions.length,"action")+" exportés. Vous pouvez fermer cet onglet et revenir dans Notion. Rien n'a été enregistré ici.";
@@ -3366,7 +3496,7 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 const persistReq=()=>{try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}};
 function applyState(r){
   S.cibles=(r.cibles||[]).map(norm);S.comptes=(r.comptes||[]).map(knorm);S.contacts=(r.contacts||[]).map(ctnorm);S.actions=(r.actions||[]).map(anorm);
-  S.plans=Array.isArray(r.plans)?r.plans:[];S.pac=(r.pac||[]).map(pnorm);S.mailing=(r.mailing||[]).map(mnorm);S.settings=Object.assign({objectif:8},r.settings||{});bump()}
+  S.plans=Array.isArray(r.plans)?r.plans:[];S.pac=(r.pac||[]).map(pnorm);S.mailing=(r.mailing||[]).map(mnorm);S.devis=(r.devis||[]).map(dvnorm);S.settings=Object.assign({objectif:8},r.settings||{});bump()}
 async function loadState(){
   let idbOK=true,st;
   try{st=await appGet("state")}catch(e){idbOK=false}
@@ -3425,7 +3555,7 @@ function renum(){S.plans.slice().sort(plSort).forEach((x,k)=>x.ordre=k+1);bump()
 const QK=[["visite","RDV"],["appel","Appel"],["mail","Mail"],["tache","Rappel"],["note","Note"],["cr","Compte rendu"]];
 const I_CR=SV+'<path d="M4 1.8h6l2.5 2.5v9.9H4z"/><path d="M10 1.8v2.5h2.5M6 7h4.5M6 9.3h4.5M6 11.6h3"/></svg>';
 function renderQk(){const el=$("#qk");if(!el)return;if(el.dataset.done){nbBadge();return}el.dataset.done="1";
-  el.innerHTML=QK.map(([t,l])=>'<button type="button" data-anew="'+(t==="cr"?"visite":t)+'"'+(t==="cr"?' data-cr="1"':'')+' data-qk="1" title="'+esc(t==="cr"?"Rédiger un compte rendu":"Nouveau : "+l)+'">'+(t==="cr"?I_CR:I_EV[t])+'<span>'+esc(l)+'</span></button>').join("")+'<button type="button" class="qk-nb" data-act="nbopen" title="Bloc-notes personnel, sans compte">'+I_EV.note+'<span>Bloc-notes</span><b class="num" id="qkNb" hidden></b></button>';nbBadge()}
+  el.innerHTML=QK.map(([t,l])=>'<button type="button" data-anew="'+(t==="cr"?"visite":t)+'"'+(t==="cr"?' data-cr="1"':'')+' data-qk="1" title="'+esc(t==="cr"?"Rédiger un compte rendu":"Nouveau : "+l)+'">'+(t==="cr"?I_CR:I_EV[t])+'<span>'+esc(l)+'</span></button>').join("")+'<button type="button" data-dvnew="1" title="Nouveau devis">'+I_DV+'<span>Devis</span></button><button type="button" class="qk-nb" data-act="nbopen" title="Bloc-notes personnel, sans compte">'+I_EV.note+'<span>Bloc-notes</span><b class="num" id="qkNb" hidden></b></button>';nbBadge()}
 
 /* ---------- Recherche de compte (nom, ville, contact, e-mail, typologie…) ---------- */
 let KSX=null,KSXV=-1,KC_I=0;
@@ -3540,12 +3670,13 @@ function viewAction(id){const a=S.actions.find(x=>x.id===id);if(!a)return;if(!vi
   modalBig()}
 
 /* ================= V3.6 · Tableau de bord personnalisable et bloc-notes ================= */
-const DW=[["kpis","Indicateurs",12],["cal","Calendrier",8],["todo","À faire",4],["prioA","Priorité A sans prochaine action",4],["recent","Dernières actions réalisées",4],["notes","Bloc-notes",4],
-  ["devis","Devis en attente",6],["perdus","Clients perdus à reconquérir",6],["pipe","Pipeline des cibles",4],["visites","Visites réalisées par mois",4],["pac","Plan d'action (PAC)",4]];
+const DW=[["kpis","Indicateurs",12],["suividevis","Suivi de mes devis",12],["cal","Calendrier",8],["todo","À faire",4],["prioA","Priorité A sans prochaine action",4],["recent","Dernières actions réalisées",4],["notes","Bloc-notes",4],
+  ["devis","Devis en attente (historique importé)",6],["perdus","Clients perdus à reconquérir",6],["pipe","Pipeline des cibles",4],["visites","Visites réalisées par mois",4],["pac","Plan d'action (PAC)",4]];
 const DWT=Object.fromEntries(DW.map(x=>[x[0],x[1]]));
 let DEDIT=false,DRO=null,DMV=null,DRS=null;
 function dashCfg(){let c=Array.isArray(S.settings.dash)?S.settings.dash.filter(x=>x&&DWT[x.id]):[];const ids=new Set(c.map(x=>x.id));
-  DW.forEach(([id,,w])=>{if(!ids.has(id))c.push({id,w,h:0,on:true})});
+  /* Un bloc nouveau se place après son voisin d'origine plutôt qu'en fin de tableau de bord */
+  DW.forEach(([id,,w],i)=>{if(ids.has(id))return;const pv=i?c.findIndex(x=>x.id===DW[i-1][0]):-1;c.splice(pv+1,0,{id,w,h:0,on:true});ids.add(id)});
   c.forEach(x=>{x.w=Math.min(12,Math.max(2,parseInt(x.w,10)||4));x.h=Math.max(0,parseInt(x.h,10)||0);x.on=x.on!==false});
   S.settings.dash=c;return c}
 const dwOf=id=>dashCfg().find(x=>x.id===id);
@@ -3759,6 +3890,263 @@ document.addEventListener("change",e=>{const t=e.target;if(S.tab!=="bilan"||!t)r
   if(t.id==="blDep"){BL.depuis=t.value&&t.value<=todayISO()?t.value:"";blSave();renderBilan()}});
 let BLQT=0;document.addEventListener("input",e=>{if(e.target&&e.target.id==="blQ"){BL.q=e.target.value;clearTimeout(BLQT);BLQT=setTimeout(blBody,180)}});
 
+/* ================= V3.8 · Suivi des devis : prestations, prélèvements estimatifs (rouge) / définitifs (bleu), réalisation ================= */
+/* Catalogue repris des plaquettes « Diagnostics et repérages réglementaires » et « Amiante sur équipements » */
+const DV_CAT=[
+  ["Repérages amiante et plomb",["Repérage amiante avant travaux","Repérage amiante avant démolition","Repérage plomb avant travaux","Repérage plomb avant démolition","Repérage amiante en industrie (équipements, NF X46-100)","Repérage amiante tous domaines","Repérage amiante et matières dangereuses sur navires","Amiante ferroviaire","Amiante aéronef","Prélèvements sur enrobés (amiante / HAP)","Diagnostic réglementaire amiante (DTA, avant vente…)","Diagnostic PEMD (produits, équipements, matériaux, déchets)","Examen visuel"]],
+  ["Amiante dans l'air",["Prélèvement d'air statique amiante (LAB REF 26)","Prélèvement d'air individuel amiante (LAB REF 28)"]],
+  ["Diagnostics immobiliers réglementaires",["Diagnostic gaz","Diagnostic électricité","Diagnostic de performance énergétique (DPE)","État des risques et pollutions (ERP)","Constat de l'état parasitaire","Mesurage de surface","Audit énergétique"]],
+  ["Nucléaire",["Diagnostic en installation nucléaire"]],
+  ["AMO et déconstruction",["Étude et conseil en stratégie patrimoniale","AMO amiante","AMO déconstruction et démolition"]]];
+const DV_ALL=DV_CAT.flatMap(g=>g[1]);
+const DVST=[["brouillon","À envoyer"],["attente","En attente"],["accepte","Accepté"],["refuse","Refusé"],["sansuite","Sans suite"]];
+const DVL=Object.fromEntries(DVST);
+const DV_REL=15; /* jours sans réponse avant de signaler une relance */
+const nb0=v=>{const n=parseFloat(String(v==null?"":v).replace(/[\s€]/g,"").replace(",","."));return isFinite(n)?n:0};
+const eur2=n=>(Number(n)||0).toLocaleString("fr-FR",{maximumFractionDigits:2})+" €";
+const dvPrelDef=p=>{const g=DV_CAT.findIndex(c=>c[1].includes(p));return g===0||g===1};
+function dvLblank(p){return {id:uid(),presta:p||"",prix:"",pOn:dvPrelDef(p||""),nb:"",pu:"",def:false,faite:false,faiteLe:""}}
+function dvblank(){return {compteId:"",contactId:"",numero:"",date:todayISO(),objet:"",statut:"attente",dateRep:"",notes:"",lignes:[]}}
+function dvnorm(x){const o=Object.assign(dvblank(),x||{});
+  o.lignes=(Array.isArray(o.lignes)?o.lignes:[]).map(l=>{const r=Object.assign(dvLblank(),l||{});if(!r.id)r.id=uid();r.pOn=!!r.pOn;r.def=!!r.def;r.faite=!!r.faite;return r});
+  if(!DVL[o.statut])o.statut="attente";return o}
+/* Montants : prix de la prestation + nombre de prélèvements × prix unitaire */
+const lPrel=l=>l.pOn?nb0(l.nb)*nb0(l.pu):0,lTot=l=>nb0(l.prix)+lPrel(l),lHasP=l=>!!l.pOn&&nb0(l.nb)>0,lEst=l=>lHasP(l)&&!l.def;
+function dvSum(d){const r={presta:0,prel:0,est:0,def:0,tot:0,real:0,n:d.lignes.length,nf:0,estN:0,nbE:0,nbD:0,reste:0};
+  d.lignes.forEach(l=>{const p=lPrel(l);r.presta+=nb0(l.prix);r.prel+=p;
+    if(lHasP(l)){if(l.def){r.def+=p;r.nbD+=nb0(l.nb)}else{r.est+=p;r.estN++;r.nbE+=nb0(l.nb)}}
+    if(l.faite){r.real+=lTot(l);r.nf++}});
+  r.tot=r.presta+r.prel;r.reste=d.statut==="accepte"?r.tot-r.real:0;return r}
+const dvLive=d=>d.statut!=="refuse"&&d.statut!=="sansuite";
+const dvSortD=(a,b)=>(b.date||"").localeCompare(a.date||"")||String(b.majLe||"").localeCompare(String(a.majLe||""));
+const dvOf=kid=>S.devis.filter(d=>d.compteId===kid).sort(dvSortD);
+const dvAge=d=>d.date?Math.max(0,Math.round((Date.parse(todayISO())-Date.parse(d.date))/864e5)):null;
+const dvRel=d=>d.statut==="attente"&&dvAge(d)!=null&&dvAge(d)>=DV_REL;
+const dvToDo=d=>d.statut==="accepte"&&dvSum(d).nf<d.lignes.length;
+const dvPill=d=>'<span class="pill dvs-'+d.statut+'">'+esc(DVL[d.statut])+'</span>';
+const dvTotCls=s=>s.estN?" est":s.nbD?" def":"";
+const dvShort=p=>String(p||"Prestation").replace(/\s*\([^()]*\)\s*$/,"");
+const I_DV=SV+'<path d="M4 1.8h6l2.5 2.5v9.9H4z"/><path d="M10 1.8v2.5h2.5"/><path d="M10.4 7.4a2.2 2.2 0 1 0 0 3.2M6.4 8.4h3.1M6.4 9.7h3.1"/></svg>';
+function dvPrelTxt(s){const P=[];
+  if(s.nbE)P.push('<span class="est" title="Nombre de prélèvements estimatif">'+s.nbE+' prél. estimatif'+(s.nbE>1?'s':'')+' · '+eur(s.est)+'</span>');
+  if(s.nbD)P.push('<span class="def" title="Nombre de prélèvements définitif">'+s.nbD+' prél. définitif'+(s.nbD>1?'s':'')+' · '+eur(s.def)+'</span>');
+  return P.join('<br>')}
+function dvTags(d,max){const L=d.lignes;
+  return '<span class="dv-tags">'+L.slice(0,max||99).map(l=>'<span class="dv-tg'+(l.faite?' ok':'')+'" title="'+esc((l.presta||"Prestation")+(l.faite?" · réalisée"+(l.faiteLe?" le "+fdate(l.faiteLe):""):" · non réalisée")+(lHasP(l)?" · "+nb0(l.nb)+" prélèvement(s) "+(l.def?"définitif(s)":"estimatif(s)"):""))+'">'+(l.faite?I_CHECK:'')+esc(dvShort(l.presta))+(lHasP(l)?'<i class="'+(l.def?'def':'est')+'">'+nb0(l.nb)+'</i>':'')+'</span>').join("")+(max&&L.length>max?'<span class="sub">+ '+(L.length-max)+'</span>':'')+'</span>'}
+function dvRealHTML(d,s){if(d.statut!=="accepte"&&!s.nf)return '<span class="sub">—</span>';
+  return '<div class="dv-rm"><span class="num">'+s.nf+' / '+s.n+'</span><div class="meter"><b style="width:'+(s.n?s.nf/s.n*100:0)+'%;background:var(--ok)"></b></div>'+(s.nf?'<span class="sub">'+eur(s.real)+' réalisé</span>':'')+'</div>'}
+function dvKpis(B){const X=B.map(d=>[d,dvSum(d)]),sum=(f,g)=>X.reduce((a,[d,s])=>a+(f(d,s)?g(d,s):0),0),cnt=f=>X.filter(([d,s])=>f(d,s)).length;
+  const dec=d=>d.statut==="accepte"||!dvLive(d),acc=cnt(d=>d.statut==="accepte"),n=cnt(dec),accM=sum(d=>d.statut==="accepte",(d,s)=>s.tot),decM=sum(dec,(d,s)=>s.tot);
+  return {att:cnt(d=>d.statut==="attente"),attM:sum(d=>d.statut==="attente",(d,s)=>s.tot),acc,accM,taux:n?Math.round(acc/n*100):null,tauxM:decM?Math.round(accM/decM*100):null,
+    real:sum(()=>true,(d,s)=>s.real),nf:sum(()=>true,(d,s)=>s.nf),reste:sum(d=>d.statut==="accepte",(d,s)=>s.reste),todo:cnt(d=>dvToDo(d)),
+    est:sum(dvLive,(d,s)=>s.est),estD:cnt((d,s)=>dvLive(d)&&s.estN>0),def:sum(dvLive,(d,s)=>s.def),rel:cnt(dvRel),tot:sum(()=>true,(d,s)=>s.tot),bro:cnt(d=>d.statut==="brouillon")}}
+
+/* ---------- Page « Suivi des devis » ---------- */
+const DVV=[["tous","Tous",()=>true],["brouillon","À envoyer",d=>d.statut==="brouillon"],["attente","En attente",d=>d.statut==="attente"],["relance","À relancer",dvRel],
+  ["arealiser","Acceptés à réaliser",dvToDo],["realises","Réalisés",d=>d.statut==="accepte"&&d.lignes.length>0&&!dvToDo(d)],["perdus","Refusés / sans suite",d=>!dvLive(d)],["estim","Prélèvements estimatifs",d=>dvLive(d)&&d.lignes.some(lEst)]];
+const DVUI=(()=>{const d={v:"tous",q:"",an:"",pr:"",lim:200};try{return Object.assign(d,JSON.parse(localStorage.getItem("pac-idf-dv")||"{}"),{q:"",lim:200})}catch(e){return d}})();
+const dvUiSave=()=>{try{localStorage.setItem("pac-idf-dv",JSON.stringify({v:DVUI.v,an:DVUI.an,pr:DVUI.pr}))}catch(e){}};
+function dvBase(){const w=nh(DVUI.q).split(" ").filter(Boolean);
+  return S.devis.filter(d=>{if(DVUI.an&&(d.date||"").slice(0,4)!==DVUI.an)return false;if(DVUI.pr&&!d.lignes.some(l=>l.presta===DVUI.pr))return false;if(!w.length)return true;
+    const k=kOf(d.compteId),ct=ctById(d.contactId),hay=nh([k?k.nom:"",k?k.ville:"",d.numero,d.objet,d.notes,ct?ct.nom:"",d.lignes.map(l=>l.presta).join(" ")].join(" "));return w.every(t=>hay.includes(t))})}
+function renderDevis(){const el=$("#view-devis");if(!el)return;
+  const B=dvBase(),v=DVV.find(x=>x[0]===DVUI.v)||DVV[0],L=B.filter(v[2]).sort(dvSortD),K=dvKpis(B);
+  const yrs=[...new Set(S.devis.map(d=>(d.date||"").slice(0,4)).filter(Boolean).concat([String(new Date().getFullYear())]))].sort().reverse();
+  const prs=[...new Set(S.devis.flatMap(d=>d.lignes.map(l=>l.presta)).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
+  let h=pageH("Suivi de prospection","Suivi des devis",pl(S.devis.length,"devis","devis")+' suivis · prélèvements <span class="est">en rouge : estimatifs</span>, <span class="def">en bleu : définitifs</span>',
+    '<button class="btn ghost" type="button" data-act="dvexport">Exporter / Excel</button><button class="btn primary" type="button" data-dvnew="1">'+I_PLUS+'Nouveau devis</button>');
+  if(!S.devis.length){el.innerHTML=h+'<div class="list-wrap"><div class="empty"><h3>Aucun devis suivi pour l\'instant</h3><p>Pour chaque devis : le compte, les prestations, leur prix, les prélèvements (nombre × prix unitaire, estimatif en rouge puis définitif en bleu), puis les prestations réalisées au fil des interventions.</p><p><button class="btn primary" type="button" data-dvnew="1">'+I_PLUS+'Créer un premier devis</button></p></div></div>';return}
+  const tile=(vv,lbl,val,sub,cls)=>'<button type="button" class="kpi click'+(DVUI.v===vv?' on':'')+'" data-dvv="'+vv+'"><span class="lbl">'+lbl+'</span><span class="v'+(cls?' '+cls:'')+'">'+val+'</span><span class="d">'+sub+'</span></button>';
+  h+='<div class="dv-k">'+tile("attente","En attente",K.att,eur(K.attM)+(K.rel?' · <span class="late">'+K.rel+' à relancer</span>':''))+
+    tile("realises","Acceptés",K.acc,eur(K.accM)+(K.taux!=null?' · transformation '+K.taux+' %':''))+
+    tile("realises","Réalisé",'<span class="num">'+eur(K.real)+'</span>',pl(K.nf,"prestation réalisée","prestations réalisées"))+
+    tile("arealiser","Reste à réaliser",'<span class="num">'+eur(K.reste)+'</span>',pl(K.todo,"devis","devis")+" accepté"+(K.todo>1?"s":"")+" en cours")+
+    tile("estim","Prélèvements",'<span class="num est">'+eur(K.est)+'</span>','<span class="est">'+pl(K.estD,"devis","devis")+' à confirmer</span>'+(K.def?' · <span class="def">'+eur(K.def)+' définitifs</span>':''))+'</div>';
+  h+='<div class="chips">'+DVV.map(([k,l,f])=>{const n=B.filter(f).length;return (k==="tous"||n||DVUI.v===k)?'<button type="button" class="chip" data-dvv="'+k+'" aria-pressed="'+(DVUI.v===k)+'">'+esc(l)+'<span class="n num">'+n+'</span></button>':''}).join("")+'</div>';
+  h+='<div class="filters dv-f"><div class="field-s"><label for="dvQ">Rechercher</label><input type="search" id="dvQ" value="'+esc(DVUI.q)+'" placeholder="Compte, n° de devis, objet, prestation, contact…"></div>'+
+    '<div class="field-s"><label for="dvAn">Année</label><select id="dvAn"><option value="">Toutes</option>'+yrs.map(y=>'<option'+(DVUI.an===y?' selected':'')+'>'+y+'</option>').join("")+'</select></div>'+
+    '<div class="field-s"><label for="dvPr">Prestation</label><select id="dvPr"><option value="">Toutes</option>'+prs.map(p=>'<option'+(DVUI.pr===p?' selected':'')+'>'+esc(p)+'</option>').join("")+'</select></div>'+
+    ((DVUI.q||DVUI.an||DVUI.pr)?'<div class="field-s" style="justify-content:flex-end"><button class="btn ghost" type="button" data-act="dvfx">Effacer les filtres</button></div>':'<span></span>')+'</div>';
+  if(!L.length){el.innerHTML=h+'<div class="list-wrap"><div class="empty"><h3>Aucun devis dans cette vue</h3><p>Changez de vue ou retirez un filtre.</p></div></div>';return}
+  const shown=L.slice(0,DVUI.lim),T=L.reduce((a,d)=>a+dvSum(d).tot,0);
+  h+='<div class="list-wrap"><table class="tbl dv-tbl"><thead><tr><th>Date · N°</th><th>Compte · objet</th><th>Prestations</th><th class="r">Montant HT</th><th>Statut</th><th>Réalisation</th></tr></thead><tbody>'+
+    shown.map(d=>{const k=kOf(d.compteId),s=dvSum(d),age=dvAge(d);
+      return '<tr data-dvid="'+esc(d.id)+'" tabindex="0"><td class="nw"><span class="num">'+(d.date?fdate(d.date):"—")+'</span>'+(d.numero?'<div class="sub">N° '+esc(d.numero)+'</div>':'')+'</td>'+
+        '<td><div class="co"><b>'+esc(k?k.nom:"Compte introuvable")+'</b></div>'+(d.objet?'<div class="sub">'+esc(d.objet)+'</div>':'')+'</td>'+
+        '<td>'+dvTags(d,4)+'</td>'+
+        '<td class="r"><span class="num dv-tt'+dvTotCls(s)+'">'+eur(s.tot)+'</span>'+(s.prel?'<div class="sub dv-pl">'+dvPrelTxt(s)+'</div>':'')+'</td>'+
+        '<td>'+dvPill(d)+(d.statut==="attente"&&age!=null?'<div class="sub'+(dvRel(d)?' late':'')+'">depuis '+pl(age,"jour")+'</div>':d.dateRep&&d.statut!=="brouillon"?'<div class="sub">le '+fdate(d.dateRep)+'</div>':'')+'</td>'+
+        '<td>'+dvRealHTML(d,s)+'</td></tr>'}).join("")+'</tbody></table></div>'+
+   '<div class="pager">'+(L.length>shown.length?'<button class="btn" type="button" data-act="dvmore">Afficher '+Math.min(200,L.length-shown.length)+' de plus</button>':'')+'<span class="sub">'+shown.length+' sur '+pl(L.length,"devis","devis")+' · '+eur(T)+' HT</span></div>';
+  el.innerHTML=h}
+
+/* ---------- Bloc du tableau de bord et de la fiche compte ---------- */
+function dvWidget(){const y=String(new Date().getFullYear()),all=S.devis,KA=dvKpis(all),KY=dvKpis(all.filter(d=>(d.date||"").slice(0,4)===y));
+  let h='<div class="panel"><div class="ph"><h2>Suivi de mes devis</h2><button type="button" class="more" data-dvnew="1">+ Devis</button><button type="button" class="more" data-dvv="tous">Tous les devis</button></div>';
+  if(!all.length)return h+'<p class="hint">Aucun devis suivi pour l\'instant. Pour chaque devis : le compte, les prestations et leur prix, les prélèvements (estimatifs en rouge, définitifs en bleu), puis les prestations réalisées.</p></div>';
+  const att=all.filter(d=>d.statut==="attente").sort((a,b)=>(a.date||"").localeCompare(b.date||"")),todo=all.filter(dvToDo).sort(dvSortD);
+  const tile=(vv,lbl,val,sub)=>'<button type="button" class="dv-wk" data-dvv="'+vv+'"><span class="lbl">'+lbl+'</span><b>'+val+'</b><span class="sub">'+sub+'</span></button>';
+  const row=(d,right)=>{const k=kOf(d.compteId),s=dvSum(d);return '<button type="button" class="dv-wr" data-dvid="'+esc(d.id)+'"><span class="grow"><b>'+esc(k?k.nom:"Compte ?")+'</b><span class="sub">'+esc([d.numero?"N° "+d.numero:"",d.objet||dvShort((d.lignes[0]||{}).presta)].filter(Boolean).join(" · "))+'</span></span>'+right(d,s)+'</button>'};
+  h+='<div class="dv-wks">'+tile("attente","En attente",'<span class="num">'+KA.att+'</span>',eur(KA.attM)+(KA.rel?' · <span class="late">'+KA.rel+' à relancer</span>':''))+
+    tile("realises","Acceptés "+y,'<span class="num">'+KY.acc+'</span>',eur(KY.accM)+(KY.taux!=null?' · transfo '+KY.taux+' %':''))+
+    tile("realises","Réalisé "+y,'<span class="num">'+eur(KY.real)+'</span>',pl(KY.nf,"prestation","prestations"))+
+    tile("arealiser","Reste à réaliser",'<span class="num">'+eur(KA.reste)+'</span>',pl(KA.todo,"devis","devis")+" en cours")+
+    tile("estim","Prélèvements",'<span class="num est">'+eur(KA.est)+'</span>','<span class="est">estimatifs</span>'+(KA.def?' · <span class="def">'+eur(KA.def)+' définitifs</span>':''))+'</div>';
+  const more=(n,v)=>n>5?'<button type="button" class="more" data-dvv="'+v+'">+ '+(n-5)+' autres</button>':'';
+  h+='<div class="dv-wl"><div><h4>En attente de réponse <span class="num">'+att.length+'</span></h4>'+(att.length?att.slice(0,5).map(d=>row(d,(d,s)=>{const a=dvAge(d);return '<span class="r"><b class="num'+dvTotCls(s)+'">'+eur(s.tot)+'</b><span class="sub'+(dvRel(d)?' late':'')+'">'+(a!=null?(a?"depuis "+pl(a,"jour"):"aujourd'hui"):"")+'</span></span>'})).join("")+more(att.length,"attente"):'<p class="hint">Aucun devis en attente.</p>')+'</div>'+
+    '<div><h4>Acceptés, à réaliser <span class="num">'+todo.length+'</span></h4>'+(todo.length?todo.slice(0,5).map(d=>row(d,(d,s)=>'<span class="r"><b class="num'+dvTotCls(s)+'">'+eur(s.reste)+'</b><span class="sub">'+s.nf+' / '+s.n+' réalisée'+(s.nf>1?'s':'')+'</span></span>')).join("")+more(todo.length,"arealiser"):'<p class="hint">Aucune prestation en attente de réalisation.</p>')+'</div></div></div>';
+  return h}
+function dvAccPanel(k){const L=dvOf(k.id);
+  let h='<div class="panel"><div class="ph"><h2>Devis</h2><span class="sub num">'+L.length+'</span><button type="button" class="more" data-dvnew="1" data-dvk="'+esc(k.id)+'">+ Devis</button></div>';
+  if(!L.length)return h+'<p class="hint">Aucun devis suivi pour ce compte.</p></div>';
+  const K=dvKpis(L);
+  h+='<p class="sub" style="margin:-4px 0 0">'+[K.acc?pl(K.acc,"accepté")+" · "+eur(K.accM):"",K.att?K.att+" en attente · "+eur(K.attM):"",K.real?eur(K.real)+" réalisé":""].filter(Boolean).join(" · ")+'</p>';
+  return h+'<div class="cards">'+L.map(d=>{const s=dvSum(d);
+    return '<button type="button" class="dv-card" data-dvid="'+esc(d.id)+'"><span class="ctop"><span class="num">'+(d.date?fdate(d.date):"—")+'</span>'+(d.numero?'<span class="sub">N° '+esc(d.numero)+'</span>':'')+'<span class="grow"></span>'+dvPill(d)+'</span>'+
+      (d.objet?'<span class="sub">'+esc(d.objet)+'</span>':'')+dvTags(d)+
+      '<span class="dv-cl"><b class="num'+dvTotCls(s)+'">'+eur(s.tot)+' HT</b>'+(s.prel?'<span class="sub">'+dvPrelTxt(s)+'</span>':'')+'</span>'+
+      (d.statut==="accepte"?'<span class="dv-rm"><span class="num">'+s.nf+' / '+s.n+'</span><span class="meter"><b style="width:'+(s.n?s.nf/s.n*100:0)+'%;background:var(--ok)"></b></span></span>':'')+'</button>'}).join("")+'</div></div>'}
+
+/* ---------- Fenêtre devis ---------- */
+let DV=null,dvNew=false,dvDelA=false,DVCAT=false,DVKI=0;
+function openDevis(id,preset){if(MODAL&&MODAL!=="devis")closeModal();
+  const src=id?S.devis.find(d=>d.id===id):null;if(id&&!src){toast("Devis introuvable.");return}
+  dvNew=!src;dvDelA=false;
+  DV=src?dvnorm(clone(src)):Object.assign(dvblank(),{id:uid(),creeLe:now()},preset||{});
+  DV._k=(kOf(DV.compteId)||{}).nom||"";
+  if(dvNew&&DV.compteId&&!DV.contactId){const p=principal(DV.compteId);if(p)DV.contactId=p.id}
+  DVCAT=dvNew;dvDraw(true);
+  setTimeout(()=>{const f=dvNew&&!DV._k?$("#dv-k"):null;if(f)f.focus()},40)}
+function dvKcHTML(d,k){return '<div class="f s2"><label class="lbl" for="dv-k">Compte <span class="req">*</span></label><div class="kc"><input type="search" id="dv-k" value="'+esc(d._k)+'" placeholder="Rechercher un compte : nom, ville, contact, e-mail…" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="dvkList" aria-autocomplete="list"><div class="kc-list" id="dvkList" role="listbox" hidden></div></div>'+
+  (k?'<p class="hint kc-sel">'+esc(kInfo(k))+'</p>':d._k?'<p class="hint">Nouveau compte : il sera créé à l\'enregistrement.</p>':'')+'</div>'}
+function dvLineHTML(l,i){const hp=lHasP(l),c=l.def?"def":"est";
+  return '<div class="dv-l'+(l.faite?' done':'')+'" data-li="'+i+'">'+
+   '<div class="dv-c"><span class="lbl dv-m">Prestation</span><input type="text" list="dvCatL" data-lf="presta" value="'+esc(l.presta)+'" placeholder="Choisir ou saisir une prestation" aria-label="Prestation"></div>'+
+   '<div class="dv-c"><span class="lbl dv-m">Prix HT</span><span class="dv-eu"><input type="number" min="0" step="any" inputmode="decimal" data-lf="prix" value="'+esc(l.prix)+'" aria-label="Prix HT de la prestation"><i>€</i></span></div>'+
+   '<div class="dv-c">'+(l.pOn?
+     '<span class="lbl dv-m">Prélèvements : nombre × prix unitaire</span><div class="dv-pr"><input type="number" min="0" step="1" inputmode="numeric" data-lf="nb" class="dv-nb '+c+'" value="'+esc(l.nb)+'" placeholder="Nb" aria-label="Nombre de prélèvements"><span class="x">×</span><span class="dv-eu"><input type="number" min="0" step="any" inputmode="decimal" data-lf="pu" class="'+c+'" value="'+esc(l.pu)+'" placeholder="PU" aria-label="Prix unitaire HT d\'un prélèvement"><i>€</i></span>'+
+     '<span class="dv-ed" role="group" aria-label="Nombre de prélèvements"><button type="button" class="e'+(l.def?'':' on')+'" data-dvdef="0" aria-pressed="'+!l.def+'" title="Nombre estimé au devis (rouge)">Estimatif</button><button type="button" class="d'+(l.def?' on':'')+'" data-dvdef="1" aria-pressed="'+l.def+'" title="Nombre réel après intervention (bleu)">Définitif</button></span>'+
+     '<button type="button" class="dv-x" data-dvpon="0" title="Retirer les prélèvements de cette ligne" aria-label="Retirer les prélèvements">×</button></div>'
+     :'<button type="button" class="dv-addp" data-dvpon="1">'+I_PLUS+'Prélèvements</button>')+'</div>'+
+   '<div class="dv-c dv-amt"><span class="lbl dv-m">Montant HT</span><span class="num'+(hp?' '+c:'')+'" data-lt>'+eur2(lTot(l))+'</span><span class="sub'+(hp?' '+c:'')+'" data-lp>'+(hp?'dont '+eur2(lPrel(l)):'')+'</span></div>'+
+   '<div class="dv-c dv-fa"><label class="toggle"><input type="checkbox" data-lf="faite"'+(l.faite?' checked':'')+'> Réalisée</label>'+(l.faite?'<input type="date" data-lf="faiteLe" value="'+esc(l.faiteLe)+'" aria-label="Réalisée le">':'')+'</div>'+
+   '<button type="button" class="dv-del" data-dvldel="'+i+'" title="Retirer cette prestation" aria-label="Retirer cette prestation">'+SV+'<path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.6 9h5.8l.6-9"/></svg></button></div>'}
+function dvTotHTML(d){const s=dvSum(d);
+  return '<div><span class="lbl">Prestations</span><b class="num">'+eur2(s.presta)+'</b><span class="sub">'+pl(s.n,"prestation")+'</span></div>'+
+   '<div><span class="lbl">Prélèvements</span><b class="num">'+(s.est||s.def?(s.est?'<span class="est">'+eur2(s.est)+'</span>':'')+(s.est&&s.def?' + ':'')+(s.def?'<span class="def">'+eur2(s.def)+'</span>':''):eur2(0))+'</b><span class="sub">'+([s.nbE?'<span class="est">'+s.nbE+' estimatif'+(s.nbE>1?'s':'')+'</span>':'',s.nbD?'<span class="def">'+s.nbD+' définitif'+(s.nbD>1?'s':'')+'</span>':''].filter(Boolean).join(" · ")||"aucun")+'</span></div>'+
+   '<div class="t"><span class="lbl">Total HT'+(s.estN?' · estimatif':'')+'</span><b class="num'+dvTotCls(s)+'">'+eur2(s.tot)+'</b></div>'+
+   '<div><span class="lbl">Réalisé</span><b class="num">'+eur2(s.real)+'</b><span class="sub">'+s.nf+' / '+pl(s.n,"prestation")+'</span></div>'}
+function dvCatHTML(){const have=new Map();DV.lignes.forEach(l=>have.set(l.presta,(have.get(l.presta)||0)+1));
+  return '<div class="dv-cat"><p class="hint" style="margin:0">Cliquez sur les prestations du devis : chacune ajoute une ligne. Les repérages et l\'amiante dans l\'air ouvrent aussi les prélèvements.</p>'+
+   DV_CAT.map(([g,L])=>'<div class="g"><span>'+esc(g)+'</span><div class="chips">'+L.map(p=>'<button type="button" class="chip" data-dvadd="'+esc(p)+'" aria-pressed="'+have.has(p)+'">'+(have.has(p)?I_CHECK:I_PLUS)+esc(p)+(have.get(p)>1?'<span class="n num">×'+have.get(p)+'</span>':'')+'</button>').join("")+'</div></div>').join("")+'</div>'}
+function dvDraw(first){const d=DV,k=kOf(d.compteId),cts=k?ctOf(k.id):[];
+  const db=$("#modal .db"),sc=!first&&db&&MODAL==="devis"?db.scrollTop:0;
+  const custom=[...new Set(S.devis.flatMap(x=>x.lignes.map(l=>l.presta)).filter(p=>p&&!DV_ALL.includes(p)))];
+  const rep=d.statut==="accepte"||d.statut==="refuse"||d.statut==="sansuite";
+  showModal(mHead(dvNew?"Nouveau devis":"Devis",(d.numero?"N° "+esc(d.numero)+" · ":"")+esc(d._k||"Compte à renseigner"))+
+  '<div class="db"><form id="dvForm" class="dv-form" onsubmit="return false">'+
+   '<div class="dv-head">'+dvKcHTML(d,k)+
+    '<div class="f"><label class="lbl" for="dv-ct">Contact</label><select id="dv-ct"><option value="">—</option>'+cts.map(c=>'<option value="'+esc(c.id)+'"'+(c.id===d.contactId?' selected':'')+'>'+esc(c.nom||c.mail||"Contact")+(c.fonction?' · '+esc(c.fonction):'')+'</option>').join("")+'</select></div>'+
+    fld("dv-num","N° de devis",d.numero,"text",' placeholder="Référence du devis"')+
+    '<div class="f s2"><label class="lbl" for="dv-obj">Objet / site</label><input type="text" id="dv-obj" value="'+esc(d.objet)+'" placeholder="Ex. : repérage avant travaux, bâtiment B, 12 rue…"></div>'+
+    fld("dv-date","Date du devis",d.date,"date")+
+    (rep?fld("dv-rep",d.statut==="accepte"?"Accepté le":"Réponse le",d.dateRep,"date"):'<div class="f dv-sp"></div>')+
+    '<div class="f s4"><span class="lbl">Statut</span><div class="seg dv-seg" role="group" aria-label="Statut du devis">'+DVST.map(([s,l])=>'<button type="button" data-dvst="'+s+'" aria-pressed="'+(d.statut===s)+'">'+esc(l)+'</button>').join("")+'</div></div>'+
+   '</div>'+
+   '<div class="dv-sec"><div class="dv-sh"><h3>Prestations du devis</h3><button class="btn'+(DVCAT?' primary':'')+'" type="button" data-act="dvcat" aria-pressed="'+DVCAT+'">'+(DVCAT?'Fermer le catalogue':I_PLUS+'Catalogue des prestations')+'</button><button class="btn ghost" type="button" data-act="dvfree">'+I_PLUS+'Prestation libre</button></div>'+
+    (DVCAT?dvCatHTML():'')+
+    '<datalist id="dvCatL">'+DV_ALL.concat(custom).map(p=>'<option value="'+esc(p)+'">').join("")+'</datalist>'+
+    (d.lignes.length?'<div class="dv-lines"><div class="dv-lh"><span>Prestation</span><span>Prix HT</span><span>Prélèvements : nombre × prix unitaire</span><span class="r">Montant HT</span><span>Réalisation</span><span></span></div>'+d.lignes.map(dvLineHTML).join("")+'</div>':'<p class="hint">Aucune prestation pour l\'instant : ouvrez le catalogue et cliquez sur les prestations du devis.</p>')+
+    '<div class="dv-tot" id="dvTot">'+dvTotHTML(d)+'</div>'+
+    '<p class="hint dv-leg"><span class="est">Rouge</span> : nombre de prélèvements estimatif, tel que chiffré au devis. <span class="def">Bleu</span> : nombre définitif, après intervention. Cochez « Réalisée » au fil des interventions.</p>'+
+   '</div>'+
+   ta("dv-not","Notes",d.notes,3,"Conditions, pièces attendues, interlocuteur, motif de refus…")+
+  '</form></div>'+
+  '<div class="df">'+(dvNew?'':'<button class="btn danger" type="button" data-act="dvdel">Supprimer</button>')+(k&&!dvNew?'<button class="btn ghost" type="button" data-kopen="'+esc(k.id)+'">Fiche compte</button>':'')+'<button class="btn ghost" type="button" data-act="dvrel">'+I_EV.tache+'Planifier une relance</button><span class="grow"></span><button class="btn" type="button" data-act="mclose">Annuler</button><button class="btn primary" type="button" data-act="dvsave">'+(dvNew?'Créer le devis':'Enregistrer')+'</button></div>',"devis");
+  modalBig();if(sc){const n=$("#modal .db");if(n)n.scrollTop=sc}}
+function dvRead(){if(!DV||!$("#dvForm"))return;const d=DV;
+  const ct=$("#dv-ct");if(ct)d.contactId=ct.value;
+  const typed=vOf("dv-k"),k=findCompte(typed);d._k=typed;
+  if(k){if(k.id!==d.compteId){d.compteId=k.id;const p=principal(k.id);d.contactId=p?p.id:""}}else{d.compteId="";d.contactId=""}
+  d.numero=vOf("dv-num");d.objet=vOf("dv-obj");d.date=vOf("dv-date");const r=$("#dv-rep");if(r)d.dateRep=r.value;d.notes=vOf("dv-not");
+  document.querySelectorAll("#dvForm .dv-l").forEach(el=>{const l=d.lignes[+el.dataset.li];if(!l)return;
+    el.querySelectorAll("[data-lf]").forEach(i=>{l[i.dataset.lf]=i.type==="checkbox"?i.checked:String(i.value).trim()})})}
+function dvLineRefresh(le,l){const hp=lHasP(l),c=l.def?"def":"est",a=le.querySelector("[data-lt]"),p=le.querySelector("[data-lp]");
+  if(a){a.textContent=eur2(lTot(l));a.className="num"+(hp?" "+c:"")}if(p){p.textContent=hp?"dont "+eur2(lPrel(l)):"";p.className="sub"+(hp?" "+c:"")}}
+function dvSave(){dvRead();const d=DV;
+  if(!d._k){toast("Indiquez le compte.");const f=$("#dv-k");if(f)f.focus();return null}
+  d.lignes=d.lignes.filter(l=>l.presta||nb0(l.prix)||(l.pOn&&nb0(l.nb)));
+  if(!d.lignes.length){dvDraw();toast("Ajoutez au moins une prestation.");return null}
+  let k=findCompte(d._k),created=false;if(!k){k=ensureCompte(d._k,{origine:"devis"});created=true}
+  d.compteId=k.id;if(!d.date)d.date=todayISO();
+  d.lignes.forEach(l=>{if(!l.presta)l.presta="Prestation";if(!l.pOn){l.nb="";l.pu="";l.def=false}if(!l.faite)l.faiteLe="";else if(!l.faiteLe)l.faiteLe=todayISO()});
+  const o=Object.assign({},d);delete o._k;put("devis",o);
+  const wasNew=dvNew,s=dvSum(o);closeModal();commit();
+  toast((wasNew?"Devis créé":"Devis enregistré")+" · "+k.nom+" · "+eur(s.tot)+" HT"+(s.estN?" (prélèvements estimatifs)":"")+(created?" · compte créé":""));
+  return {k,o}}
+function dvDelete(btn){if(!dvDelA){dvDelA=true;btn.classList.add("armed");btn.textContent="Confirmer la suppression";return}
+  drop("devis",DV.id);closeModal();commit();toast("Devis supprimé")}
+/* Recherche de compte dans la fenêtre devis */
+function dvRenderKc(){const inp=$("#dv-k"),box=$("#dvkList");if(!inp||!box)return;const q=inp.value.trim(),L=kSearch(q,12);DVKI=0;
+  let h=(!q&&L.length?'<div class="kc-h">Comptes récents</div>':'')+L.map((k,i)=>'<button type="button" class="kc-o'+(i===0?' act':'')+'" data-dvpick="'+esc(k.id)+'" role="option"><span class="grow"><b>'+esc(k.nom)+'</b><span class="sub">'+esc(kInfo(k))+'</span></span></button>').join("");
+  if(q&&!findCompte(q))h+='<button type="button" class="kc-o'+(L.length?'':' act')+'" data-dvpick="__new" role="option">'+I_PLUS+'<span class="grow">Créer le compte « <b>'+esc(q)+'</b> »</span></button>';
+  box.innerHTML=h;box.hidden=!h;inp.setAttribute("aria-expanded",String(!box.hidden))}
+function dvPick(id){if(!DV)return;const typed=vOf("dv-k");dvRead();
+  if(id==="__new"){DV._k=typed;DV.compteId="";DV.contactId=""}
+  else{const k=kOf(id);if(!k)return;DV.compteId=id;DV._k=k.nom;const p=principal(id);DV.contactId=p?p.id:""}
+  dvDraw();setTimeout(()=>{const f=$("#dv-num");if(f)f.focus()},20)}
+
+/* ---------- Événements du suivi des devis ---------- */
+document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("button,tr[data-dvid]");if(!t)return;const d=t.dataset;
+  if(d.dvnew){openDevis(null,d.dvk?{compteId:d.dvk}:(S.tab==="compte"&&kOf(S.kid)?{compteId:S.kid}:null));return}
+  if(d.dvid){openDevis(d.dvid);return}
+  if(d.dvv){DVUI.v=d.dvv;DVUI.lim=200;dvUiSave();if(S.tab!=="devis")showTab("devis");else renderDevis();return}
+  if(d.act==="dvmore"){DVUI.lim+=200;renderDevis();return}
+  if(d.act==="dvexport"){exportMenu();return}
+  if(d.act==="dvfx"){DVUI.q="";DVUI.an="";DVUI.pr="";dvUiSave();renderDevis();return}
+  if(!DV||MODAL!=="devis")return;
+  if(d.dvst){dvRead();DV.statut=d.dvst;if(d.dvst==="attente"||d.dvst==="brouillon")DV.dateRep="";else if(!DV.dateRep)DV.dateRep=todayISO();dvDraw();return}
+  if(d.act==="dvcat"){dvRead();DVCAT=!DVCAT;dvDraw();return}
+  if(d.dvadd){dvRead();DV.lignes.push(dvLblank(d.dvadd));dvDraw();return}
+  if(d.act==="dvfree"){dvRead();DV.lignes.push(dvLblank(""));dvDraw();setTimeout(()=>{const L=document.querySelectorAll('#dvForm .dv-l [data-lf="presta"]');if(L.length)L[L.length-1].focus()},30);return}
+  const le=t.closest(".dv-l"),li=le?+le.dataset.li:-1,l=li>=0?DV.lignes[li]:null;
+  if(d.dvdef!=null&&l){dvRead();l.def=d.dvdef==="1";dvDraw();if(l.def&&!nb0(l.nb))setTimeout(()=>{const x=document.querySelector('#dvForm .dv-l[data-li="'+li+'"] [data-lf="nb"]');if(x)x.focus()},30);return}
+  if(d.dvpon!=null&&l){dvRead();l.pOn=d.dvpon==="1";if(!l.pOn){l.nb="";l.pu="";l.def=false}dvDraw();
+    if(l.pOn)setTimeout(()=>{const x=document.querySelector('#dvForm .dv-l[data-li="'+li+'"] [data-lf="nb"]');if(x)x.focus()},30);return}
+  if(d.dvldel!=null){dvRead();DV.lignes.splice(+d.dvldel,1);dvDraw();return}
+  if(d.act==="dvsave"){dvSave();return}
+  if(d.act==="dvdel"){dvDelete(t);return}
+  if(d.act==="dvrel"){const r=dvSave();if(r)openAction({type:"tache",compteId:r.k.id,date:addD(todayISO(),7),objet:"Relancer le devis"+(r.o.numero?" n° "+r.o.numero:"")+(r.o.objet?" – "+r.o.objet:"")});return}
+});
+document.addEventListener("input",e=>{const t=e.target;if(!t||!t.closest)return;
+  if(t.id==="dvQ"){DVUI.q=t.value;DVUI.lim=200;clearTimeout(qT);qT=setTimeout(()=>keepFocus("dvQ",renderDevis),180);return}
+  if(!DV)return;
+  if(t.id==="dv-k"){dvRenderKc();return}
+  const le=t.closest("#dvForm .dv-l");if(!le||!t.dataset.lf||t.type==="checkbox")return;
+  const l=DV.lignes[+le.dataset.li];if(!l)return;l[t.dataset.lf]=String(t.value).trim();dvLineRefresh(le,l);const b=$("#dvTot");if(b)b.innerHTML=dvTotHTML(DV)});
+document.addEventListener("change",e=>{const t=e.target;if(!t||!t.closest)return;
+  if(t.id==="dvAn"){DVUI.an=t.value;dvUiSave();renderDevis();return}
+  if(t.id==="dvPr"){DVUI.pr=t.value;dvUiSave();renderDevis();return}
+  if(!DV)return;
+  if(t.id==="dv-k"&&$("#dvkList")&&$("#dvkList").hidden){dvRead();dvDraw();return}
+  const le=t.closest("#dvForm .dv-l");if(!le||!t.dataset.lf)return;const l=DV.lignes[+le.dataset.li];if(!l)return;
+  if(t.dataset.lf==="faite"){dvRead();if(l.faite&&!l.faiteLe)l.faiteLe=todayISO();if(!l.faite)l.faiteLe="";
+    const msg=[];if(l.faite&&(DV.statut==="attente"||DV.statut==="brouillon")){DV.statut="accepte";if(!DV.dateRep)DV.dateRep=todayISO();msg.push("devis passé en « Accepté »")}
+    if(l.faite&&lEst(l))msg.push("saisissez le nombre définitif de prélèvements");
+    dvDraw();if(msg.length)toast("Prestation réalisée : "+msg.join(" · "));return}
+  if(t.dataset.lf==="presta"){l.presta=String(t.value).trim();if(!l.pOn&&dvPrelDef(l.presta)){dvRead();l.pOn=true;dvDraw()}}});
+document.addEventListener("keydown",e=>{const t=e.target;if(!t)return;
+  if(t.matches&&t.matches("tr[data-dvid]")&&e.key==="Enter"){openDevis(t.dataset.dvid);return}
+  if(t.id!=="dv-k")return;const box=$("#dvkList");
+  if(!box||box.hidden){if(e.key==="ArrowDown"){dvRenderKc();e.preventDefault()}return}
+  const o=[...box.querySelectorAll(".kc-o")];if(!o.length)return;
+  if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();o[DVKI].classList.remove("act");DVKI=(DVKI+(e.key==="ArrowDown"?1:-1)+o.length)%o.length;o[DVKI].classList.add("act");o[DVKI].scrollIntoView({block:"nearest"});return}
+  if(e.key==="Enter"){e.preventDefault();dvPick(o[DVKI].dataset.dvpick);return}
+  if(e.key==="Escape"){e.preventDefault();e.stopImmediatePropagation();box.hidden=true;t.setAttribute("aria-expanded","false")}},true);
+document.addEventListener("focusin",e=>{if(e.target.id==="dv-k"){const el=e.target;if(DV&&DV.compteId&&el.value)setTimeout(()=>{if(document.activeElement===el)el.select()},0);dvRenderKc()}});
+document.addEventListener("focusout",e=>{if(e.target.id==="dv-k")setTimeout(()=>{if(document.activeElement&&document.activeElement.id==="dv-k")return;const b=$("#dvkList");if(b)b.hidden=true},120)});
+
+
 /* ================= V3 · Événements ================= */
 document.addEventListener("click",async e=>{
   const t=e.target.closest("button,a[data-kopen],[data-aid],[data-mopen],[data-cday],[data-cib],[data-pid],tr[data-id],tr[data-kid],[data-act]");if(!t)return;
@@ -3958,7 +4346,7 @@ document.addEventListener("pointermove",e=>{if(!MDRAG)return;const m=$("#modal")
   const x=Math.min(Math.max(e.clientX-MDRAG.dx,120-w),innerWidth-120),y=Math.min(Math.max(e.clientY-MDRAG.dy,0),innerHeight-56);m.style.left=x+"px";m.style.top=y+"px"});
 document.addEventListener("pointerup",()=>{if(MDRAG){MDRAG=null;document.body.classList.remove("dragging")}});
 document.addEventListener("dblclick",e=>{const h=e.target.closest&&e.target.closest("#modal .dh");if(!h||e.target.closest("button,a,input,select,textarea"))return;const m=$("#modal");m.classList.remove("moved");m.style.left=m.style.top="";$("#mscrim").classList.remove("light")});
-document.addEventListener("mousedown",e=>{const o=e.target.closest&&e.target.closest(".kc-o");if(o){e.preventDefault();kPick(o.dataset.kpick)}});
+document.addEventListener("mousedown",e=>{const o=e.target.closest&&e.target.closest(".kc-o");if(o){e.preventDefault();if(o.dataset.dvpick!=null)dvPick(o.dataset.dvpick);else kPick(o.dataset.kpick)}});
 document.addEventListener("focusin",e=>{if(e.target.id==="am-k"){const el=e.target;if(AM&&AM.compteId&&el.value)setTimeout(()=>{if(document.activeElement===el)el.select()},0);renderKc()}});
 document.addEventListener("focusout",e=>{if(e.target.id==="am-k")setTimeout(()=>{if(document.activeElement&&document.activeElement.id==="am-k")return;kcHide()},120)});
 $("#mscrim").addEventListener("click",()=>{const b=document.querySelector("#modal .df .btn.primary");if(b){b.classList.remove("nudge");void b.offsetWidth;b.classList.add("nudge")}toast("Enregistrer, ou Annuler.")});
