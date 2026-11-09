@@ -918,7 +918,7 @@ body.dv-drop #view-devis,body.dv-drop #modal{outline:3px dashed var(--accent);ou
   <div class="side-f">
     <span class="sync" id="sync" data-s="wait"><i></i><span id="syncTxt">Chargement…</span></span>
     <button class="btn" type="button" data-act="export" title="Exporter, sauvegarder, restaurer"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11"/></svg><span>Exporter / sauvegarder</span></button>
-    <span class="ver">V3.12 · CSC</span>
+    <span class="ver">V3.13 · CSC</span>
   </div>
 </aside>
 
@@ -1009,7 +1009,7 @@ function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTi
 const nh=x=>String(x==null?"":x).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
 const now=()=>new Date().toISOString();
 const S={open:new Set(),mode:"wait",cibles:[],comptes:[],contacts:[],actions:[],plans:[],pac:[],mailing:[],devis:[],settings:{objectif:8},writable:true,view:"actives",tab:"tdb",kid:"",db:null,downloads:null,ver:0};
-const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.12";
+const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.13";
 let STORE="ls"; /* "idb" dès que les données sont dans la base du navigateur */
 const IN_FRAME=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 const TYPE_RANK={"Client existant":3,"Prescripteur":2,"Prospect":1};
@@ -3986,8 +3986,8 @@ function renderDevis(){const el=$("#view-devis");if(!el)return;
   const yrs=[...new Set(S.devis.map(d=>(d.date||"").slice(0,4)).filter(Boolean).concat([String(new Date().getFullYear())]))].sort().reverse();
   const prs=[...new Set(S.devis.flatMap(d=>d.lignes.map(l=>l.presta)).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
   let h=pageH("Suivi de prospection","Suivi des devis",pl(S.devis.length,"devis","devis")+' suivis · prélèvements <span class="est">en rouge : estimatifs</span>, <span class="def">en bleu : définitifs</span>',
-    '<button class="btn ghost" type="button" data-act="dvexport">Exporter / Excel</button><button class="btn" type="button" data-act="dvimp" title="Devis Word (.docx), un ou plusieurs, ou export Excel des pièces (devis, commandes, factures) · ou glissez les fichiers sur la page">'+SV+'<path d="M8 10.5V2.5M4.8 5.6 8 2.4l3.2 3.2M2.5 10v3.5h11V10"/></svg>'+'Importer (Word ou Excel)</button><button class="btn primary" type="button" data-dvnew="1">'+I_PLUS+'Nouveau devis</button>');
-  if(!S.devis.length){el.innerHTML=h+'<div class="list-wrap"><div class="empty"><h3>Aucun devis suivi pour l\'instant</h3><p>Pour chaque devis : le compte, les prestations, leur prix, les prélèvements (nombre × prix unitaire, estimatif en rouge puis définitif en bleu), puis les prestations réalisées au fil des interventions.</p><p style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn" type="button" data-act="dvimp">'+SV+'<path d="M8 10.5V2.5M4.8 5.6 8 2.4l3.2 3.2M2.5 10v3.5h11V10"/></svg>'+'Importer (devis Word ou export Excel)</button><button class="btn primary" type="button" data-dvnew="1">'+I_PLUS+'Créer un devis</button></p><p class="sub">Vous pouvez aussi glisser vos fichiers .docx ou votre export Excel sur cette page.</p></div></div>';return}
+    '<button class="btn ghost" type="button" data-act="dvexport">Exporter / Excel</button><button class="btn" type="button" data-act="dvimp" title="Devis Word (.docx) ou PDF, un ou plusieurs, ou export Excel des pièces (devis, commandes, factures) · ou glissez les fichiers sur la page">'+SV+'<path d="M8 10.5V2.5M4.8 5.6 8 2.4l3.2 3.2M2.5 10v3.5h11V10"/></svg>'+'Importer (Word, PDF ou Excel)</button><button class="btn primary" type="button" data-dvnew="1">'+I_PLUS+'Nouveau devis</button>');
+  if(!S.devis.length){el.innerHTML=h+'<div class="list-wrap"><div class="empty"><h3>Aucun devis suivi pour l\'instant</h3><p>Pour chaque devis : le compte, les prestations, leur prix, les prélèvements (nombre × prix unitaire, estimatif en rouge puis définitif en bleu), puis les prestations réalisées au fil des interventions.</p><p style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn" type="button" data-act="dvimp">'+SV+'<path d="M8 10.5V2.5M4.8 5.6 8 2.4l3.2 3.2M2.5 10v3.5h11V10"/></svg>'+'Importer (devis Word ou PDF, export Excel)</button><button class="btn primary" type="button" data-dvnew="1">'+I_PLUS+'Créer un devis</button></p><p class="sub">Vous pouvez aussi glisser vos devis .docx ou .pdf, ou votre export Excel, sur cette page.</p></div></div>';return}
   const tile=(vv,lbl,val,sub,cls)=>'<button type="button" class="kpi click'+(DVUI.v===vv?' on':'')+'" data-dvv="'+vv+'"><span class="lbl">'+lbl+'</span><span class="v'+(cls?' '+cls:'')+'">'+val+'</span><span class="d">'+sub+'</span></button>';
   h+='<div class="dv-k">'+tile("attente","En attente",K.att,eur(K.attM)+(K.rel?' · <span class="late">'+K.rel+' à relancer</span>':''))+
     tile("realises","Acceptés",K.acc,eur(K.accM)+(K.taux!=null?' · transformation '+K.taux+' %':''))+
@@ -4077,7 +4077,7 @@ function dvDraw(first){const d=DV,k=kOf(d.compteId),cts=k?ctOf(k.id):[];
   const rep=d.statut==="accepte"||d.statut==="refuse"||d.statut==="sansuite";
   showModal(mHead(dvNew?"Nouveau devis":"Devis",(d.numero?"N° "+esc(d.numero)+" · ":"")+esc(d._k||"Compte à renseigner"))+
   '<div class="db"><form id="dvForm" class="dv-form" onsubmit="return false">'+dvImpHTML()+(d.avoir?'<div class="notice warn"><b>Avoir émis'+(d.avoir.le?' le '+fdate(d.avoir.le):'')+' : '+eur(d.avoir.m)+'</b>'+(d.avoir.pieces&&d.avoir.pieces.length?' ('+esc(d.avoir.pieces.join(", "))+')':'')+'. Le devis a été accepté : il reste compté comme gagné, au montant du devis.</div>':'')+
-   (dvNew&&!d._imp?'<div class="dv-impb"><button class="btn" type="button" data-act="dvimp">'+SV+'<path d="M8 10.5V2.5M4.8 5.6 8 2.4l3.2 3.2M2.5 10v3.5h11V10"/></svg>'+'Remplir depuis le devis Word (.docx)</button><span class="sub">Compte, n°, date, objet, prestations, prix et analyses sont repris du fichier · ou glissez-le ici</span></div>':'')+
+   (dvNew&&!d._imp?'<div class="dv-impb"><button class="btn" type="button" data-act="dvimp">'+SV+'<path d="M8 10.5V2.5M4.8 5.6 8 2.4l3.2 3.2M2.5 10v3.5h11V10"/></svg>'+'Remplir depuis le devis (Word ou PDF)</button><span class="sub">Compte, n°, date, objet, prestations, prix et analyses sont repris du fichier · ou glissez-le ici</span></div>':'')+
    '<div class="dv-head">'+dvKcHTML(d,k)+
     '<div class="f"><label class="lbl" for="dv-ct">Contact</label><select id="dv-ct"><option value="">—</option>'+cts.map(c=>'<option value="'+esc(c.id)+'"'+(c.id===d.contactId?' selected':'')+'>'+esc(c.nom||c.mail||"Contact")+(c.fonction?' · '+esc(c.fonction):'')+'</option>').join("")+'</select></div>'+
     fld("dv-num","N° de devis",d.numero,"text",' placeholder="Référence du devis"')+
@@ -4249,9 +4249,11 @@ function wText(p){let s="";const tw=p.ownerDocument.createTreeWalker(p,1);let n=
 const dvNum=t=>{let x=String(t||"").replace(/[\s €]/g,"");if(!x||!/\d/.test(x))return null;if(x.includes(",")&&x.includes("."))x=x.replace(/,/g,"");else x=x.replace(",",".");const n=parseFloat(x);return isFinite(n)?n:null};
 const dvIsPrel=t=>/\b(analyses?|pr[ée]l[èe]vements?|[ée]chantillons?)\b/i.test(t);
 function dvParseDocx(xml,fname){const doc=new DOMParser().parseFromString(xml,"application/xml");
-  const paras=[...doc.getElementsByTagNameNS(WNS,"p")].map(wText).map(s=>s.trim()).filter(Boolean),all=paras.join("\n");
+  const paras=[...doc.getElementsByTagNameNS(WNS,"p")].map(wText).map(s=>s.trim()).filter(Boolean);
   const cellLines=tc=>[...tc.getElementsByTagNameNS(WNS,"p")].map(wText).join("\n").split("\n").map(s=>s.replace(/\s+/g," ").trim()).filter(Boolean);
   const tables=[...doc.getElementsByTagNameNS(WNS,"tbl")].map(t=>[...t.getElementsByTagNameNS(WNS,"tr")].filter(tr=>tr.parentNode===t).map(tr=>[...tr.childNodes].filter(c=>c.localName==="tc").map(cellLines)));
+  return dvParseCore(paras,tables,fname)}
+function dvParseCore(paras,tables,fname){const all=paras.join("\n");
   const fm=String(fname||"").match(/([A-Z]{1,4}\d{5,})(?:[_ -](\d{4})-(\d{2})-(\d{2}))?/);
   const r={numero:"",date:"",objet:"",site:"",client:"",adresse:"",cp:"",ville:"",siret:"",contact:null,emetteur:"",agence:"",lignes:[],brut:[]};
   let m=all.match(/Affaire\s*n[°o]\s*:?\s*([A-Z]{0,4}\d{5,})/i)||all.match(/\bDevis\s*\n?\s*([A-Z]{1,4}\d{5,})/i);r.numero=m?m[1]:fm?fm[1]:"";
@@ -4302,15 +4304,15 @@ function dvFromImport(r,fname){const mt=dvMatchCompte(r.client),k=mt&&mt.k;
   d._imp={file:fname,client:r.client,match:k?(mt.sure?"exact":"proche"):"nouveau",ct:r.contact,init:{adresse:r.adresse,ville:r.ville,dept:r.cp&&DNAME[r.cp.slice(0,2)]?r.cp.slice(0,2):"",origine:"devis",notes:r.siret?"SIRET "+r.siret:""},prelSur:r.prelSur};
   if(k&&r.contact){const c=findContact(k.id,r.contact);if(c)d.contactId=c.id}
   return d}
-async function dvReadFile(f){if(!/\.docx$/i.test(f.name))throw new Error("format");
+async function dvReadFile(f){if(/\.pdf$/i.test(f.name))return dvReadPdf(f);if(!/\.docx$/i.test(f.name))throw new Error("format");
   const xml=await zipText(await f.arrayBuffer(),"word/document.xml");if(!xml)throw new Error("docx");return dvParseDocx(xml,f.name)}
 /* Un fichier : la fenêtre s'ouvre pré-remplie pour vérification. Plusieurs fichiers : les devis sont créés directement. */
 async function dvImport(files){files=[...(files||[])];if(!files.length)return;
   const xl=files.find(f=>/\.(xlsx|xlsm)$/i.test(f.name));if(xl){dvxOpen(xl);return}
-  if(files.some(f=>/\.(xls|csv)$/i.test(f.name))&&!files.some(f=>/\.docx$/i.test(f.name))){toast("Enregistrez l'export au format Excel .xlsx, puis importez-le.");return}
-  const bad=files.filter(f=>!/\.docx$/i.test(f.name));if(bad.length===files.length){toast(/\.pdf$/i.test(bad[0].name)?"Les PDF ne sont pas encore lus : choisissez le devis au format Word (.docx).":"Choisissez un devis au format Word (.docx).");return}
-  files=files.filter(f=>/\.docx$/i.test(f.name));
-  if(files.length===1){let r;try{r=await dvReadFile(files[0])}catch(e){toast("Lecture impossible de « "+files[0].name+" » : "+(e.message==="inflate"?"navigateur trop ancien.":"le fichier n'est pas un devis Word lisible."));return}
+  if(files.some(f=>/\.(xls|csv)$/i.test(f.name))&&!files.some(f=>/\.(docx|pdf)$/i.test(f.name))){toast("Enregistrez l'export au format Excel .xlsx, puis importez-le.");return}
+  const bad=files.filter(f=>!/\.(docx|pdf)$/i.test(f.name));if(bad.length===files.length){toast("Choisissez un devis Word (.docx) ou PDF, ou l'export Excel (.xlsx).");return}
+  files=files.filter(f=>/\.(docx|pdf)$/i.test(f.name));
+  if(files.length===1){let r;try{r=await dvReadFile(files[0])}catch(e){toast("Lecture impossible de « "+files[0].name+" » : "+(e.message==="inflate"?"navigateur trop ancien.":e.message==="scan"?"ce PDF ne contient pas de texte (document scanné).":e.message==="pdfjs"?"lecteur PDF indisponible, vérifiez la connexion internet.":"le fichier n'est pas un devis lisible."));return}
     if(!r.lignes.length&&!r.numero){toast("Aucun devis reconnu dans « "+files[0].name+" ».");return}
     const ex=r.numero?S.devis.find(d=>nh(d.numero)===nh(r.numero)||(d.refs||[]).some(x=>nh(x)===nh(r.numero))):null;
     if(ex){openDevis(ex.id);DV._upd={r,file:files[0].name};dvDraw();toast("Ce devis est déjà suivi : il est ouvert, rien n'est créé en double.");return}
@@ -4344,7 +4346,7 @@ document.addEventListener("dragleave",e=>{if(!e.relatedTarget)document.body.clas
 document.addEventListener("drop",e=>{document.body.classList.remove("dv-drop");if(!(S.tab==="devis"||MODAL==="devis"))return;if(e.dataTransfer&&e.dataTransfer.files.length){e.preventDefault();dvImport(e.dataTransfer.files)}});
 document.addEventListener("change",e=>{const t=e.target;if(t&&t.id==="dvFile"){const f=t.files;dvImport(f).finally(()=>{t.value=""})}});
 document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("button");if(!t)return;
-  if(t.dataset.act==="dvimp"){let i=$("#dvFile");if(!i){i=document.createElement("input");i.type="file";i.id="dvFile";i.accept=".docx,.xlsx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";i.multiple=true;i.hidden=true;document.body.appendChild(i)}i.multiple=!(MODAL==="devis");i.click();return}
+  if(t.dataset.act==="dvimp"){let i=$("#dvFile");if(!i){i=document.createElement("input");i.type="file";i.id="dvFile";i.accept=".docx,.pdf,.xlsx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";i.multiple=true;i.hidden=true;document.body.appendChild(i)}i.multiple=!(MODAL==="devis");i.click();return}
   if(t.dataset.act==="dvimpupd"){dvApplyUpd();return}});
 
 
@@ -4462,6 +4464,51 @@ document.addEventListener("change",e=>{const t=e.target;if(!DVX||MODAL!=="dvx"||
   const lb=t.closest(".dvx-a");if(lb)lb.classList.toggle("on",t.checked);const s=$("#dvxSum");if(s)s.innerHTML=dvxSumHTML();const b=document.querySelector('#modal [data-act="dvxgo"]');if(b)b.disabled=!DVX.sel.size});
 document.addEventListener("input",e=>{if(e.target&&e.target.id==="dvxQ"&&DVX){DVX.q=e.target.value;keepFocus("dvxQ",dvxDraw)}});
 document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("button");if(t&&t.dataset.act==="dvxgo"&&DVX){dvxGo()}});
+
+
+/* ================= V3.13 · Lecture d'un devis PDF (PDF texte, issu de Word) ================= */
+const PDF_SRC="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",PDFW_SRC="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+let pdfP=null;
+function loadPdf(){if(window.pdfjsLib)return Promise.resolve();if(pdfP)return pdfP;
+  pdfP=new Promise((res,rej)=>{const s=document.createElement("script");s.src=PDF_SRC;s.onload=()=>{try{window.pdfjsLib.GlobalWorkerOptions.workerSrc=PDFW_SRC;res()}catch(e){pdfP=null;rej(new Error("pdfjs"))}};s.onerror=()=>{pdfP=null;rej(new Error("pdfjs"))};document.head.appendChild(s)});return pdfP}
+/* Lignes de texte reconstituées à partir des positions (une ligne = même hauteur sur la page) */
+async function pdfLines(buf){await loadPdf();const doc=await window.pdfjsLib.getDocument({data:new Uint8Array(buf),isEvalSupported:false}).promise,L=[];
+  for(let p=1;p<=doc.numPages;p++){const pg=await doc.getPage(p),vp=pg.getViewport({scale:1}),tc=await pg.getTextContent();
+    const it=tc.items.filter(i=>i.str&&i.str.trim()).map(i=>({s:i.str.replace(/ /g," "),x:i.transform[4],y:vp.height-i.transform[5],w:i.width||0,h:Math.abs(i.transform[3])||9}));
+    it.sort((a,b)=>a.y-b.y||a.x-b.x);const lines=[];
+    it.forEach(i=>{let l=lines.find(l=>Math.abs(l.y-i.y)<Math.max(2,i.h*.4));if(!l)lines.push(l={y:i.y,h:i.h,items:[]});l.items.push(i)});
+    lines.forEach(l=>{l.items.sort((a,b)=>a.x-b.x);let t="",px=null;
+      l.items.forEach(i=>{if(px!=null){const g=i.x-px;t+=g>12?"   ":(g>1&&!/\s$/.test(t)&&!/^\s/.test(i.s)?" ":"")}t+=i.s;px=i.x+i.w});l.t=t;l.gy=(p-1)*10000+l.y});
+    lines.sort((a,b)=>a.y-b.y);L.push(...lines)}
+  return L}
+const pdfIsNum=s=>/^(?:[\d\s.,]+|U|u|F|ens\.?|forfait)$/.test(String(s).trim());
+async function dvReadPdf(f){const L=await pdfLines(await f.arrayBuffer());
+  if(!L.length)throw new Error("scan");
+  const paras=[];L.forEach(l=>l.t.split(/\s{3,}/).map(s=>s.trim()).filter(Boolean).forEach(s=>paras.push(s)));
+  const tables=[];
+  /* Bloc client : lignes sous « PROPOSITION ENTRE » */
+  const ci=L.findIndex(l=>/PROPOSITION ENTRE/i.test(l.t));
+  if(ci>=0){const c=["PROPOSITION ENTRE"];for(let i=ci+1;i<L.length&&c.length<14;i++){const s=L[i].t.split(/\s{3,}/)[0].trim();if(/^(ET|Devis)$/i.test(s))break;if(s)c.push(s)}tables.push([[c]])}
+  /* Tableau des prestations : colonnes repérées par l'en-tête, montants rattachés à leur ligne */
+  const isHead=l=>/libell/i.test(l.t)&&/P\.?\s?U/i.test(l.t);const hi=L.findIndex(isHead);
+  if(hi>=0){const H=L[hi],col=re=>{const i=H.items.find(i=>re.test(i.s.trim()));return i?i.x+i.w/2:null};
+    const C={q:col(/^qt/i),u:col(/^P\.?\s?U/i),t:col(/^(P\.?\s?T|montant|total)/i),v:col(/^TVA/i)},xs=Object.values(C).filter(v=>v!=null),xNum=Math.min(...xs)-28;
+    const body=[];
+    for(let i=hi+1;i<L.length;i++){const l=L[i],tt=l.t.trim();if(/Base HT|Total HT|Comme l.indique|^ARTICLE|CONDITIONS/i.test(tt))break;
+      if(isHead(l)||/SIRET|Si[èe]ge social|www\.|capital de|^\d+\/\d+$|^[A-Z]{1,4}\d{5,}\s+Agence|^Immeuble|^Mail\s*:/i.test(tt))continue;
+      const nums=l.items.filter(x=>x.x+x.w/2>=xNum&&pdfIsNum(x.s)),txt=l.items.filter(x=>x.x+x.w/2<xNum);
+      body.push({gy:l.gy,h:l.h,text:txt.map(x=>x.s).join(" ").replace(/\s+/g," ").trim(),nums})}
+    const N=body.filter(b=>b.nums.length>=2),T=body.filter(b=>b.text);
+    if(N.length&&T.length){const rows=[],near=x=>{let best=null,d=1e9;Object.entries(C).forEach(([k,c])=>{if(c==null)return;const e=Math.abs(c-(x.x+x.w/2));if(e<d){d=e;best=k}});return best};
+      const top=N.every(n=>n.text);let st=0;
+      N.forEach((n,i)=>{let e;
+        if(top){e=st;while(e+1<T.length&&(i===N.length-1||T[e+1].gy<N[i+1].gy-1))e++}
+        else{const first=T[st]?T[st].gy:n.gy,est=2*n.gy-first,tol=(n.h||9)*.7;e=st;
+          while(e+1<T.length&&(i===N.length-1||(T[e+1].gy<=est+tol&&T[e+1].gy<N[i+1].gy)))e++}
+        const lines=T.slice(st,e+1).map(x=>x.text);st=e+1;const v={q:"",u:"",t:"",v:""};n.nums.forEach(x=>{const k=near(x);if(k)v[k]=(v[k]?v[k]+" ":"")+x.s.trim()});
+        rows.push([[""],lines.length?lines:[""],[v.q],[v.u],[v.t],[v.v]])});
+      tables.push([[["Ref. Client"],["Libellé"],["Qté"],["P.U HT"],["P.T HT"],["TVA"]]].concat(rows))}}
+  return dvParseCore(paras,tables,f.name)}
 
 /* ================= V3 · Événements ================= */
 document.addEventListener("click",async e=>{
