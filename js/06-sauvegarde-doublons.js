@@ -1,5 +1,5 @@
 /* PAC Prospection IDF · CSC — Exporter / sauvegarder / restaurer, copie de cibles vers d'autres campagnes, doublons
-   Fichier 6/12 : les fichiers se chargent dans l'ordre et partagent leurs déclarations. */
+   Fichier 6/18 : les fichiers se chargent dans l'ordre et partagent leurs déclarations. */
 "use strict";
 
 /* ---------- Export, sauvegarde, restauration ---------- */
@@ -48,7 +48,7 @@ function exportMenu(){
   '<div style="display:flex;flex-direction:column;gap:8px"><span class="lbl">Fichier Excel</span>'+
   (IN_FRAME?'<a class="btn" id="exX" href="#" target="_blank" rel="noopener" aria-disabled="true">Préparation du lien…</a><p class="hint">Notion bloque les téléchargements : un onglet s\'ouvre, produit le fichier et le télécharge. Il ne garde rien.</p>'
    :'<button class="btn" type="button" id="exX">Exporter en Excel (.xlsx)</button>')+
-  '<p class="hint">Onglets : PAC (un par plan), Synthèse, Cibles, Actions, Comptes, Contacts'+(S.mailing.length?', Mailing':'')+'. Prêt à imprimer.</p></div>'+
+  xlSecHTML()+'</div>'+
   '<div style="display:flex;flex-direction:column;gap:8px"><span class="lbl">Copier pour Excel</span>'+
   '<button class="btn" type="button" id="exC">Cibles · '+pl(S.cibles.length,"ligne")+'</button>'+
   '<button class="btn" type="button" id="exA">Actions · '+pl(S.actions.length,"ligne")+'</button>'+
@@ -58,9 +58,9 @@ function exportMenu(){
   '<div style="display:flex;flex-direction:column;gap:8px"><span class="lbl">Doublons de cibles</span><button class="btn" type="button" data-act="dupmenu">Vérifier les doublons</button><p class="hint">Même compte dans le même département : l\'application garde la fiche la plus avancée et la complète avec les autres.</p></div>'+
   '<div id="exBox" class="addv" hidden><p class="hint" id="exMsg"></p><textarea id="exOut" class="exout" readonly></textarea><div class="bar"><button class="btn primary" type="button" id="exCopy">Copier</button></div></div>'+
   '<div class="addv"><span class="lbl">Restaurer une sauvegarde</span><p class="hint">Choisissez un fichier de sauvegarde (V2 ou V3), ou collez son texte. Les éléments de la sauvegarde sont ajoutés, ou remplacés s\'ils existent déjà ; rien n\'est supprimé.</p><input type="file" id="imJ" accept=".json,.txt,application/json,text/plain"><textarea id="imTxt" class="exout" placeholder="Coller ici le texte de la sauvegarde"></textarea><div class="bar"><button class="btn" type="button" id="imBtn">Restaurer</button></div></div>'+
-  '<div id="bkBox"></div>'+(false?'<div class="addv"><span class="lbl">Copie de l\'ancienne version (V2)</span><p class="hint">Conservée sur ce poste lors du passage en V3, telle qu\'elle était. Vous pouvez la télécharger, puis la supprimer pour libérer de la place dans le navigateur.</p><div class="bar"><button class="btn" type="button" id="bkDl">Télécharger la copie V2</button><button class="btn ghost danger" type="button" id="bkDel">Supprimer la copie V2</button></div></div>':'')+
+  '<div id="abBox"></div><div id="bkBox"></div>'+(false?'<div class="addv"><span class="lbl">Copie de l\'ancienne version (V2)</span><p class="hint">Conservée sur ce poste lors du passage en V3, telle qu\'elle était. Vous pouvez la télécharger, puis la supprimer pour libérer de la place dans le navigateur.</p><div class="bar"><button class="btn" type="button" id="bkDl">Télécharger la copie V2</button><button class="btn ghost danger" type="button" id="bkDel">Supprimer la copie V2</button></div></div>':'')+
   '</div>';
-  $("#scrim").hidden=false;d.hidden=false;fillSto();fillBk();
+  $("#scrim").hidden=false;d.hidden=false;fillSto();fillBk();fillAb();
   const stamp=todayISO();
   if(IN_FRAME){xlsxHandoffURL().then(u=>{const a=$("#exX");if(a){a.href=u;a.textContent="Exporter en Excel (.xlsx)";a.removeAttribute("aria-disabled");a.classList.add("primary")}}).catch(()=>{const a=$("#exX");if(a)a.textContent="Export Excel indisponible ici"})}
   else $("#exX").onclick=exportXlsxHere;

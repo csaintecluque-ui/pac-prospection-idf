@@ -1,5 +1,5 @@
 /* PAC Prospection IDF · CSC — Calendrier, tableau de bord, agenda
-   Fichier 3/12 : les fichiers se chargent dans l'ordre et partagent leurs déclarations. */
+   Fichier 3/18 : les fichiers se chargent dans l'ordre et partagent leurs déclarations. */
 "use strict";
 
 /* ================= V3 · Calendrier, tableau de bord, agenda ================= */
@@ -52,6 +52,7 @@ function todoHTML(limit){const t=todayISO(),tom=addD(t,1),wk=addD(t,7),O=S.actio
   let h='<div class="todo">',any=false;
   G.forEach(([l,cls,L])=>{if(!L.length)return;any=true;h+='<div class="todo-g '+cls+'">'+esc(l)+'<span class="n">'+L.length+'</span></div>'+L.slice(0,limit).map(a=>tItem(a)).join("")+(L.length>limit?'<button type="button" class="more" data-nav="agenda" style="padding:6px 2px;text-align:left">Voir les '+L.length+' dans l\'agenda</button>':'')});
   if(R.length){any=true;h+='<div class="todo-g bad">Relances mailing<span class="n">'+R.length+'</span></div>'+R.slice(0,5).map(rItem).join("")+(R.length>5?'<button type="button" class="more" data-act="mrelview" style="padding:6px 2px;text-align:left">Voir les '+R.length+' relances</button>':'')}
+  const DR=dvRelList();if(DR.length){any=true;h+='<div class="todo-g bad">Devis à relancer<span class="n">'+DR.length+'</span></div>'+DR.slice(0,5).map(dvRelItem).join("")+(DR.length>5?'<button type="button" class="more" data-dvv="relance" style="padding:6px 2px;text-align:left">Voir les '+DR.length+' devis à relancer</button>':'')}
   const nd=O.filter(a=>!a.date).length;
   if(!any)h+='<div class="empty-s">Rien en retard ni de prévu cette semaine.</div>';
   if(nd)h+='<div class="todo-g">Sans date<span class="n">'+nd+'</span></div><div class="ti" data-act="agnodate" style="grid-template-columns:minmax(0,1fr)"><span class="m">'+pl(nd,"action")+' à planifier (prochaines étapes reprises de vos cibles). <b style="color:var(--accent)">Les voir</b></span></div>';

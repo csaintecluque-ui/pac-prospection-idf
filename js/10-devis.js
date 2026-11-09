@@ -1,5 +1,5 @@
 /* PAC Prospection IDF · CSC — Suivi des devis : page, fenêtre, tableau de bord, bilan, imports Word / PDF / Excel
-   Fichier 10/12 : les fichiers se chargent dans l'ordre et partagent leurs déclarations. */
+   Fichier 10/18 : les fichiers se chargent dans l'ordre et partagent leurs déclarations. */
 "use strict";
 
 /* ================= V3.8 · Suivi des devis : prestations, prélèvements estimatifs (rouge) / définitifs (bleu), réalisation ================= */
@@ -13,7 +13,9 @@ const DV_CAT=[
 const DV_ALL=DV_CAT.flatMap(g=>g[1]);
 const DVST=[["brouillon","À envoyer"],["attente","En attente"],["accepte","Accepté"],["refuse","Refusé"],["sansuite","Sans suite"]];
 const DVL=Object.fromEntries(DVST);
-const DV_REL=15; /* jours sans réponse avant de signaler une relance */
+/* Relance : délai sans réponse (réglable, 15 jours par défaut) compté depuis le devis ou la dernière relance ; « reporter » décale l'échéance */
+const dvRelJ=()=>Math.max(1,parseInt(S.settings.dvRelJ,10)||15);
+function dvRelDue(d){if(d.statut!=="attente")return "";const lr=(d.relances||[]).slice(-1)[0]||"",b=[d.date||"",lr].sort().pop();let due=b?addD(b,dvRelJ()):"";if(d.relSnooze&&d.relSnooze>due)due=d.relSnooze;return due}
 const nb0=v=>{const n=parseFloat(String(v==null?"":v).replace(/[\s€]/g,"").replace(",","."));return isFinite(n)?n:0};
 const eur2=n=>(Number(n)||0).toLocaleString("fr-FR",{maximumFractionDigits:2})+" €";
 const dvPrelDef=p=>{const g=DV_CAT.findIndex(c=>c[1].includes(p));return g===0||g===1};
@@ -33,7 +35,7 @@ const dvLive=d=>d.statut!=="refuse"&&d.statut!=="sansuite";
 const dvSortD=(a,b)=>(b.date||"").localeCompare(a.date||"")||String(b.majLe||"").localeCompare(String(a.majLe||""));
 const dvOf=kid=>S.devis.filter(d=>d.compteId===kid).sort(dvSortD);
 const dvAge=d=>d.date?Math.max(0,Math.round((Date.parse(todayISO())-Date.parse(d.date))/864e5)):null;
-const dvRel=d=>d.statut==="attente"&&dvAge(d)!=null&&dvAge(d)>=DV_REL;
+const dvRel=d=>{const due=dvRelDue(d);return !!due&&due<=todayISO()};
 const dvToDo=d=>d.statut==="accepte"&&dvSum(d).nf<d.lignes.length;
 const dvAvTag=d=>d.avoir?'<span class="dv-av" title="'+esc("Avoir émis"+(d.avoir.le?" le "+fdate(d.avoir.le):"")+" : "+eur(d.avoir.m)+(d.avoir.pieces&&d.avoir.pieces.length?" ("+d.avoir.pieces.join(", ")+")":"")+". Le devis reste compté comme accepté.")+'">Avoir '+eur(d.avoir.m)+'</span>':'';
 const dvPill=d=>'<span class="pill dvs-'+d.statut+'">'+esc(DVL[d.statut])+'</span>'+dvAvTag(d);
@@ -120,7 +122,7 @@ function dvRow(d,inK){const k=kOf(d.compteId),s=dvSum(d),age=dvAge(d);
     '<td>'+(inK?'':'<div class="co"><b>'+esc(k?k.nom:"Compte introuvable")+'</b></div>')+(d.objet?'<div class="sub dv-obj'+(inK?' in':'')+'" title="'+esc(d.objet)+'">'+esc(d.objet)+'</div>':(inK?'<span class="sub">—</span>':''))+'</td>'+
     '<td>'+dvTags(d,4)+'</td>'+
     '<td class="r"><span class="num dv-tt'+dvTotCls(s)+'">'+eur(s.tot)+'</span>'+(s.prel?'<div class="sub dv-pl">'+dvPrelTxt(s)+'</div>':'')+'</td>'+
-    '<td>'+dvPill(d)+(d.statut==="attente"&&age!=null?'<div class="sub'+(dvRel(d)?' late':'')+'">depuis '+pl(age,"jour")+'</div>':d.dateRep&&d.statut!=="brouillon"?'<div class="sub">le '+fdate(d.dateRep)+'</div>':'')+'</td>'+
+    '<td>'+dvPill(d)+(d.statut==="attente"&&age!=null?'<div class="sub'+(dvRel(d)?' late':'')+'">depuis '+pl(age,"jour")+((d.relances||[]).length?' · relancé le '+fdate(d.relances.slice(-1)[0]):'')+'</div>'+(dvRel(d)?'<button type="button" class="dv-rl" data-dvrel="'+esc(d.id)+'">'+I_MAIL+'Relancer</button>':''):d.dateRep&&d.statut!=="brouillon"?'<div class="sub">le '+fdate(d.dateRep)+'</div>':'')+'</td>'+
     '<td>'+dvRealHTML(d,s)+'</td></tr>'}
 function renderDevis(){const el=$("#view-devis");if(!el)return;
   const B=dvBase(),L=dvList(B),K=dvKpis(B);
@@ -129,7 +131,7 @@ function renderDevis(){const el=$("#view-devis");if(!el)return;
   const KS=[...new Set(S.devis.map(d=>d.compteId))].map(kOf).filter(Boolean),uq=f=>[...new Set(KS.map(f).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
   const fams=FAMILLES.filter(([c])=>KS.some(k=>famOf(k)===c)),segs=uq(k=>k.segment),typs=uq(k=>k.typologie),tys=TYPES.filter(t=>KS.some(k=>k.type===t)),dps=DEPTS.filter(([c])=>KS.some(k=>k.dept===c));
   let h=pageH("Suivi de prospection","Suivi des devis",pl(S.devis.length,"devis","devis")+' suivis · prélèvements <span class="est">en rouge : estimatifs</span>, <span class="def">en bleu : définitifs</span>',
-    '<button class="btn ghost" type="button" data-act="dvexport">Exporter / Excel</button><button class="btn" type="button" data-act="dvimp" title="Devis Word (.docx) ou PDF, un ou plusieurs, ou export Excel des pièces (devis, commandes, factures) · ou glissez les fichiers sur la page">'+SV+'<path d="M8 10.5V2.5M4.8 5.6 8 2.4l3.2 3.2M2.5 10v3.5h11V10"/></svg>'+'Importer (Word, PDF ou Excel)</button><button class="btn primary" type="button" data-dvnew="1">'+I_PLUS+'Nouveau devis</button>');
+    '<button class="btn ghost" type="button" data-act="dvexport">Exporter / Excel</button>'+(S.settings.dvxLast?'<button class="btn ghost" type="button" data-act="dvqn" title="Ce qui a changé lors du dernier import Excel">Quoi de neuf</button>':'')+'<button class="btn" type="button" data-act="dvimp" title="Devis Word (.docx) ou PDF, un ou plusieurs, ou export Excel des pièces (devis, commandes, factures) · ou glissez les fichiers sur la page">'+SV+'<path d="M8 10.5V2.5M4.8 5.6 8 2.4l3.2 3.2M2.5 10v3.5h11V10"/></svg>'+'Importer (Word, PDF ou Excel)</button><button class="btn primary" type="button" data-dvnew="1">'+I_PLUS+'Nouveau devis</button>');
   if(!S.devis.length){el.innerHTML=h+'<div class="list-wrap"><div class="empty"><h3>Aucun devis suivi pour l\'instant</h3><p>Pour chaque devis : le compte, les prestations, leur prix, les prélèvements (nombre × prix unitaire, estimatif en rouge puis définitif en bleu), puis les prestations réalisées au fil des interventions.</p><p style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn" type="button" data-act="dvimp">Importer (devis Word ou PDF, export Excel)</button><button class="btn primary" type="button" data-dvnew="1">'+I_PLUS+'Créer un devis</button></p><p class="sub">Vous pouvez aussi glisser vos devis .docx ou .pdf, ou votre export Excel, sur cette page.</p></div></div>';return}
   const tile=(vv,lbl,val,sub,cls)=>'<button type="button" class="kpi click'+(DVUI.vs.length===1&&DVUI.vs[0]===vv?' on':'')+'" data-dvv="'+vv+'"><span class="lbl">'+lbl+'</span><span class="v'+(cls?' '+cls:'')+'">'+val+'</span><span class="d">'+sub+'</span></button>';
   h+='<div class="dv-k">'+tile("attente","En attente",K.att,eur(K.attM)+(K.rel?' · <span class="late">'+K.rel+' à relancer</span>':''))+
@@ -208,7 +210,7 @@ function dvWidget(){const y=String(new Date().getFullYear()),all=S.devis,KA=dvKp
     tile("arealiser","Reste à réaliser",'<span class="num">'+eur(KA.reste)+'</span>',pl(KA.todo,"devis","devis")+" en cours")+
     tile("estim","Prélèvements",'<span class="num est">'+eur(KA.est)+'</span>','<span class="est">estimatifs</span>'+(KA.def?' · <span class="def">'+eur(KA.def)+' définitifs</span>':''))+'</div>';
   const more=(n,v)=>n>5?'<button type="button" class="more" data-dvv="'+v+'">+ '+(n-5)+' autres</button>':'';
-  h+='<div class="dv-wl"><div><h4>En attente de réponse <span class="num">'+att.length+'</span></h4>'+(att.length?att.slice(0,5).map(d=>row(d,(d,s)=>{const a=dvAge(d);return '<span class="r"><b class="num'+dvTotCls(s)+'">'+eur(s.tot)+'</b><span class="sub'+(dvRel(d)?' late':'')+'">'+(a!=null?(a?"depuis "+pl(a,"jour"):"aujourd'hui"):"")+'</span></span>'})).join("")+more(att.length,"attente"):'<p class="hint">Aucun devis en attente.</p>')+'</div>'+
+  h+='<div class="dv-wl"><div><h4>En attente de réponse <span class="num">'+att.length+'</span></h4>'+(att.length?att.slice(0,5).map(d=>row(d,(d,s)=>{const a=dvAge(d);return '<span class="r"><b class="num'+dvTotCls(s)+'">'+eur(s.tot)+'</b><span class="sub'+(dvRel(d)?' late':'')+'">'+(a!=null?(a?"depuis "+pl(a,"jour"):"aujourd'hui"):"")+'</span>'+(dvRel(d)?'<span class="dv-rl sm" data-dvrel="'+esc(d.id)+'" role="button" tabindex="0">Relancer</span>':'')+'</span>'})).join("")+more(att.length,"attente"):'<p class="hint">Aucun devis en attente.</p>')+'</div>'+
     '<div><h4>Acceptés, à réaliser <span class="num">'+todo.length+'</span></h4>'+(todo.length?todo.slice(0,5).map(d=>row(d,(d,s)=>'<span class="r"><b class="num'+dvTotCls(s)+'">'+eur(s.reste)+'</b><span class="sub">'+s.nf+' / '+s.n+' réalisée'+(s.nf>1?'s':'')+'</span></span>')).join("")+more(todo.length,"arealiser"):'<p class="hint">Aucune prestation en attente de réalisation.</p>')+'</div></div></div>';
   return h}
 function dvAccPanel(k){const L=dvOf(k.id);
@@ -278,7 +280,7 @@ function dvDraw(first){const d=DV,k=kOf(d.compteId),cts=k?ctOf(k.id):[];
    '</div>'+
    ta("dv-not","Notes",d.notes,3,"Conditions, pièces attendues, interlocuteur, motif de refus…")+
   '</form></div>'+
-  '<div class="df">'+(dvNew?'':'<button class="btn danger" type="button" data-act="dvdel">Supprimer</button>')+(k&&!dvNew?'<button class="btn ghost" type="button" data-kopen="'+esc(k.id)+'">Fiche compte</button>':'')+'<button class="btn ghost" type="button" data-act="dvrel">'+I_EV.tache+'Planifier une relance</button><span class="grow"></span><button class="btn" type="button" data-act="mclose">Annuler</button><button class="btn primary" type="button" data-act="dvsave">'+(dvNew?'Créer le devis':'Enregistrer')+'</button></div>',"devis");
+  '<div class="df">'+(dvNew?'':'<button class="btn danger" type="button" data-act="dvdel">Supprimer</button>')+(k&&!dvNew?'<button class="btn ghost" type="button" data-kopen="'+esc(k.id)+'">Fiche compte</button>':'')+'<button class="btn ghost" type="button" data-act="dvrel">'+I_EV.tache+'Planifier une relance</button>'+(!dvNew&&d.statut==="attente"?'<button class="btn ghost" type="button" data-dvrel="'+esc(d.id)+'">'+I_MAIL+'Mail de relance</button>':'')+'<span class="grow"></span><button class="btn" type="button" data-act="mclose">Annuler</button><button class="btn primary" type="button" data-act="dvsave">'+(dvNew?'Créer le devis':'Enregistrer')+'</button></div>',"devis");
   modalBig();if(sc){const n=$("#modal .db");if(n)n.scrollTop=sc}}
 function dvRead(){if(!DV||!$("#dvForm"))return;const d=DV;
   const ct=$("#dv-ct");if(ct)d.contactId=ct.value;
@@ -633,13 +635,14 @@ function dvxSumHTML(){const X=DVX;if(!X.sel.size)return '<div class="empty" styl
    (P.av?'<li><b>'+pl(P.av,"affaire avec avoir","affaires avec avoir")+'</b> : gardée'+(P.av>1?'s':'')+' en gagné au montant du devis, et signalée'+(P.av>1?'s':'')+' « Avoir »</li>':'')+'</ul>'+
    '<p class="hint" style="margin:0">Sans doublon : un n° de devis, de commande ou de facture déjà suivi met à jour le devis existant. Le détail des prestations n\'est pas dans l\'export : chaque devis porte son montant global, et vous pouvez ensuite importer le devis Word pour le détailler.</p>'}
 function dvxGo(){const X=DVX,P=dvxPlan(X.groups,[...X.sel]);S.settings.dvApporteurs=[...X.sel];
-  let nk=0;const KI=dvxIndex();
-  P.add.forEach(({g})=>{let k=KI.get(dvxKey(g.tiers));if(!k){k=ensureCompte(g.tiers||"Client sans nom",{type:g.st==="accepte"?"Client existant":"Prospect",ville:g.ville,cp:/^\d{5}$/.test(g.cp)?g.cp:"",dept:g.cp&&DNAME[g.cp.slice(0,2)]?g.cp.slice(0,2):"",origine:"devis excel"});KI.set(dvxKey(k.nom),k);nk++}
+  let nk=0;const KI=dvxIndex(),QI=[],QK=[];
+  P.add.forEach(({g})=>{let k=KI.get(dvxKey(g.tiers));if(!k){k=ensureCompte(g.tiers||"Client sans nom",{type:g.st==="accepte"?"Client existant":"Prospect",ville:g.ville,cp:/^\d{5}$/.test(g.cp)?g.cp:"",dept:g.cp&&DNAME[g.cp.slice(0,2)]?g.cp.slice(0,2):"",origine:"devis excel"});QK.push(k.nom);KI.set(dvxKey(k.nom),k);nk++}
     else if(g.st==="accepte"&&(TYPE_RANK[k.type]||0)<TYPE_RANK["Client existant"])k.type="Client existant";
-    put("devis",dvxNew(g,k))});
-  P.upd.forEach(({d,g})=>put("devis",dvxMerge(clone(d),g)));
-  P.link.forEach(({d,g})=>{const c=dvxMerge(clone(d),g);c.notes=[c.notes,"Commande "+g.key+" rattachée (même client, même montant)"].filter(Boolean).join(" · ");put("devis",c)});
-  closeModal();DVX=null;commit();if(S.tab!=="devis")showTab("devis");
+    const o=dvxNew(g,k);put("devis",o);QI.push({id:o.id,n:1,e:qnDiff(null,o,true)})});
+  P.upd.forEach(({d,g})=>{const o=dvxMerge(clone(d),g),e=qnDiff(dvnorm(clone(d)),o,false);put("devis",o);if(e.length)QI.push({id:o.id,e})});
+  P.link.forEach(({d,g})=>{const c=dvxMerge(clone(d),g);c.notes=[c.notes,"Commande "+g.key+" rattachée (même client, même montant)"].filter(Boolean).join(" · ");const e=qnDiff(dvnorm(clone(d)),c,false);put("devis",c);if(e.length)QI.push({id:c.id,e})});
+  qnRecord(X.file,QI,QK);
+  closeModal();DVX=null;commit();if(S.tab!=="devis")showTab("devis");setTimeout(qnOpen,50);
   toast("Intégré : "+[pl(P.add.length,"devis créé","devis créés"),pl(P.upd.length,"mis à jour","mis à jour"),P.link.length?pl(P.link.length,"rattaché","rattachés")+" à sa commande":"",nk?pl(nk,"compte créé","comptes créés"):""].filter(Boolean).join(" · "))}
 document.addEventListener("change",e=>{const t=e.target;if(!DVX||MODAL!=="dvx"||!t.dataset||t.dataset.dvxa==null)return;const a=t.dataset.dvxa;t.checked?DVX.sel.add(a):DVX.sel.delete(a);
   const lb=t.closest(".dvx-a");if(lb)lb.classList.toggle("on",t.checked);const s=$("#dvxSum");if(s)s.innerHTML=dvxSumHTML();const b=document.querySelector('#modal [data-act="dvxgo"]');if(b)b.disabled=!DVX.sel.size});

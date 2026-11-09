@@ -1,5 +1,5 @@
 /* PAC Prospection IDF · CSC — Export Excel (.xlsx), liens d'export depuis Notion, import Excel / CSV des cibles
-   Fichier 8/12 : les fichiers se chargent dans l'ordre et partagent leurs déclarations. */
+   Fichier 8/18 : les fichiers se chargent dans l'ordre et partagent leurs déclarations. */
 "use strict";
 
 /* ---------- Export ---------- */
@@ -112,37 +112,57 @@ function addPacSheet(wb,name,plan,pac,cibles){
   wp.pageSetup={orientation:"landscape",paperSize:9,fitToPage:true,fitToWidth:1,fitToHeight:0,margins:{left:.3,right:.3,top:.5,bottom:.5,header:.25,footer:.25},printTitlesRow:"3:4"};
   wp.headerFooter={oddFooter:"&LPAC Prospection IDF · CSC&RPage &P / &N"};
 }
+/* Sections du classeur : cochées dans « Exporter » (toutes par défaut) ; « depuis le » limite les actions et les devis */
+const XL_SEC=[["pac","Plan d'action (PAC)"],["syn","Synthèse des indicateurs"],["cib","Cibles et campagnes"],["act","Actions (RDV, appels, mails, rappels)"],["cpt","Comptes"],["ctc","Contacts"],["dev","Devis (une ligne par prestation)"],["dva","Analyse des devis (mois par mois)"],["mai","Mailing"]];
+const xlSecs=st=>new Set(Array.isArray(st&&st.xlSec)?st.xlSec:XL_SEC.map(x=>x[0]));
+function xlSecHTML(){const S0=xlSecs(S.settings),dep=S.settings.xlDepuis||"";
+  return '<div class="xl-sec"><span class="sub">Onglets à inclure :</span><div class="xl-ck">'+XL_SEC.map(([k,l])=>'<label class="toggle"><input type="checkbox" data-xls="'+k+'"'+(S0.has(k)?' checked':'')+'> '+esc(l)+'</label>').join("")+'</div>'+
+    '<div class="xl-bar"><button type="button" class="more" data-xlall="1">Tout cocher</button><button type="button" class="more" data-xlall="0">Tout décocher</button><span class="grow"></span><label class="sub">Actions et devis depuis le <input type="date" id="xlDep" value="'+esc(dep)+'"></label>'+(dep?'<button type="button" class="more" data-xldepx="1" title="Retirer la date : tout l\'historique">effacer</button>':'')+'</div>'+
+    '<p class="hint" style="margin:0">'+(S0.size?pl(S0.size,"onglet")+' sélectionné'+(S0.size>1?'s':'')+(dep?' · actions et devis depuis le '+fdate(dep):''):'<b style="color:var(--bad)">Cochez au moins un onglet.</b>')+'. Votre choix est mémorisé.</p></div>'}
+function xlSecRefresh(){const b=document.querySelector(".xl-sec");if(b)b.outerHTML=xlSecHTML();
+  if(IN_FRAME){const a=$("#exX");if(a){a.setAttribute("aria-disabled","true");a.textContent="Préparation du lien…";xlsxHandoffURL().then(u=>{const x=$("#exX");if(x){x.href=u;x.textContent="Exporter en Excel (.xlsx)";x.removeAttribute("aria-disabled")}})}}}
+document.addEventListener("change",e=>{const t=e.target;if(!t)return;
+  if(t.dataset&&t.dataset.xls){const s=xlSecs(S.settings);t.checked?s.add(t.dataset.xls):s.delete(t.dataset.xls);S.settings.xlSec=XL_SEC.map(x=>x[0]).filter(k=>s.has(k));lsSave();xlSecRefresh();return}
+  if(t.id==="xlDep"){S.settings.xlDepuis=t.value||"";lsSave();xlSecRefresh()}});
+document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("button");if(!t)return;
+  if(t.dataset.xlall!=null){S.settings.xlSec=t.dataset.xlall==="1"?XL_SEC.map(x=>x[0]):[];lsSave();xlSecRefresh();return}
+  if(t.dataset.xldepx){S.settings.xlDepuis="";lsSave();xlSecRefresh()}});
 async function buildXlsx(cibles,settings,pac,mailing){mailing=mailing||[];settings=settings||{};
+  const SEC=xlSecs(settings),X=k=>SEC.has(k),DEP=settings.xlDepuis||"";if(!SEC.size)throw new Error("aucune section");
   await loadExcel();
   const wb=new ExcelJS.Workbook();wb.creator="PAC Prospection IDF · CSC";wb.created=new Date();
   /* ---- PAC : un onglet par plan ---- */
   const plans=S.plans.filter(p=>pac.some(l=>l.planId===p.id)),used=new Set();
-  plans.forEach(p=>{let nm=plans.length>1?("PAC – "+p.nom).replace(/[\[\]:*?\/\\]/g," ").slice(0,31):"PAC";while(used.has(nm))nm=nm.slice(0,28)+" "+used.size;used.add(nm);addPacSheet(wb,nm,p,pac.filter(l=>l.planId===p.id),cibles)});
+  if(X("pac"))plans.forEach(p=>{let nm=plans.length>1?("PAC – "+p.nom).replace(/[\[\]:*?\/\\]/g," ").slice(0,31):"PAC";while(used.has(nm))nm=nm.slice(0,28)+" "+used.size;used.add(nm);addPacSheet(wb,nm,p,pac.filter(l=>l.planId===p.id),cibles)});
   const order=cibles.slice().sort((a,b)=>{const na=nextFor(a),nb=nextFor(b);return (a.priorite||"Z").localeCompare(b.priorite||"Z")||SIDX[a.etape]-SIDX[b.etape]||((na&&na.date)||"9999").localeCompare((nb&&nb.date)||"9999")||a.compte.localeCompare(b.compte,"fr")});
-  const sy=wb.addWorksheet("Synthèse",{properties:{tabColor:{argb:COPPER}},views:[{showGridLines:false}]});
+  const sy=X("syn")?wb.addWorksheet("Synthèse",{properties:{tabColor:{argb:COPPER}},views:[{showGridLines:false}]}):null;
   /* ---- Cibles ---- */
-  const wc=xlTable(wb,"Cibles","Cibles",INK,XMAIN,order.map(c=>XMAIN.map(x=>x.v(c))),3);
+  if(X("cib")){const wc=xlTable(wb,"Cibles","Cibles",INK,XMAIN,order.map(c=>XMAIN.map(x=>x.v(c))),3);
   order.forEach((c,i)=>{const row=wc.getRow(i+2);row.getCell(2).fill={type:"pattern",pattern:"solid",fgColor:{argb:STAGE_FILL[c.etape]}};
     const pr=row.getCell(1);pr.font={name:"Calibri",size:10,bold:true,color:{argb:c.priorite==="A"?"FFFFFFFF":INK}};
     if(c.priorite==="A")pr.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FFA35C2A"}};else if(c.priorite==="B")pr.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FFF5E7DB"}};
-    const n=nextFor(c);if(n&&n.date&&n.date<todayISO()&&isActive(c))row.getCell(10).font={name:"Calibri",size:10,bold:true,color:{argb:"FFB0442D"}}});
+    const n=nextFor(c);if(n&&n.date&&n.date<todayISO()&&isActive(c))row.getCell(10).font={name:"Calibri",size:10,bold:true,color:{argb:"FFB0442D"}}})}
   /* ---- Actions ---- */
+  if(X("act")){
   const AC=[{h:"Date",w:12,fmt:DFMT,al:"center"},{h:"Heure",w:8,al:"center"},{h:"Compte",w:30,bold:true},{h:"Type",w:15},{h:"Statut",w:11,al:"center"},{h:"Résultat",w:15},{h:"Contact",w:22},{h:"Objet",w:32,wrap:true},{h:"Détails / compte rendu",w:70,wrap:true},{h:"Accompagnant",w:18},{h:"Campagne",w:28},{h:"Compte rendu",w:70,wrap:true}];
-  const acts=S.actions.slice().sort(aSortDesc);
+  const acts=S.actions.filter(a=>!DEP||(a.date||"")>=DEP).sort(aSortDesc);
   const wa=xlTable(wb,"Actions","Actions","FF6E6862",AC,acts.map(a=>{const k=kOf(a.compteId)||{},ct=ctById(a.contactId),cb=cibById(a.cibleId);return [toDate(a.date),a.heure||null,k.nom||"",ALBL[a.type]||a.type,stLbl(a),a.resultat,ct?ct.nom:a.interlocuteur,a.objet,a.details,a.accompagnant,cb?cb.campagne:"",a.cr?crRows(a).filter(r=>r[0]!=="Points abordés").map(([l,v])=>l+" : "+v).join("\n"):""]}),0);
   acts.forEach((a,i)=>{const cell=wa.getRow(i+2).getCell(5);cell.fill={type:"pattern",pattern:"solid",fgColor:{argb:{ok:"FFE2F0E6",warn:"FFFBEED3",bad:"FFF7E1DA",grey:"FFECEAE6"}[stTone(a)]}}});
+  }
   /* ---- Comptes ---- */
   const yy=new Date().getFullYear(),y0s=String(yy-1),y1s=String(yy);
+  if(X("cpt")){
   const KC=[{h:"Compte",w:32,bold:true},{h:"Type",w:14},{h:"Famille",w:26,wrap:true},{h:"Segment",w:24,wrap:true},{h:"Typologie",w:24,wrap:true},{h:"Contrat cadre",w:9,al:"center"},{h:"Statut",w:24,wrap:true},{h:"CA facturé "+y0s,w:14,fmt:EUR},{h:"CA facturé "+y1s,w:14,fmt:EUR},{h:"Devis en attente",w:14,fmt:EUR},{h:"Département",w:18},{h:"Agence",w:18},{h:"Apporteur",w:18},{h:"Contacts",w:9,al:"center"},{h:"Campagnes",w:30,wrap:true},{h:"Dernier contact",w:13,fmt:DFMT,al:"center"},{h:"Prochaine action",w:13,fmt:DFMT,al:"center"},{h:"Quoi",w:30,wrap:true},{h:"Notes",w:40,wrap:true}];
   const ks=S.comptes.slice().sort((a,b)=>a.nom.localeCompare(b.nom,"fr"));
   xlTable(wb,"Comptes","Comptes","FFA35C2A",KC,ks.map(k=>{const n=nextOf(k.id),l=lastOf(k.id);const h=k.histo;return [k.nom,k.type,FNOM[famOf(k)]||"",k.segment,k.typologie,k.contrat?"Oui":"",h?(HST[h.st]||[""])[0]:"",h?hCA(k,y0s):null,h?hCA(k,y1s):null,h&&h.dv.n?h.dv.m:null,dLabel(k.dept),k.agence,k.apporteur,ctOf(k.id).length,cibOf(k.id).map(c=>c.campagne.replace(/^PAC IDF – /,"")).join(", "),l?toDate(l.date):null,n?toDate(n.date):null,n?n.objet:"",k.notes]}),1);
+  }
   /* ---- Contacts ---- */
-  const CC=[{h:"Compte",w:32,bold:true},{h:"Contact",w:24},{h:"Fonction",w:22},{h:"Téléphone",w:15},{h:"E-mail",w:30},{h:"Principal",w:9,al:"center"},{h:"Notes",w:40,wrap:true}];
+  if(X("ctc")){const CC=[{h:"Compte",w:32,bold:true},{h:"Contact",w:24},{h:"Fonction",w:22},{h:"Téléphone",w:15},{h:"E-mail",w:30},{h:"Principal",w:9,al:"center"},{h:"Notes",w:40,wrap:true}];
   const cs=S.contacts.slice().sort((a,b)=>((kOf(a.compteId)||{}).nom||"").localeCompare((kOf(b.compteId)||{}).nom||"","fr")||(b.principal-a.principal));
-  xlTable(wb,"Contacts","Contacts","FFA49B91",CC,cs.map(c=>[(kOf(c.compteId)||{}).nom||"",c.nom,c.fonction,c.tel,c.mail,c.principal?"Oui":"",c.notes]),1);
+  xlTable(wb,"Contacts","Contacts","FFA49B91",CC,cs.map(c=>[(kOf(c.compteId)||{}).nom||"",c.nom,c.fonction,c.tel,c.mail,c.principal?"Oui":"",c.notes]),1)}
   /* ---- Devis (une ligne par prestation ; prélèvements en rouge si estimatifs, en bleu si définitifs) ---- */
-  const dvs=(S.devis||[]).slice().sort(dvSortD);
-  if(dvs.length){
+  const dvs=(S.devis||[]).filter(d=>!DEP||(d.date||"")>=DEP).sort(dvSortD);
+  if(X("dev")&&dvs.length){
     const DC=[{h:"Date",w:12,fmt:DFMT,al:"center"},{h:"N° devis",w:14},{h:"Compte",w:30,bold:true},{h:"Contact",w:22},{h:"Objet / site",w:30,wrap:true},{h:"Statut",w:12,al:"center"},{h:"Réponse le",w:12,fmt:DFMT,al:"center"},{h:"Prestation",w:40,wrap:true},{h:"Prix HT",w:12,fmt:EUR},{h:"Nb prélèvements",w:12,al:"center"},{h:"PU prélèvement",w:13,fmt:EUR},{h:"Montant prélèvements",w:14,fmt:EUR},{h:"Prélèvements",w:12,al:"center"},{h:"Montant ligne HT",w:14,fmt:EUR},{h:"Réalisée",w:9,al:"center"},{h:"Réalisée le",w:12,fmt:DFMT,al:"center"},{h:"Avoir",w:12,fmt:EUR},{h:"Notes",w:40,wrap:true}];
     const rows=[],tone=[];
     dvs.forEach(d=>{const k=kOf(d.compteId)||{},ct=ctById(d.contactId);d.lignes.forEach(l=>{const hp=lHasP(l);
@@ -150,15 +170,34 @@ async function buildXlsx(cibles,settings,pac,mailing){mailing=mailing||[];settin
       tone.push(hp?(l.def?"FF1F5FBF":"FFC62828"):null)})});
     const wd=xlTable(wb,"Devis","Devis","FFC62828",DC,rows,3);
     tone.forEach((c,i)=>{const r=wd.getRow(i+2);if(c)[10,11,12,13].forEach(n=>{r.getCell(n).font={name:"Calibri",size:10,bold:true,color:{argb:c}}});if(rows[i][14]==="Oui")r.getCell(15).fill={type:"pattern",pattern:"solid",fgColor:{argb:"FFE2F0E6"}}})}
+  /* ---- Analyse des devis : mois par mois, année en cours et précédente ---- */
+  if(X("dva")&&(S.devis||[]).length){const y=String(new Date().getFullYear()),yp=String(+y-1),M=anMonths(y),P=anMonths(yp),obj=Number(((settings.dvObj)||{})[y])||0;
+    const wv=wb.addWorksheet("Analyse devis",{properties:{tabColor:{argb:"FFC62828"}},views:[{showGridLines:false,state:"frozen",ySplit:4}]});
+    wv.columns=[{width:14},{width:10},{width:14},{width:10},{width:14},{width:10},{width:14},{width:14},{width:16},{width:14}];
+    wv.getCell("A1").value="Analyse des devis "+y;wv.getCell("A1").font={name:"Calibri",size:16,bold:true,color:{argb:INK}};
+    wv.getCell("A2").value=(obj?"Objectif "+y+" : "+eur(obj)+" de devis acceptés · ":"")+"export du "+new Date().toLocaleDateString("fr-FR");wv.getCell("A2").font={name:"Calibri",size:10,color:{argb:GREYTXT}};
+    const H=["Mois","Envoyés","Montant envoyé","Acceptés","Montant accepté","Refusés","Montant refusé","Réalisé","Accepté "+yp,"Écart"];
+    H.forEach((h,i)=>{const c=wv.getCell(4,i+1);c.value=h;c.font={name:"Calibri",size:10,bold:true,color:{argb:"FFFFFFFF"}};c.fill={type:"pattern",pattern:"solid",fgColor:{argb:INK}};c.alignment={horizontal:i?"right":"left",vertical:"middle"}});
+    const T=[0,0,0,0,0,0,0,0];
+    M.forEach((x,i)=>{const p=P[i],v=[MOIS[i].charAt(0).toUpperCase()+MOIS[i].slice(1),x.env,x.envM,x.acc,x.accM,x.lost,x.lostM,x.real,p.accM,x.accM-p.accM];[x.env,x.envM,x.acc,x.accM,x.lost,x.lostM,x.real,p.accM].forEach((n,j)=>T[j]+=n);
+      v.forEach((n,j)=>{const c=wv.getCell(5+i,j+1);c.value=n;c.font={name:"Calibri",size:10,bold:j===4};if([2,4,6,7,8,9].includes(j))c.numFmt=EUR;if(j)c.alignment={horizontal:"right"};c.border={bottom:{style:"hair",color:{argb:LINE}}}});
+      const e=wv.getCell(5+i,10);e.font={name:"Calibri",size:10,color:{argb:x.accM-p.accM>=0?"FF2E7A45":"FFB0442D"}}});
+    ["Total"].concat(T,[T[4]-T[7]]).forEach((n,j)=>{const c=wv.getCell(17,j+1);c.value=n;c.font={name:"Calibri",size:10.5,bold:true};if([2,4,6,7,8,9].includes(j))c.numFmt=EUR;if(j)c.alignment={horizontal:"right"};c.border={top:{style:"medium",color:{argb:COPPER}}}});
+    const G=anGroups("famille",y);let r0=20;wv.getCell(r0,1).value="Par famille de clients ("+y+")";wv.getCell(r0,1).font={name:"Calibri",size:12,bold:true,color:{argb:"FFA35C2A"}};r0++;
+    ["Famille","Devis","Montant total","Acceptés","Montant accepté","Refusés","Montant refusé","En attente (€)","Transfo (nb)","Transfo (€)"].forEach((h,i)=>{const c=wv.getCell(r0,i+1);c.value=h;c.font={name:"Calibri",size:10,bold:true,color:{argb:"FFFFFFFF"}};c.fill={type:"pattern",pattern:"solid",fgColor:{argb:INK}}});
+    G.forEach((g,i)=>{const v=[g.lab,g.n,g.tot,g.acc,g.accM,g.lost,g.lostM,g.attM,g.acc+g.lost?g.acc/(g.acc+g.lost):null,g.accM+g.lostM?g.accM/(g.accM+g.lostM):null];
+      v.forEach((n,j)=>{const c=wv.getCell(r0+1+i,j+1);c.value=n;c.font={name:"Calibri",size:10};if([2,4,6,7].includes(j))c.numFmt=EUR;if(j>=8)c.numFmt=PCT;c.border={bottom:{style:"hair",color:{argb:LINE}}}})});
+    wv.pageSetup={orientation:"landscape",paperSize:9,fitToPage:true,fitToWidth:1,fitToHeight:0}}
   /* ---- Mailing ---- */
-  if(mailing.length){
+  if(X("mai")&&mailing.length){
     const MC=[{h:"Envoyé",w:9,al:"center"},{h:"Date d'envoi",w:12,fmt:DFMT,al:"center"},{h:"Relance le",w:12,fmt:DFMT,al:"center"},{h:"Relance faite",w:12,fmt:DFMT,al:"center"},{h:"Commentaire",w:40,wrap:true},{h:"Client",w:32,bold:true},{h:"Typologie",w:24},{h:"Famille",w:26,wrap:true},{h:"Contact",w:24},{h:"E-mail",w:32},{h:"Agence",w:18},{h:"Apporteur",w:18},{h:"Liste",w:18},{h:"Envoyer ?",w:22,wrap:true},{h:"Point d'attention",w:30,wrap:true}];
     const ml=mailing.slice().sort((a,b)=>(a.liste||"").localeCompare(b.liste||"","fr")||(a.client||"").localeCompare(b.client||"","fr"));
     const wm=xlTable(wb,"Mailing","Mailing","FF2A66A8",MC,ml.map(m=>[m.envoye?"Oui":"Non",toDate(m.dateEnvoi),toDate(m.relance),toDate(m.relanceFaite),m.commentaire,m.client,m.typologie,m.famille,m.contact,m.mail,m.agence,m.apporteur,m.liste,m.envoyer,m.attention]),0);
     ml.forEach((m,i)=>{const row=wm.getRow(i+2);if(m.envoye)row.getCell(1).fill={type:"pattern",pattern:"solid",fgColor:{argb:"FFE2F0E6"}};
       if(m.envoye&&m.relance&&!m.relanceFaite&&m.relance<=todayISO())row.getCell(3).font={name:"Calibri",size:10,bold:true,color:{argb:"FFB0442D"}}})}
-  /* ---- Synthèse ---- */
-  const N=order.length,CR="Cibles!",col=h=>CR+"$"+XI[h]+"$2:$"+XI[h]+"$"+(N+1);
+  /* ---- Synthèse (formules liées à l'onglet Cibles quand il est exporté) ---- */
+  if(sy){
+  const N=order.length,NF=X("cib")?N:0,CR="Cibles!",col=h=>CR+"$"+XI[h]+"$2:$"+XI[h]+"$"+(N+1);
   const act=order.filter(isActive),done=S.actions.filter(a=>a.type==="visite"&&a.statut==="fait"),mk=todayISO().slice(0,7);
   const doneM=done.filter(a=>(a.date||"").slice(0,7)===mk).length,obj=Number(settings.objectif)||0;
   const opps=order.filter(c=>c.opp.creee),sumOpp=st=>opps.filter(c=>c.opp.statut===st).reduce((s,c)=>s+(Number(c.opp.montant)||0),0);
@@ -176,7 +215,7 @@ async function buildXlsx(cibles,settings,pac,mailing){mailing=mailing||[];settin
   const line=(label,vals,fmts,bold)=>{const row=sy.getRow(r);row.getCell(2).value=label;row.getCell(2).font={name:"Calibri",size:11,bold:!!bold};
     vals.forEach((v,i)=>{const c=row.getCell(3+i);c.value=v;c.font={name:"Calibri",size:11,bold:!!bold};c.alignment={horizontal:"right"};if(fmts&&fmts[i])c.numFmt=fmts[i]});
     for(let i=2;i<=5;i++)row.getCell(i).border={bottom:{style:"hair",color:{argb:LINE}}};r++};
-  const F=(f,res)=>N?{formula:f,result:res}:res;
+  const F=(f,res)=>NF?{formula:f,result:res}:res;
   const t=todayISO(),open=S.actions.filter(isOpen);
   section("Indicateurs clés");
   line("Comptes",[S.comptes.length]);line("Contacts",[S.contacts.length]);
@@ -212,9 +251,11 @@ async function buildXlsx(cibles,settings,pac,mailing){mailing=mailing||[];settin
   if(mailing.length){const ok=m=>!m.envoyer||/^oui/i.test(m.envoyer);r++;section("Mailing",["Contacts"]);
     line("Contacts à joindre",[mailing.filter(ok).length]);line("Mails envoyés",[mailing.filter(m=>m.envoye).length]);
     line("Reste à envoyer",[mailing.filter(m=>!m.envoye&&ok(m)&&m.mail).length]);line("Relances à faire",[mailing.filter(m=>m.envoye&&m.relance&&!m.relanceFaite&&m.relance<=t).length])}
-  r++;const note=sy.getRow(r).getCell(2);note.value="Les chiffres des cibles se recalculent si vous modifiez l'onglet Cibles. Onglets : PAC, Cibles (pipeline), Actions (RDV, appels, mails, rappels, comptes rendus), Comptes, Contacts"+(mailing.length?", Mailing (suivi des envois)":"")+".";note.font={name:"Calibri",size:9.5,italic:true,color:{argb:GREYTXT}};note.alignment={wrapText:true};sy.getRow(r).height=42;
+  r++;const note=sy.getRow(r).getCell(2);note.value=(NF?"Les chiffres des cibles se recalculent si vous modifiez l'onglet Cibles. ":"")+"Onglets : "+wb.worksheets.map(w=>w.name).join(", ")+"."+(DEP?" Actions et devis depuis le "+fdate(DEP)+".":"");note.font={name:"Calibri",size:9.5,italic:true,color:{argb:GREYTXT}};note.alignment={wrapText:true};sy.getRow(r).height=42;
   sy.pageSetup={orientation:"portrait",paperSize:9,fitToPage:true,fitToWidth:1,fitToHeight:1,margins:{left:.5,right:.5,top:.6,bottom:.6,header:.3,footer:.3}};
   sy.headerFooter={oddFooter:"&LPAC Prospection IDF · CSC&RExport du "+new Date().toLocaleDateString("fr-FR")};
+  }
+  if(!wb.worksheets.length){const w=wb.addWorksheet("Export");w.getCell("A1").value="Aucune donnée pour les onglets choisis."}
   const buf=await wb.xlsx.writeBuffer();
   return new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
 }
@@ -230,6 +271,7 @@ async function unpackData(s){const kind=s[0],body=s.slice(1);if(kind==="j")retur
   return JSON.parse(await new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).text())}
 async function xlsxHandoffURL(){const st=Object.assign({},S.settings);delete st.mailTypes;return location.href.split("#")[0]+"#xlsz="+await packData(Object.assign({},snapshot(),{settings:st}))}
 async function exportXlsxHere(){
+  if(!xlSecs(S.settings).size){toast("Cochez au moins un onglet à exporter.");return}
   try{toast("Préparation du fichier Excel…");saveBlob(await buildXlsx(S.cibles,S.settings,S.pac,S.mailing),xlName());toast("Fichier Excel téléchargé")}
   catch(e){console.error(e);toast("Export Excel impossible : vérifiez la connexion internet, puis réessayez.")}
 }

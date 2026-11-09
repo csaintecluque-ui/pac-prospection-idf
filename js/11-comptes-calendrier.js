@@ -1,5 +1,5 @@
 /* PAC Prospection IDF · CSC — Comptes à compléter (extraction / réintégration), glisser-déposer dans le calendrier
-   Fichier 11/12 : les fichiers se chargent dans l'ordre et partagent leurs déclarations. */
+   Fichier 11/18 : les fichiers se chargent dans l'ordre et partagent leurs déclarations. */
 "use strict";
 
 /* ================= V3.19 · Extraction des comptes à compléter, puis réintégration des compléments ================= */

@@ -1,5 +1,5 @@
 /* PAC Prospection IDF · CSC — Historique clients et familles, stockage IndexedDB, gestion des plans, actions rapides, comptes rendus, tableau de bord personnalisable, bloc-notes, bilan d'activité
-   Fichier 9/12 : les fichiers se chargent dans l'ordre et partagent leurs déclarations. */
+   Fichier 9/18 : les fichiers se chargent dans l'ordre et partagent leurs déclarations. */
 "use strict";
 
 /* ================= V3.1 · Antécédents de facturation, familles de clients, mailing → comptes ================= */

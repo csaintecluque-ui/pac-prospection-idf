@@ -1,5 +1,5 @@
 /* PAC Prospection IDF · CSC — Liste des comptes, fiche compte, cibles et campagnes
-   Fichier 4/12 : les fichiers se chargent dans l'ordre et partagent leurs déclarations. */
+   Fichier 4/18 : les fichiers se chargent dans l'ordre et partagent leurs déclarations. */
 "use strict";
 
 /* ================= V3 · Comptes et fiche compte ================= */
@@ -59,7 +59,7 @@ function renderCompte(){
   const rel=ml.filter(m=>m.envoye&&m.relance&&!m.relanceFaite);
   let h='<div class="page-h"><div class="grow"><span class="crumb"><button type="button" data-nav="comptes">Comptes</button>›<span>Fiche compte</span></span></div></div>';
   h+='<div class="acc-h"><div class="acc-top"><div class="grow"><h2>'+esc(k.nom)+'</h2><div class="acc-tags">'+tyTag(k.type)+(secteurOf(k)?'<span class="tag bu">'+esc(secteurOf(k))+'</span>':'')+(k.dept?'<span class="ty">'+esc(dLabel(k.dept))+'</span>':'')+(k.ville?'<span class="sub">'+esc(k.ville)+'</span>':'')+(k.contrat?'<span class="tag bu">Contrat cadre</span>':'')+(FNOM[famOf(k)]?'<span class="sub">· '+esc(FNOM[famOf(k)])+'</span>':'')+(k.agence?'<span class="sub">· agence '+esc(k.agence)+'</span>':'')+'</div></div>'+
-    '<div class="bar"><button class="btn" type="button" data-kedit="'+esc(k.id)+'">Modifier</button><button class="btn" type="button" data-ctnew="'+esc(k.id)+'">'+I_PLUS+'Contact</button><button class="btn" type="button" data-cibnew="'+esc(k.id)+'">'+I_PLUS+'Campagne</button><button class="btn primary" type="button" data-anew="visite" data-k="'+esc(k.id)+'">'+I_PLUS+'RDV</button></div></div>'+
+    '<div class="bar"><button class="btn" type="button" data-prep="'+esc(k.id)+'" title="Fiche imprimable : informations, contacts, devis, échanges, prospection">Préparer le RDV</button><button class="btn" type="button" data-kedit="'+esc(k.id)+'">Modifier</button><button class="btn" type="button" data-ctnew="'+esc(k.id)+'">'+I_PLUS+'Contact</button><button class="btn" type="button" data-cibnew="'+esc(k.id)+'">'+I_PLUS+'Campagne</button><button class="btn primary" type="button" data-anew="visite" data-k="'+esc(k.id)+'">'+I_PLUS+'RDV</button></div></div>'+
     '<div class="acc-stats"><div><b class="'+(n&&n.date&&n.date<t?'late':'')+'">'+(n?esc(n.date?fdate(n.date):"Sans date"):"—")+'</b><span>'+(n?esc(n.objet||ALBL[n.type]):"Aucune action prévue")+'</span></div>'+
      '<div><b>'+(la?fdate(la.date):"—")+'</b><span>'+(la?"Dernier contact · "+esc(la.label):"Jamais contacté")+'</span></div>'+
      '<div><b>'+A.filter(a=>a.statut==="fait"&&a.type!=="note").length+'</b><span>actions réalisées · '+A.filter(a=>a.type==="visite"&&a.statut==="fait").length+' visite(s)</span></div>'+

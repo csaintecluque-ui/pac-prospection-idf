@@ -1,5 +1,5 @@
 /* PAC Prospection IDF · CSC — Plan d'action commercial (PAC) : lignes, plans, import / export, impression
-   Fichier 5/12 : les fichiers se chargent dans l'ordre et partagent leurs déclarations. */
+   Fichier 5/18 : les fichiers se chargent dans l'ordre et partagent leurs déclarations. */
 "use strict";
 
 /* ---------- PAC : plan d'action commercial (format PAC France : élément, objectif, actions T1-T4, suivi, résultats, correctif) ---------- */

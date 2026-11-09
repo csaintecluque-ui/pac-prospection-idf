@@ -1,5 +1,5 @@
 /* PAC Prospection IDF · CSC — Interface : navigation, fenêtres, actions (RDV, appel, mail…), contacts, comptes
-   Fichier 2/12 : les fichiers se chargent dans l'ordre et partagent leurs déclarations. */
+   Fichier 2/18 : les fichiers se chargent dans l'ordre et partagent leurs déclarations. */
 "use strict";
 
 /* ================= V3 · Navigation, fenêtres, actions, contacts, comptes ================= */
@@ -46,7 +46,8 @@ const NAV=[["tdb","Tableau de bord",SV+'<rect x="2" y="2" width="5" height="6" r
  ["agenda","Agenda & actions",SV+'<rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M2 6.5h12M5.5 1.8v2.4M10.5 1.8v2.4M5 9.5h2M9 9.5h2M5 12h2"/></svg>',"Actions commerciales"],
  ["mailing","Mailing",SV+'<path d="M14 2 7 9M14 2l-4.5 12L7 9 2 6.5z"/></svg>',""],
  ["pac","Plan d'action (PAC)",SV+'<path d="M3 14.5V2M3 2.5h8.5l-1.5 3 1.5 3H3"/></svg>',"Pilotage"],
- ["bilan","Bilan d'activité",SV+'<path d="M2 14h12M3.5 13.5V9M7 13.5V5M10.5 13.5V7.5M14 13.5V3"/></svg>',""]];
+ ["bilan","Bilan d'activité",SV+'<path d="M2 14h12M3.5 13.5V9M7 13.5V5M10.5 13.5V7.5M14 13.5V3"/></svg>',""],
+ ["analyse","Analyse des devis",SV+'<path d="M2.5 13.5h11M3.5 11l3-3.5 2.5 2 4-5"/><path d="M10.5 4.5h2.5V7"/></svg>',""]];
 function renderNav(){
   renderQk();
   const t=todayISO(),late=S.actions.filter(a=>isOpen(a)&&a.date&&a.date<t).length,tod=S.actions.filter(a=>isOpen(a)&&a.date===t).length;
@@ -56,7 +57,7 @@ function renderNav(){
   $("#nav").innerHTML=NAV.map(([k,l,ic,g])=>{const c=cnt[k],hot=Array.isArray(c)&&c[1],n=Array.isArray(c)?c[0]:c;
     return (g?'<div class="nav-g">'+esc(g)+'</div>':'')+'<button type="button" data-nav="'+k+'"'+(cur===k?' aria-current="page"':'')+' title="'+esc(l)+'">'+ic+'<span class="l">'+esc(l)+'</span>'+(n!==""&&n!=null?'<span class="nb'+(hot?' hot':'')+'">'+n+'</span>':'')+'</button>'}).join("");
 }
-const VIEWS_ALL=["tdb","agenda","comptes","compte","cibles","mailing","pac","bilan","devis"];
+const VIEWS_ALL=["tdb","agenda","comptes","compte","cibles","mailing","pac","bilan","devis","analyse"];
 function showTab(k,arg,noPush){
   if(!VIEWS_ALL.includes(k))k="tdb";
   S.tab=k;if(k==="compte")S.kid=arg||S.kid;
@@ -74,7 +75,7 @@ function render(){
   renderNav();
   const t=S.tab;
   if(t==="tdb")renderTdb();else if(t==="agenda")renderAgenda();else if(t==="comptes")renderComptes();else if(t==="compte")renderCompte();
-  else if(t==="cibles")renderCibles();else if(t==="mailing")renderMailing();else if(t==="pac")renderPac();else if(t==="bilan")renderBilan();else if(t==="devis")renderDevis();
+  else if(t==="cibles")renderCibles();else if(t==="mailing")renderMailing();else if(t==="pac")renderPac();else if(t==="bilan")renderBilan();else if(t==="devis")renderDevis();else if(t==="analyse")renderAnalyse();
 }
 const pageH=(crumb,title,sub,tools)=>'<div class="page-h"><div class="grow">'+(crumb?'<span class="crumb">'+crumb+'</span>':'')+'<h2>'+title+'</h2>'+(sub?'<p class="sub">'+sub+'</p>':'')+'</div>'+(tools?'<div class="bar">'+tools+'</div>':'')+'</div>';
 const qBtns=(kid,cid)=>{const d=(k)=>' data-anew="'+k+'"'+(kid?' data-k="'+esc(kid)+'"':'')+(cid?' data-c="'+esc(cid)+'"':'');
@@ -101,8 +102,8 @@ function modalBig(){const m=$("#modal");if(MSIZE==="compact"){m.classList.remove
 function modalCtl(m){const dh=m.querySelector(".dh");if(!dh)return;dh.title="Glisser pour déplacer la fenêtre · double-clic pour la recentrer";
   if(!dh.querySelector(".mgrip")){const g=document.createElement("span");g.className="mgrip";g.setAttribute("aria-hidden","true");g.textContent="⠿";dh.insertBefore(g,dh.firstChild)}
   const cl=dh.querySelector('[data-act="mclose"]');if(cl&&!dh.querySelector('[data-act="msize"]')){const b=document.createElement("button");b.type="button";b.className="btn ghost";b.dataset.act="msize";b.innerHTML='<span class="l-big">Réduire</span><span class="l-cmp">Agrandir</span>';dh.insertBefore(b,cl)}}
-function showModal(html,kind){MODAL=kind||"x";const m=$("#modal");m.classList.remove("big","compact");m.innerHTML=html;modalCtl(m);m.hidden=false;$("#mscrim").hidden=false}
-function closeModal(){if(MODAL==="nb")setTimeout(()=>{if(S.tab==="tdb")renderTdb()},0);NLINK=null;MODAL=null;DV=null;AM=null;CM=null;KM=null;RV=null;const m=$("#modal");m.classList.remove("big","compact","moved");m.style.left=m.style.top="";$("#mscrim").classList.remove("light");$("#modal").hidden=true;$("#mscrim").hidden=true}
+function showModal(html,kind){MODAL=kind||"x";const m=$("#modal");m.classList.remove("big","compact","gs-m");m.innerHTML=html;modalCtl(m);m.hidden=false;$("#mscrim").hidden=false}
+function closeModal(){if(MODAL==="nb")setTimeout(()=>{if(S.tab==="tdb")renderTdb()},0);NLINK=null;MODAL=null;DV=null;AM=null;CM=null;KM=null;RV=null;const m=$("#modal");m.classList.remove("big","compact","moved","gs-m");m.style.left=m.style.top="";$("#mscrim").classList.remove("light");$("#modal").hidden=true;$("#mscrim").hidden=true}
 const mHead=(lbl,title)=>'<div class="dh"><div class="grow"><span class="lbl">'+lbl+'</span><h2 id="mTitle">'+title+'</h2></div><button class="btn ghost" type="button" data-act="mclose">Fermer</button></div>';
 const fld=(id,lab,val,type,extra)=>'<div class="f"><label class="lbl" for="'+id+'">'+lab+'</label><input type="'+(type||"text")+'" id="'+id+'" value="'+esc(val==null?"":val)+'"'+(extra||"")+'></div>';
 const ta=(id,lab,val,rows,ph)=>'<div class="f"><label class="lbl" for="'+id+'">'+lab+'</label><textarea id="'+id+'" rows="'+(rows||3)+'"'+(ph?' placeholder="'+esc(ph)+'"':'')+'>'+esc(val||"")+'</textarea></div>';
@@ -156,7 +157,7 @@ function drawAction(){
    ta("am-det",a.type==="note"?"Note":(a.cr||a._crOpen)?"Points abordés":rdv||a.type==="evenement"?"Compte rendu":"Détails",a.details,a.type==="note"||rdv||a.cr||a._crOpen?12:8,EPH[a.type])+
    (crOK(a.type)?crSection(a):'')+
   '</div></form></div>'+
-  '<div class="df">'+(amNew?'':'<button class="btn danger" type="button" data-act="amdel">Supprimer</button>')+(k?'<button class="btn ghost" type="button" data-kopen="'+esc(k.id)+'">Fiche compte</button>':'')+'<span class="grow"></span><button class="btn" type="button" data-act="mclose">Annuler</button><button class="btn primary" type="button" data-act="amsave">Enregistrer</button></div>',"action");
+  '<div class="df">'+(amNew?'':'<button class="btn danger" type="button" data-act="amdel">Supprimer</button>')+(k?'<button class="btn ghost" type="button" data-kopen="'+esc(k.id)+'">Fiche compte</button>':'')+(k&&rdv?'<button class="btn ghost" type="button" data-prep="'+esc(k.id)+'" data-prepa="'+esc(a.id)+'">Fiche de préparation</button>':'')+'<span class="grow"></span><button class="btn" type="button" data-act="mclose">Annuler</button><button class="btn primary" type="button" data-act="amsave">Enregistrer</button></div>',"action");
   modalBig();
 }
 async function amSave(){

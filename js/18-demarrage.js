@@ -1,5 +1,5 @@
 /* PAC Prospection IDF · CSC — Événements de l'interface et démarrage de l'application
-   Fichier 12/12 : les fichiers se chargent dans l'ordre et partagent leurs déclarations. */
+   Fichier 18/18 : les fichiers se chargent dans l'ordre et partagent leurs déclarations. */
 "use strict";
 
 /* ================= V3 · Événements ================= */
