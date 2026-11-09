@@ -935,7 +935,7 @@ body.dv-drop #view-devis,body.dv-drop #modal{outline:3px dashed var(--accent);ou
   <div class="side-f">
     <span class="sync" id="sync" data-s="wait"><i></i><span id="syncTxt">Chargement…</span></span>
     <button class="btn" type="button" data-act="export" title="Exporter, sauvegarder, restaurer"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11"/></svg><span>Exporter / sauvegarder</span></button>
-    <span class="ver">V3.14 · CSC</span>
+    <span class="ver">V3.15 · CSC</span>
   </div>
 </aside>
 
@@ -1026,7 +1026,7 @@ function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTi
 const nh=x=>String(x==null?"":x).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
 const now=()=>new Date().toISOString();
 const S={open:new Set(),mode:"wait",cibles:[],comptes:[],contacts:[],actions:[],plans:[],pac:[],mailing:[],devis:[],settings:{objectif:8},writable:true,view:"actives",tab:"tdb",kid:"",db:null,downloads:null,ver:0};
-const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.14";
+const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.15";
 let STORE="ls"; /* "idb" dès que les données sont dans la base du navigateur */
 const IN_FRAME=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 const TYPE_RANK={"Client existant":3,"Prescripteur":2,"Prospect":1};
@@ -3993,16 +3993,16 @@ function dvKpis(B){const X=B.map(d=>[d,dvSum(d)]),sum=(f,g)=>X.reduce((a,[d,s])=
 /* ---------- Page « Suivi des devis » ---------- */
 const DVV=[["tous","Tous",()=>true],["brouillon","À envoyer",d=>d.statut==="brouillon"],["attente","En attente",d=>d.statut==="attente"],["relance","À relancer",dvRel],
   ["arealiser","Acceptés à réaliser",dvToDo],["realises","Réalisés",d=>d.statut==="accepte"&&d.lignes.length>0&&!dvToDo(d)],["perdus","Refusés / sans suite",d=>!dvLive(d)],["estim","Prélèvements estimatifs",d=>dvLive(d)&&d.lignes.some(lEst)],["avoir","Avec avoir",d=>!!d.avoir]];
-const DVUI=(()=>{const d={v:"tous",q:"",an:"",mo:"",pr:"",cl:"",dp:"",ap:"",sort:"date-desc",grp:"mois",open:{},lim:400};
-  try{return Object.assign(d,JSON.parse(localStorage.getItem("pac-idf-dv")||"{}"),{q:"",lim:400})}catch(e){return d}})();
-const dvUiSave=()=>{try{localStorage.setItem("pac-idf-dv",JSON.stringify({v:DVUI.v,an:DVUI.an,mo:DVUI.mo,pr:DVUI.pr,cl:DVUI.cl,dp:DVUI.dp,ap:DVUI.ap,sort:DVUI.sort,grp:DVUI.grp,open:DVUI.open}))}catch(e){}};
+const DVUI=(()=>{const d={v:"tous",q:"",an:"",mo:"",pr:"",cl:"",dp:"",sort:"date-desc",grp:"mois",open:{},lim:400};
+  try{return Object.assign(d,JSON.parse(localStorage.getItem("pac-idf-dv")||"{}"),{q:"",ap:"",lim:400})}catch(e){return d}})();
+const dvUiSave=()=>{try{localStorage.setItem("pac-idf-dv",JSON.stringify({v:DVUI.v,an:DVUI.an,mo:DVUI.mo,pr:DVUI.pr,cl:DVUI.cl,dp:DVUI.dp,sort:DVUI.sort,grp:DVUI.grp,open:DVUI.open}))}catch(e){}};
 const MOIS=["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
 /* Typologie de client : famille, segment, typologie ou type du compte */
 function dvClOk(k,cl){if(!cl)return true;if(!k)return false;const [t,v]=[cl.slice(0,1),cl.slice(2)];
   return t==="f"?famOf(k)===v:t==="s"?k.segment===v:t==="y"?k.typologie===v:t==="t"?k.type===v:true}
 function dvBase(){const w=nh(DVUI.q).split(" ").filter(Boolean);
   return S.devis.filter(d=>{const dt=d.date||"";if(DVUI.an&&dt.slice(0,4)!==DVUI.an)return false;if(DVUI.mo&&dt.slice(5,7)!==DVUI.mo)return false;
-    if(DVUI.pr&&!d.lignes.some(l=>l.presta===DVUI.pr))return false;if(DVUI.ap&&(d.apporteur||"")!==DVUI.ap)return false;
+    if(DVUI.pr&&!d.lignes.some(l=>l.presta===DVUI.pr))return false;
     const k=kOf(d.compteId);if(DVUI.cl&&!dvClOk(k,DVUI.cl))return false;if(DVUI.dp&&(k?k.dept:"")!==DVUI.dp)return false;
     if(!w.length)return true;const ct=ctById(d.contactId),hay=nh([k?k.nom:"",k?k.ville:"",d.numero,(d.refs||[]).join(" "),d.apporteur,d.objet,d.notes,ct?ct.nom:"",d.lignes.map(l=>l.presta).join(" ")].join(" "));return w.every(t=>hay.includes(t))})}
 const DVSORT=[["date-desc","Date (récent d'abord)"],["date-asc","Date (ancien d'abord)"],["mt-desc","Montant (décroissant)"],["mt-asc","Montant (croissant)"],["compte","Compte (A → Z)"],["statut","Statut"]];
@@ -4034,7 +4034,7 @@ function dvGHead(G,lvl){const open=dvGOpen(G.key,G.def),X=G.items.map(d=>[d,dvSu
     '<span class="sub">'+pl(G.items.length,"devis","devis")+' · '+eur(tot)+' HT'+[n("attente")?n("attente")+" en attente":"",n("accepte")?n("accepte")+" accepté"+(n("accepte")>1?"s":"")+" ("+eur(acc)+")":"",n("refuse")?n("refuse")+" refusé"+(n("refuse")>1?"s":""):"",real?eur(real)+" réalisé":""].filter(Boolean).map(x=>" · "+x).join("")+'</span></button></td></tr>'}
 function dvRow(d){const k=kOf(d.compteId),s=dvSum(d),age=dvAge(d);
   return '<tr data-dvid="'+esc(d.id)+'" tabindex="0"><td class="nw"><span class="num">'+(d.date?fdate(d.date):"—")+'</span>'+(d.numero?'<div class="sub">N° '+esc(d.numero)+'</div>':'')+'</td>'+
-    '<td><div class="co"><b>'+esc(k?k.nom:"Compte introuvable")+'</b></div>'+(d.objet?'<div class="sub">'+esc(d.objet)+'</div>':'')+(d.apporteur&&!DVUI.ap?'<div class="sub">Apporteur : '+esc(d.apporteur)+'</div>':'')+'</td>'+
+    '<td><div class="co"><b>'+esc(k?k.nom:"Compte introuvable")+'</b></div>'+(d.objet?'<div class="sub">'+esc(d.objet)+'</div>':'')+'</td>'+
     '<td>'+dvTags(d,4)+'</td>'+
     '<td class="r"><span class="num dv-tt'+dvTotCls(s)+'">'+eur(s.tot)+'</span>'+(s.prel?'<div class="sub dv-pl">'+dvPrelTxt(s)+'</div>':'')+'</td>'+
     '<td>'+dvPill(d)+(d.statut==="attente"&&age!=null?'<div class="sub'+(dvRel(d)?' late':'')+'">depuis '+pl(age,"jour")+'</div>':d.dateRep&&d.statut!=="brouillon"?'<div class="sub">le '+fdate(d.dateRep)+'</div>':'')+'</td>'+
@@ -4045,7 +4045,6 @@ function renderDevis(){const el=$("#view-devis");if(!el)return;
   const prs=[...new Set(S.devis.flatMap(d=>d.lignes.map(l=>l.presta)).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
   const KS=[...new Set(S.devis.map(d=>d.compteId))].map(kOf).filter(Boolean),uq=f=>[...new Set(KS.map(f).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
   const fams=FAMILLES.filter(([c])=>KS.some(k=>famOf(k)===c)),segs=uq(k=>k.segment),typs=uq(k=>k.typologie),tys=TYPES.filter(t=>KS.some(k=>k.type===t)),dps=DEPTS.filter(([c])=>KS.some(k=>k.dept===c));
-  const aps=[...new Set(S.devis.map(d=>d.apporteur).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
   let h=pageH("Suivi de prospection","Suivi des devis",pl(S.devis.length,"devis","devis")+' suivis · prélèvements <span class="est">en rouge : estimatifs</span>, <span class="def">en bleu : définitifs</span>',
     '<button class="btn ghost" type="button" data-act="dvexport">Exporter / Excel</button><button class="btn" type="button" data-act="dvimp" title="Devis Word (.docx) ou PDF, un ou plusieurs, ou export Excel des pièces (devis, commandes, factures) · ou glissez les fichiers sur la page">'+SV+'<path d="M8 10.5V2.5M4.8 5.6 8 2.4l3.2 3.2M2.5 10v3.5h11V10"/></svg>'+'Importer (Word, PDF ou Excel)</button><button class="btn primary" type="button" data-dvnew="1">'+I_PLUS+'Nouveau devis</button>');
   if(!S.devis.length){el.innerHTML=h+'<div class="list-wrap"><div class="empty"><h3>Aucun devis suivi pour l\'instant</h3><p>Pour chaque devis : le compte, les prestations, leur prix, les prélèvements (nombre × prix unitaire, estimatif en rouge puis définitif en bleu), puis les prestations réalisées au fil des interventions.</p><p style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn" type="button" data-act="dvimp">Importer (devis Word ou PDF, export Excel)</button><button class="btn primary" type="button" data-dvnew="1">'+I_PLUS+'Créer un devis</button></p><p class="sub">Vous pouvez aussi glisser vos devis .docx ou .pdf, ou votre export Excel, sur cette page.</p></div></div>';return}
@@ -4058,14 +4057,13 @@ function renderDevis(){const el=$("#view-devis");if(!el)return;
   h+='<div class="chips">'+DVV.map(([k,l,f])=>{const n=B.filter(f).length;return (k==="tous"||n||DVUI.v===k)?'<button type="button" class="chip" data-dvv="'+k+'" aria-pressed="'+(DVUI.v===k)+'">'+esc(l)+'<span class="n num">'+n+'</span></button>':''}).join("")+'</div>';
   const sel=(id,lab,cur,opts,all)=>'<div class="field-s"><label for="'+id+'">'+lab+'</label><select id="'+id+'" data-dvf="'+id+'">'+'<option value="">'+(all||"Tous")+'</option>'+opts+'</select></div>';
   const op=(v,l,cur)=>'<option value="'+esc(v)+'"'+(cur===v?' selected':'')+'>'+esc(l)+'</option>';
-  const nf=["an","mo","pr","cl","dp","ap"].filter(k=>DVUI[k]).length+(DVUI.q?1:0);
+  const nf=["an","mo","pr","cl","dp"].filter(k=>DVUI[k]).length+(DVUI.q?1:0);
   h+='<div class="filters dv-f2"><div class="field-s dv-q"><label for="dvQ">Rechercher</label><input type="search" id="dvQ" value="'+esc(DVUI.q)+'" placeholder="Compte, n° de devis ou de facture, objet, prestation, contact…"></div>'+
     sel("dvAn","Année",DVUI.an,yrs.map(y=>op(y,y,DVUI.an)).join(""),"Toutes")+
     sel("dvMo","Mois",DVUI.mo,MOIS.map((m,i)=>op(pad(i+1),blCap(m),DVUI.mo)).join(""))+
     sel("dvPr","Prestation",DVUI.pr,prs.map(p=>op(p,p,DVUI.pr)).join(""),"Toutes")+
     sel("dvCl","Typologie client",DVUI.cl,(fams.length?'<optgroup label="Famille">'+fams.map(([c,n])=>op("f:"+c,n,DVUI.cl)).join("")+'</optgroup>':'')+(segs.length?'<optgroup label="Segment">'+segs.map(s=>op("s:"+s,s,DVUI.cl)).join("")+'</optgroup>':'')+(typs.length?'<optgroup label="Typologie">'+typs.map(s=>op("y:"+s,s,DVUI.cl)).join("")+'</optgroup>':'')+(tys.length?'<optgroup label="Type de compte">'+tys.map(s=>op("t:"+s,s,DVUI.cl)).join("")+'</optgroup>':''),"Toutes")+
     sel("dvDp","Département",DVUI.dp,dps.map(([c,n])=>op(c,c+" · "+n,DVUI.dp)).join(""))+
-    (aps.length?sel("dvAp","Apporteur",DVUI.ap,aps.map(a=>op(a,a,DVUI.ap)).join("")):'')+
     '<div class="field-s"><label for="dvSort">Trier par</label><select id="dvSort" data-dvf="dvSort">'+DVSORT.map(([v,l])=>op(v,l,DVUI.sort)).join("")+'</select></div>'+
     '<div class="field-s"><label for="dvGrp">Regrouper</label><select id="dvGrp" data-dvf="dvGrp">'+DVGRP.map(([v,l])=>op(v,l,DVUI.grp)).join("")+'</select></div>'+
     (nf?'<div class="field-s" style="justify-content:flex-end"><button class="btn ghost" type="button" data-act="dvfx">Effacer les filtres ('+nf+')</button></div>':'')+'</div>';
@@ -4086,7 +4084,7 @@ document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest
   if(d.act==="dvgall"){const tree=dvGroupTree(dvBase().filter((DVV.find(x=>x[0]===DVUI.v)||DVV[0])[2]))||[],o=d.o==="1";tree.forEach(G=>{DVUI.open[G.key]=o;if(o)(G.sub||[]).forEach(M=>{DVUI.open[M.key]=true})});dvUiSave();renderDevis();return}
   if(d.dvsort){const k=d.dvsort,s=DVUI.sort;DVUI.sort=k==="date"?(s==="date-desc"?"date-asc":"date-desc"):k==="mt"?(s==="mt-desc"?"mt-asc":"mt-desc"):k;dvUiSave();renderDevis();return}});
 document.addEventListener("change",e=>{const t=e.target;if(!t||!t.dataset||!t.dataset.dvf)return;
-  const m={dvAn:"an",dvMo:"mo",dvPr:"pr",dvCl:"cl",dvDp:"dp",dvAp:"ap",dvSort:"sort",dvGrp:"grp"}[t.dataset.dvf];if(!m)return;DVUI[m]=t.value;DVUI.lim=400;dvUiSave();renderDevis()});
+  const m={dvAn:"an",dvMo:"mo",dvPr:"pr",dvCl:"cl",dvDp:"dp",dvSort:"sort",dvGrp:"grp"}[t.dataset.dvf];if(!m)return;DVUI[m]=t.value;DVUI.lim=400;dvUiSave();renderDevis()});
 /* ---------- Bloc du tableau de bord et de la fiche compte ---------- */
 function dvWidget(){const y=String(new Date().getFullYear()),all=S.devis,KA=dvKpis(all),KY=dvKpis(all.filter(d=>(d.date||"").slice(0,4)===y));
   let h='<div class="panel"><div class="ph"><h2>Suivi de mes devis</h2><button type="button" class="more" data-dvnew="1">+ Devis</button><button type="button" class="more" data-dvv="tous">Tous les devis</button></div>';
@@ -4212,7 +4210,7 @@ document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest
   if(d.dvv){DVUI.v=d.dvv;DVUI.lim=200;dvUiSave();if(S.tab!=="devis")showTab("devis");else renderDevis();return}
   if(d.act==="dvmore"){DVUI.lim+=200;renderDevis();return}
   if(d.act==="dvexport"){exportMenu();return}
-  if(d.act==="dvfx"){DVUI.q="";DVUI.an="";DVUI.pr="";DVUI.mo="";DVUI.cl="";DVUI.dp="";DVUI.ap="";dvUiSave();renderDevis();return}
+  if(d.act==="dvfx"){DVUI.q="";DVUI.an="";DVUI.pr="";DVUI.mo="";DVUI.cl="";DVUI.dp="";dvUiSave();renderDevis();return}
   if(!DV||MODAL!=="devis")return;
   if(d.dvst){dvRead();DV.statut=d.dvst;if(d.dvst==="attente"||d.dvst==="brouillon")DV.dateRep="";else if(!DV.dateRep)DV.dateRep=todayISO();dvDraw();return}
   if(d.act==="dvcat"){dvRead();DVCAT=!DVCAT;dvDraw();return}
