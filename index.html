@@ -896,6 +896,9 @@ body.dv-drop #view-devis,body.dv-drop #modal{outline:3px dashed var(--accent);ou
 .dvx-a .grow{flex:1;min-width:0}.dvx-a .grow b{font-weight:600;display:block}.dvx-a .sub{font-size:12px}
 .dvx-s{display:flex;flex-direction:column;gap:12px;min-width:0}
 .dvx-r{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+
+/* V3.12 · avoirs signalés */
+.dv-av{display:inline-block;margin-left:6px;font:600 10.5px var(--f-label);letter-spacing:.04em;text-transform:uppercase;border-radius:4px;padding:1px 6px;background:var(--bad-soft);color:var(--bad);white-space:nowrap;vertical-align:middle}
 </style>
 </head>
 <body>
@@ -915,7 +918,7 @@ body.dv-drop #view-devis,body.dv-drop #modal{outline:3px dashed var(--accent);ou
   <div class="side-f">
     <span class="sync" id="sync" data-s="wait"><i></i><span id="syncTxt">Chargement…</span></span>
     <button class="btn" type="button" data-act="export" title="Exporter, sauvegarder, restaurer"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11"/></svg><span>Exporter / sauvegarder</span></button>
-    <span class="ver">V3.11 · CSC</span>
+    <span class="ver">V3.12 · CSC</span>
   </div>
 </aside>
 
@@ -1006,7 +1009,7 @@ function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTi
 const nh=x=>String(x==null?"":x).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
 const now=()=>new Date().toISOString();
 const S={open:new Set(),mode:"wait",cibles:[],comptes:[],contacts:[],actions:[],plans:[],pac:[],mailing:[],devis:[],settings:{objectif:8},writable:true,view:"actives",tab:"tdb",kid:"",db:null,downloads:null,ver:0};
-const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.11";
+const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.12";
 let STORE="ls"; /* "idb" dès que les données sont dans la base du navigateur */
 const IN_FRAME=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 const TYPE_RANK={"Client existant":3,"Prescripteur":2,"Prospect":1};
@@ -2874,10 +2877,10 @@ async function buildXlsx(cibles,settings,pac,mailing){mailing=mailing||[];settin
   /* ---- Devis (une ligne par prestation ; prélèvements en rouge si estimatifs, en bleu si définitifs) ---- */
   const dvs=(S.devis||[]).slice().sort(dvSortD);
   if(dvs.length){
-    const DC=[{h:"Date",w:12,fmt:DFMT,al:"center"},{h:"N° devis",w:14},{h:"Compte",w:30,bold:true},{h:"Contact",w:22},{h:"Objet / site",w:30,wrap:true},{h:"Statut",w:12,al:"center"},{h:"Réponse le",w:12,fmt:DFMT,al:"center"},{h:"Prestation",w:40,wrap:true},{h:"Prix HT",w:12,fmt:EUR},{h:"Nb prélèvements",w:12,al:"center"},{h:"PU prélèvement",w:13,fmt:EUR},{h:"Montant prélèvements",w:14,fmt:EUR},{h:"Prélèvements",w:12,al:"center"},{h:"Montant ligne HT",w:14,fmt:EUR},{h:"Réalisée",w:9,al:"center"},{h:"Réalisée le",w:12,fmt:DFMT,al:"center"},{h:"Notes",w:40,wrap:true}];
+    const DC=[{h:"Date",w:12,fmt:DFMT,al:"center"},{h:"N° devis",w:14},{h:"Compte",w:30,bold:true},{h:"Contact",w:22},{h:"Objet / site",w:30,wrap:true},{h:"Statut",w:12,al:"center"},{h:"Réponse le",w:12,fmt:DFMT,al:"center"},{h:"Prestation",w:40,wrap:true},{h:"Prix HT",w:12,fmt:EUR},{h:"Nb prélèvements",w:12,al:"center"},{h:"PU prélèvement",w:13,fmt:EUR},{h:"Montant prélèvements",w:14,fmt:EUR},{h:"Prélèvements",w:12,al:"center"},{h:"Montant ligne HT",w:14,fmt:EUR},{h:"Réalisée",w:9,al:"center"},{h:"Réalisée le",w:12,fmt:DFMT,al:"center"},{h:"Avoir",w:12,fmt:EUR},{h:"Notes",w:40,wrap:true}];
     const rows=[],tone=[];
     dvs.forEach(d=>{const k=kOf(d.compteId)||{},ct=ctById(d.contactId);d.lignes.forEach(l=>{const hp=lHasP(l);
-      rows.push([toDate(d.date),d.numero,k.nom||"",ct?ct.nom:"",d.objet,DVL[d.statut],toDate(d.dateRep),l.presta,nb0(l.prix)||null,hp?nb0(l.nb):null,hp?nb0(l.pu):null,hp?lPrel(l):null,hp?(l.def?"Définitif":"Estimatif"):"",lTot(l),l.faite?"Oui":"Non",toDate(l.faiteLe),d.notes]);
+      rows.push([toDate(d.date),d.numero,k.nom||"",ct?ct.nom:"",d.objet,DVL[d.statut],toDate(d.dateRep),l.presta,nb0(l.prix)||null,hp?nb0(l.nb):null,hp?nb0(l.pu):null,hp?lPrel(l):null,hp?(l.def?"Définitif":"Estimatif"):"",lTot(l),l.faite?"Oui":"Non",toDate(l.faiteLe),d.avoir?d.avoir.m:null,d.notes]);
       tone.push(hp?(l.def?"FF1F5FBF":"FFC62828"):null)})});
     const wd=xlTable(wb,"Devis","Devis","FFC62828",DC,rows,3);
     tone.forEach((c,i)=>{const r=wd.getRow(i+2);if(c)[10,11,12,13].forEach(n=>{r.getCell(n).font={name:"Calibri",size:10,bold:true,color:{argb:c}}});if(rows[i][14]==="Oui")r.getCell(15).fill={type:"pattern",pattern:"solid",fgColor:{argb:"FFE2F0E6"}}})}
@@ -3951,7 +3954,8 @@ const dvOf=kid=>S.devis.filter(d=>d.compteId===kid).sort(dvSortD);
 const dvAge=d=>d.date?Math.max(0,Math.round((Date.parse(todayISO())-Date.parse(d.date))/864e5)):null;
 const dvRel=d=>d.statut==="attente"&&dvAge(d)!=null&&dvAge(d)>=DV_REL;
 const dvToDo=d=>d.statut==="accepte"&&dvSum(d).nf<d.lignes.length;
-const dvPill=d=>'<span class="pill dvs-'+d.statut+'">'+esc(DVL[d.statut])+'</span>';
+const dvAvTag=d=>d.avoir?'<span class="dv-av" title="'+esc("Avoir émis"+(d.avoir.le?" le "+fdate(d.avoir.le):"")+" : "+eur(d.avoir.m)+(d.avoir.pieces&&d.avoir.pieces.length?" ("+d.avoir.pieces.join(", ")+")":"")+". Le devis reste compté comme accepté.")+'">Avoir '+eur(d.avoir.m)+'</span>':'';
+const dvPill=d=>'<span class="pill dvs-'+d.statut+'">'+esc(DVL[d.statut])+'</span>'+dvAvTag(d);
 const dvTotCls=s=>s.estN?" est":s.nbD?" def":"";
 const dvShort=p=>String(p||"Prestation").replace(/\s*\([^()]*\)\s*$/,"");
 const I_DV=SV+'<path d="M4 1.8h6l2.5 2.5v9.9H4z"/><path d="M10 1.8v2.5h2.5"/><path d="M10.4 7.4a2.2 2.2 0 1 0 0 3.2M6.4 8.4h3.1M6.4 9.7h3.1"/></svg>';
@@ -3971,7 +3975,7 @@ function dvKpis(B){const X=B.map(d=>[d,dvSum(d)]),sum=(f,g)=>X.reduce((a,[d,s])=
 
 /* ---------- Page « Suivi des devis » ---------- */
 const DVV=[["tous","Tous",()=>true],["brouillon","À envoyer",d=>d.statut==="brouillon"],["attente","En attente",d=>d.statut==="attente"],["relance","À relancer",dvRel],
-  ["arealiser","Acceptés à réaliser",dvToDo],["realises","Réalisés",d=>d.statut==="accepte"&&d.lignes.length>0&&!dvToDo(d)],["perdus","Refusés / sans suite",d=>!dvLive(d)],["estim","Prélèvements estimatifs",d=>dvLive(d)&&d.lignes.some(lEst)]];
+  ["arealiser","Acceptés à réaliser",dvToDo],["realises","Réalisés",d=>d.statut==="accepte"&&d.lignes.length>0&&!dvToDo(d)],["perdus","Refusés / sans suite",d=>!dvLive(d)],["estim","Prélèvements estimatifs",d=>dvLive(d)&&d.lignes.some(lEst)],["avoir","Avec avoir",d=>!!d.avoir]];
 const DVUI=(()=>{const d={v:"tous",q:"",an:"",pr:"",lim:200};try{return Object.assign(d,JSON.parse(localStorage.getItem("pac-idf-dv")||"{}"),{q:"",lim:200})}catch(e){return d}})();
 const dvUiSave=()=>{try{localStorage.setItem("pac-idf-dv",JSON.stringify({v:DVUI.v,an:DVUI.an,pr:DVUI.pr}))}catch(e){}};
 function dvBase(){const w=nh(DVUI.q).split(" ").filter(Boolean);
@@ -4072,7 +4076,7 @@ function dvDraw(first){const d=DV,k=kOf(d.compteId),cts=k?ctOf(k.id):[];
   const custom=[...new Set(S.devis.flatMap(x=>x.lignes.map(l=>l.presta)).filter(p=>p&&!DV_ALL.includes(p)))];
   const rep=d.statut==="accepte"||d.statut==="refuse"||d.statut==="sansuite";
   showModal(mHead(dvNew?"Nouveau devis":"Devis",(d.numero?"N° "+esc(d.numero)+" · ":"")+esc(d._k||"Compte à renseigner"))+
-  '<div class="db"><form id="dvForm" class="dv-form" onsubmit="return false">'+dvImpHTML()+
+  '<div class="db"><form id="dvForm" class="dv-form" onsubmit="return false">'+dvImpHTML()+(d.avoir?'<div class="notice warn"><b>Avoir émis'+(d.avoir.le?' le '+fdate(d.avoir.le):'')+' : '+eur(d.avoir.m)+'</b>'+(d.avoir.pieces&&d.avoir.pieces.length?' ('+esc(d.avoir.pieces.join(", "))+')':'')+'. Le devis a été accepté : il reste compté comme gagné, au montant du devis.</div>':'')+
    (dvNew&&!d._imp?'<div class="dv-impb"><button class="btn" type="button" data-act="dvimp">'+SV+'<path d="M8 10.5V2.5M4.8 5.6 8 2.4l3.2 3.2M2.5 10v3.5h11V10"/></svg>'+'Remplir depuis le devis Word (.docx)</button><span class="sub">Compte, n°, date, objet, prestations, prix et analyses sont repris du fichier · ou glissez-le ici</span></div>':'')+
    '<div class="dv-head">'+dvKcHTML(d,k)+
     '<div class="f"><label class="lbl" for="dv-ct">Contact</label><select id="dv-ct"><option value="">—</option>'+cts.map(c=>'<option value="'+esc(c.id)+'"'+(c.id===d.contactId?' selected':'')+'>'+esc(c.nom||c.mail||"Contact")+(c.fonction?' · '+esc(c.fonction):'')+'</option>').join("")+'</select></div>'+
@@ -4371,11 +4375,16 @@ async function dvxRead(f){await loadExcel();const wb=new ExcelJS.Workbook();awai
   throw new Error("colonnes")}
 /* Regroupement par affaire : les factures et avoirs rejoignent leur commande (ou devis) d'origine */
 function dvxGroups(rows){const G=new Map();
-  rows.forEach(x=>{const inv=/^(FC|FVI|FPF|BLI)/i.test(x.piece)&&x.cmd,key=inv?x.cmd:x.piece;let g=G.get(key);if(!g)G.set(key,g={key,rows:[]});g.rows.push(x)});
+  /* même commande d'origine ET même client : une facture saisie par erreur sur la commande d'un autre client reste à part */
+  rows.forEach(x=>{const inv=/^(FC|FVI|FPF|BLI)/i.test(x.piece)&&x.cmd,key=inv?x.cmd:x.piece,gk=key+"|"+(inv?nh(x.tiers):"");let g=G.get(gk);if(!g)G.set(gk,g={key,rows:[]});g.rows.push(x)});
   return [...G.values()].map(g=>{const R=g.rows,S0=R.map(x=>Object.assign(dvxStage(x.etape,x.piece),{x})),top=S0.reduce((a,b)=>b.r>a.r?b:a),inv=R.filter(x=>/^(FC|FVI)/i.test(x.piece));
     const base=R.find(x=>x.piece===g.key)||R.slice().sort((a,b)=>(a.date||"").localeCompare(b.date||""))[0],last=R.slice().sort((a,b)=>(b.date||"").localeCompare(a.date||""))[0];
-    const amount=inv.length?Math.round(inv.reduce((s,x)=>s+x.total,0)*100)/100:(base.total||top.x.total);
-    return {key:g.key,rows:R,pieces:R.map(x=>x.piece),st:top.st,done:!!top.done,fact:!!top.fact,cancel:inv.length>0&&amount<=0,amount,tiers:base.tiers||last.tiers,
+    const pos=inv.filter(x=>x.total>0).map(x=>({x,v:x.total,used:false})),corr=[],real=[];
+    inv.filter(x=>x.total<0).forEach(a=>{const v=-a.total,same=pos.filter(p=>!p.used&&Math.abs(p.v-v)<.01);if(same.length>=2){same[0].used=true;corr.push(a.piece)}else real.push(a)});
+    const gross=pos.filter(p=>!p.used).reduce((s,p)=>s+p.v,0),avM=real.reduce((s,a)=>s-a.total,0);
+    const amount=Math.round((inv.length?(gross>0?gross:avM):(base.total||top.x.total))*100)/100;
+    const avoir=real.length?{m:Math.round(avM*100)/100,pieces:real.map(a=>a.piece),le:real.map(a=>a.date).sort().pop()||""}:null;
+    return {key:g.key,rows:R,pieces:R.map(x=>x.piece),st:top.st,done:!!top.done,fact:!!top.fact,cancel:false,avoir,corr,amount,tiers:base.tiers||last.tiers,
       date:(top.st==="accepte"?(R.map(x=>x.dcmd).find(Boolean)||base.date):base.date)||last.date,dateRep:top.st==="accepte"?(R.map(x=>x.dcmd).find(Boolean)||top.x.date):top.st==="refuse"?top.x.date:"",faiteLe:top.done?last.date:"",
       app:(last.app||base.app),apps:[...new Set(R.map(x=>x.app).filter(Boolean))],agence:base.agence||last.agence,tech:R.map(x=>x.tech).find(Boolean)||"",contact:base.contact||last.contact,frais:base.frais,
       objet:dvxObjet(base),cp:base.cp,ville:base.ville,factures:inv.map(x=>x.piece)}})}
@@ -4387,13 +4396,13 @@ const DVX_LEGAL=/\b(sa|sas|sasu|sarl|sci|eurl|snc|scp|gie|scs)\b/g;
 const dvxKey=n=>nh(n).replace(DVX_LEGAL," ").replace(/\s+/g," ").trim();
 function dvxIndex(){const m=new Map();S.comptes.forEach(k=>{const a=dvxKey(k.nom);if(a&&!m.has(a))m.set(a,k)});return m}
 /* Plan d'intégration (rien n'est modifié avant « Intégrer ») */
-function dvxPlan(groups,apps){const sel=new Set(apps),KI=dvxIndex(),plan={add:[],upd:[],link:[],same:0,skip:0,newK:new Set(),G:[]};
+function dvxPlan(groups,apps){const sel=new Set(apps),KI=dvxIndex(),plan={add:[],upd:[],link:[],same:0,av:0,newK:new Set(),G:[]};
   const byNum=new Map();S.devis.forEach(d=>{[d.numero].concat(d.refs||[]).filter(Boolean).forEach(n=>byNum.set(nh(n),d))});
   const used=new Set();
   groups.filter(g=>g.apps.some(a=>sel.has(a))).forEach(g=>{plan.G.push(g);
     const ex=[g.key].concat(g.pieces).map(n=>byNum.get(nh(n))).find(Boolean);
-    if(ex){used.add(ex.id);const c=dvxMerge(clone(ex),g);if(JSON.stringify(c)!==JSON.stringify(dvnorm(clone(ex))))plan.upd.push({d:ex,g});else plan.same++;return}
-    if(g.cancel){plan.skip++;return}
+    if(ex){if(g.avoir)plan.av++;used.add(ex.id);const c=dvxMerge(clone(ex),g);if(JSON.stringify(c)!==JSON.stringify(dvnorm(clone(ex))))plan.upd.push({d:ex,g});else plan.same++;return}
+    if(g.avoir)plan.av++;
     const k=KI.get(dvxKey(g.tiers));
     if(g.st==="accepte"&&k){/* devis en attente du même client et du même montant : c'est lui qui a été commandé */
       const cand=S.devis.filter(d=>!used.has(d.id)&&d.compteId===k.id&&(d.statut==="attente"||d.statut==="brouillon")&&Math.abs(dvSum(d).tot-g.amount)<=Math.max(1,g.amount*.005)&&(!d.date||!g.date||d.date<=g.date));
@@ -4401,18 +4410,19 @@ function dvxPlan(groups,apps){const sel=new Set(apps),KI=dvxIndex(),plan={add:[]
     if(!k)plan.newK.add(dvxKey(g.tiers));plan.add.push({g,k})});
   return plan}
 function dvxMerge(d,g){d=dvnorm(d);
-  if(g.cancel){if(d.statut!=="sansuite"){d.statut="sansuite";d.dateRep=d.dateRep||g.dateRep||todayISO()}}
-  else if(g.st==="accepte"){if(d.statut!=="accepte"){d.statut="accepte";d.dateRep=g.dateRep||d.dateRep||todayISO()}}
+  if(g.st==="accepte"){if(d.statut!=="accepte"){d.statut="accepte";d.dateRep=g.dateRep||d.dateRep||todayISO()}}
   else if(g.st==="refuse"){if(d.statut==="attente"||d.statut==="brouillon"){d.statut="refuse";d.dateRep=g.dateRep||d.dateRep}}
   if(g.done&&!g.cancel)d.lignes.forEach(l=>{if(!l.faite){l.faite=true;l.faiteLe=g.faiteLe||todayISO()}});
-  if(d.lignes.length===1&&d.lignes[0].gx&&!g.cancel)d.lignes[0].prix=String(g.amount);
+  if(d.lignes.length===1&&d.lignes[0].gx)d.lignes[0].prix=String(g.amount);
+  if(g.avoir)d.avoir=g.avoir;else if(d.avoir&&d.src==="excel")delete d.avoir;
+  if(g.corr&&g.corr.length&&!String(d.notes).includes(g.corr[0]))d.notes=[d.notes,"Facture refaite (avoir "+g.corr.join(", ")+" puis nouvelle facture)"].filter(Boolean).join(" · ");
   d.refs=[...new Set((d.refs||[]).concat(g.pieces,[g.key]).filter(n=>n&&nh(n)!==nh(d.numero)))];
   const f=g.factures.filter(n=>!String(d.notes).includes(n));if(f.length)d.notes=[d.notes,"Factures : "+f.join(", ")].filter(Boolean).join(" · ");
   if(!d.apporteur&&g.app)d.apporteur=g.app;return d}
 function dvxNew(g,k){const won=g.st==="accepte";
-  const d=Object.assign(dvblank(),{id:uid(),creeLe:now(),compteId:k.id,numero:g.key,date:g.date||todayISO(),objet:g.objet,statut:g.cancel?"sansuite":g.st,dateRep:g.st==="attente"?"":(g.dateRep||""),src:"excel",apporteur:g.app,
-    refs:g.pieces.filter(n=>n!==g.key),lignes:[Object.assign(dvLblank(""),{presta:"Montant global du devis (import Excel)",prix:String(g.amount),pOn:false,gx:true,faite:!!(g.done&&won),faiteLe:g.done&&won?g.faiteLe:""})]});
-  d.notes=["Import Excel","apporteur "+g.app,g.agence?"agence "+g.agence:"",g.tech?"technicien "+g.tech:"",g.frais?"dont frais de dossier "+eur(g.frais):"",g.factures.length?"Factures : "+g.factures.join(", "):""].filter(Boolean).join(" · ");
+  const d=Object.assign(dvblank(),{id:uid(),creeLe:now(),compteId:k.id,numero:g.key,date:g.date||todayISO(),objet:g.objet,statut:g.st,dateRep:g.st==="attente"?"":(g.dateRep||""),src:"excel",apporteur:g.app,
+    refs:g.pieces.filter(n=>n!==g.key),avoir:g.avoir||undefined,lignes:[Object.assign(dvLblank(""),{presta:"Montant global du devis (import Excel)",prix:String(g.amount),pOn:false,gx:true,faite:!!(g.done&&won),faiteLe:g.done&&won?g.faiteLe:""})]});
+  d.notes=["Import Excel","apporteur "+g.app,g.agence?"agence "+g.agence:"",g.tech?"technicien "+g.tech:"",g.frais?"dont frais de dossier "+eur(g.frais):"",g.factures.length?"Factures : "+g.factures.join(", "):"",g.corr&&g.corr.length?"Facture refaite (avoir "+g.corr.join(", ")+" puis nouvelle facture)":""].filter(Boolean).join(" · ");
   const c=dvxContact(g.contact);if(c){const ct=ensureContact(k.id,c);d.contactId=ct.id}return d}
 function dvxContact(s){s=String(s||"").trim();if(!s)return null;const m=s.match(/[^\s<>()]+@[^\s<>()]+/),mail=m?m[0]:"",nom=s.replace(mail,"").replace(/[<>()]/g,"").replace(/\s+/g," ").trim();return nom||mail?{nom,mail}:null}
 /* Fenêtre d'intégration */
@@ -4430,14 +4440,14 @@ function dvxDraw(){const X=DVX,L=[...X.cnt.entries()].sort((a,b)=>(X.sel.has(b[0
    '<div class="dvx-s" id="dvxSum">'+dvxSumHTML()+'</div></div></div>'+
   '<div class="df"><span class="grow"></span><button class="btn" type="button" data-act="mclose">Annuler</button><button class="btn primary" type="button" data-act="dvxgo"'+(X.sel.size?'':' disabled')+'>Intégrer</button></div>',"dvx");modalBig()}
 function dvxSumHTML(){const X=DVX;if(!X.sel.size)return '<div class="empty" style="padding:30px 10px"><h3>Aucun apporteur coché</h3><p>Cochez vos apporteurs d\'affaires dans la liste.</p></div>';
-  const P=dvxPlan(X.groups,[...X.sel]);X.plan=P;const G=P.G,by=s=>G.filter(g=>!g.cancel&&g.st===s),sum=a=>eur(a.reduce((x,g)=>x+g.amount,0));
+  const P=dvxPlan(X.groups,[...X.sel]);X.plan=P;const G=P.G,by=s=>G.filter(g=>g.st===s),sum=a=>eur(a.reduce((x,g)=>x+g.amount,0));
   const won=by("accepte"),att=by("attente"),ref=by("refuse"),fact=won.filter(g=>g.fact);
   const t=(l,v,d,c)=>'<div class="kpi"><span class="lbl">'+l+'</span><span class="v'+(c?' '+c:'')+'"><span class="num">'+v+'</span></span><span class="d">'+d+'</span></div>';
   return '<div class="dv-k" style="grid-template-columns:repeat(3,minmax(0,1fr))">'+t("En attente",att.length,sum(att))+t("Gagnés",won.length,sum(won)+(fact.length?" · "+fact.length+" facturé"+(fact.length>1?"s":""):""),"")+t("Refusés",ref.length,sum(ref))+'</div>'+
    '<ul class="dvx-r"><li><b>'+pl(P.add.length,"devis nouveau","devis nouveaux")+'</b> à créer'+(P.newK.size?' (dont '+pl(P.newK.size,"compte")+' à créer)':'')+'</li>'+
    '<li><b>'+pl(P.upd.length,"devis déjà suivi","devis déjà suivis")+'</b> mis à jour (statut, réalisation, factures)'+(P.same?' · '+P.same+' déjà à jour':'')+'</li>'+
    (P.link.length?'<li><b>'+pl(P.link.length,"devis en attente","devis en attente")+'</b> passé'+(P.link.length>1?'s':'')+' en accepté : la commande du même client et du même montant y est rattachée</li>':'')+
-   (P.skip?'<li>'+pl(P.skip,"affaire annulée","affaires annulées")+' par avoir, ignorée'+(P.skip>1?'s':'')+'</li>':'')+'</ul>'+
+   (P.av?'<li><b>'+pl(P.av,"affaire avec avoir","affaires avec avoir")+'</b> : gardée'+(P.av>1?'s':'')+' en gagné au montant du devis, et signalée'+(P.av>1?'s':'')+' « Avoir »</li>':'')+'</ul>'+
    '<p class="hint" style="margin:0">Sans doublon : un n° de devis, de commande ou de facture déjà suivi met à jour le devis existant. Le détail des prestations n\'est pas dans l\'export : chaque devis porte son montant global, et vous pouvez ensuite importer le devis Word pour le détailler.</p>'}
 function dvxGo(){const X=DVX,P=dvxPlan(X.groups,[...X.sel]);S.settings.dvApporteurs=[...X.sel];
   let nk=0;const KI=dvxIndex();
