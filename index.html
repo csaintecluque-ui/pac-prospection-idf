@@ -979,7 +979,7 @@ body.dv-drop #view-devis,body.dv-drop #modal{outline:3px dashed var(--accent);ou
   <div class="side-f">
     <span class="sync" id="sync" data-s="wait"><i></i><span id="syncTxt">Chargement…</span></span>
     <button class="btn" type="button" data-act="export" title="Exporter, sauvegarder, restaurer"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11"/></svg><span>Exporter / sauvegarder</span></button>
-    <span class="ver">V3.19 · CSC</span>
+    <span class="ver">V3.20 · CSC</span>
   </div>
 </aside>
 
@@ -1070,7 +1070,7 @@ function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTi
 const nh=x=>String(x==null?"":x).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
 const now=()=>new Date().toISOString();
 const S={open:new Set(),mode:"wait",cibles:[],comptes:[],contacts:[],actions:[],plans:[],pac:[],mailing:[],devis:[],settings:{objectif:8},writable:true,view:"actives",tab:"tdb",kid:"",db:null,downloads:null,ver:0};
-const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.19";
+const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.20";
 let STORE="ls"; /* "idb" dès que les données sont dans la base du navigateur */
 const IN_FRAME=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 const TYPE_RANK={"Client existant":3,"Prescripteur":2,"Prospect":1};
@@ -4061,14 +4061,14 @@ function dvBase(){const w=nh(DVUI.q).split(" ").filter(Boolean);
     if(U.pr.length&&!d.lignes.some(l=>U.pr.includes(l.presta)))return false;
     const k=kOf(d.compteId);if(U.cl.length&&!U.cl.some(c=>dvClOk(k,c)))return false;if(U.dp.length&&!U.dp.includes(k?k.dept:""))return false;
     if(!w.length)return true;const ct=ctById(d.contactId),hay=nh([k?k.nom:"",k?k.ville:"",d.numero,(d.refs||[]).join(" "),d.apporteur,d.objet,d.notes,ct?ct.nom:"",d.lignes.map(l=>l.presta).join(" ")].join(" "));return w.every(t=>hay.includes(t))})}
-const DVSORT=[["date","Date du devis","desc"],["mt","Montant HT","desc"],["compte","Compte","asc"],["statut","Statut","asc"],["real","Réalisation","desc"],["num","N° de devis","asc"]];
+const DVSORT=[["date","Date du devis","desc"],["mt","Montant HT","desc"],["compte","Compte","asc"],["statut","Statut","asc"],["real","Réalisation","desc"],["num","N° de devis","asc"],["presta","Prestation","asc"],["nb","Nombre de dossiers (vue par compte)","desc"],["taux","Transformation (vue par compte)","desc"]];
 const DVSL=Object.fromEntries(DVSORT.map(x=>[x[0],x[1]]));
 /* Liste affichée : vues cochées (au moins une), puis tri */
 function dvList(B){B=B||dvBase();const V=DVUI.vs.map(k=>DVV.find(x=>x[0]===k)).filter(Boolean);return (V.length?B.filter(d=>V.some(v=>v[2](d))):B).sort(dvSorter())}
 const DVGRP=[["mois","Année puis mois"],["annee","Année"],["compte","Compte"],["statut","Statut"],["aucun","Sans regroupement"]];
 function dvSorter(){const kn=d=>((kOf(d.compteId)||{}).nom||""),si=Object.fromEntries(DVST.map((x,i)=>[x[0],i])),C=new Map(),sm=d=>{let v=C.get(d.id);if(!v)C.set(d.id,v=dvSum(d));return v};
   const cmp={date:(a,b)=>(a.date||"").localeCompare(b.date||""),mt:(a,b)=>sm(a).tot-sm(b).tot,compte:(a,b)=>kn(a).localeCompare(kn(b),"fr"),statut:(a,b)=>si[a.statut]-si[b.statut],
-    real:(a,b)=>{const x=sm(a),y=sm(b);return (x.n?x.nf/x.n:0)-(y.n?y.nf/y.n:0)||x.real-y.real},num:(a,b)=>String(a.numero||"").localeCompare(String(b.numero||""),"fr",{numeric:true})};
+    real:(a,b)=>{const x=sm(a),y=sm(b);return (x.n?x.nf/x.n:0)-(y.n?y.nf/y.n:0)||x.real-y.real},num:(a,b)=>String(a.numero||"").localeCompare(String(b.numero||""),"fr",{numeric:true}),presta:(a,b)=>String((a.lignes[0]||{}).presta||"").localeCompare(String((b.lignes[0]||{}).presta||""),"fr")};
   const L=DVUI.sorts.filter(x=>cmp[x.k]);
   return (a,b)=>{for(const x of L){const r=cmp[x.k](a,b);if(r)return x.dir==="asc"?r:-r}return dvSortD(a,b)}}
 /* Groupes repliables : ouverts par défaut pour l'année en cours (et ses mois), repliés sinon */
@@ -4083,10 +4083,11 @@ function dvGroupTree(L){const g=DVUI.grp,cy=String(new Date().getFullYear()),asc
         sub=[...bm.keys()].sort((a,b)=>asc?a.localeCompare(b):b.localeCompare(a)).map(m=>mk("m"+y+"-"+m,m==="00"?"Sans date":blCap(MOIS[+m-1])+" "+y,bm.get(m),true))}
       return mk("y"+y,y,items,y===cy,sub)})}
   if(g==="compte"){const by=new Map();L.forEach(d=>{const id=kOf(d.compteId)?d.compteId:"?";if(!by.has(id))by.set(id,[]);by.get(id).push(d)});
-    const G=[...by.entries()].map(([id,items])=>{const k=kOf(id),g=mk("c"+id,k?k.nom:"Compte introuvable",items,false);g.k=k;g.tot=items.reduce((a,d)=>a+dvSum(d).tot,0);g.last=items.map(d=>d.date||"").sort().pop()||"";return g});
-    /* Ordre des comptes : selon le premier critère de tri (montant global par défaut) */
-    const f=DVUI.sorts[0]||{k:"mt",dir:"desc"},sg=f.dir==="asc"?1:-1;
-    return G.sort((a,b)=>(f.k==="compte"?sg*a.label.localeCompare(b.label,"fr"):f.k==="date"?sg*a.last.localeCompare(b.last):f.k==="statut"||f.k==="num"?a.label.localeCompare(b.label,"fr"):sg*(a.tot-b.tot))||a.label.localeCompare(b.label,"fr"))}
+    const G=[...by.entries()].map(([id,items])=>{const k=kOf(id),g=mk("c"+id,k?k.nom:"Compte introuvable",items,false);g.k=k;const X=items.map(d=>[d,dvSum(d)]),acc=X.filter(([d])=>d.statut==="accepte"),dec=X.filter(([d])=>d.statut==="accepte"||!dvLive(d));
+      g.tot=X.reduce((a,[,s])=>a+s.tot,0);g.last=items.map(d=>d.date||"").sort().pop()||"";g.n=items.length;g.real=X.reduce((a,[,s])=>a+s.real,0);g.taux=dec.length?acc.length/dec.length:-1;g.st=acc.length?0:items.some(d=>d.statut==="attente")?1:2;return g});
+    /* Ordre des comptes : critères de tri cochés, dans l'ordre (montant global par défaut) */
+    const gc={compte:(x,y)=>x.label.localeCompare(y.label,"fr"),num:(x,y)=>x.label.localeCompare(y.label,"fr"),date:(x,y)=>x.last.localeCompare(y.last),mt:(x,y)=>x.tot-y.tot,nb:(x,y)=>x.n-y.n,taux:(x,y)=>x.taux-y.taux,real:(x,y)=>x.real-y.real,statut:(x,y)=>x.st-y.st};
+    const C=DVUI.sorts.filter(x=>gc[x.k]);return G.sort((x,y)=>{for(const c of C){const r=gc[c.k](x,y);if(r)return c.dir==="asc"?r:-r}return y.tot-x.tot||x.label.localeCompare(y.label,"fr")})}
   if(g==="statut")return DVST.map(([s,l])=>mk("s"+s,l,L.filter(d=>d.statut===s),s==="attente"||s==="accepte")).filter(x=>x.items.length);
   return null}
 function dvCHead(G){const open=dvGOpen(G.key,G.def),k=G.k,X=G.items.map(d=>[d,dvSum(d)]),cnt=s=>X.filter(([d])=>d.statut===s),sm=a=>a.reduce((x,[,s])=>x+s.tot,0);
@@ -4143,7 +4144,7 @@ function renderDevis(){const el=$("#view-devis");if(!el)return;
     (nf?'<div class="field-s" style="justify-content:flex-end"><button class="btn ghost" type="button" data-act="dvfx">Effacer les filtres ('+nf+')</button></div>':'')+'</div>';
   if(!L.length){el.innerHTML=h+'<div class="list-wrap"><div class="empty"><h3>Aucun devis dans cette vue</h3><p>Changez de vue ou retirez un filtre.</p></div></div>';return}
   const T=L.reduce((a,d)=>a+dvSum(d).tot,0),tree=dvGroupTree(L);
-  const th=(k,l,cls)=>{const i=DVUI.sorts.findIndex(x=>x.k===k),x=DVUI.sorts[i];return '<th'+(cls?' class="'+cls+'"':'')+'><button type="button" class="dv-th'+(x?' on':'')+'" data-dvsort="'+k+'" title="Trier · Maj+clic : ajouter ce critère">'+l+(x?' <i>'+(DVUI.sorts.length>1?(i+1):'')+(x.dir==="asc"?"↑":"↓")+'</i>':'')+'</button></th>'};
+  const th=(k,l,cls,cs)=>{const i=DVUI.sorts.findIndex(x=>x.k===k),x=DVUI.sorts[i];return '<th'+(cls?' class="'+cls+'"':'')+(cs?' colspan="'+cs+'"':'')+'><button type="button" class="dv-th'+(x?' on':'')+'" data-dvsort="'+k+'" title="Trier · Maj+clic : ajouter ce critère">'+l+(x?' <i>'+(DVUI.sorts.length>1?(i+1):'')+(x.dir==="asc"?"↑":"↓")+'</i>':'')+'</button></th>'};
   let body="",shown=0;const lim=DVUI.lim;
   const rows=list=>{let s="";for(const d of list){if(shown>=lim)break;s+=dvRow(d,DVUI.grp==="compte");shown++}return s};
   if(!tree)body=rows(L);
@@ -4153,7 +4154,7 @@ function renderDevis(){const el=$("#view-devis");if(!el)return;
   h+='<div class="dv-gt"><div class="seg" role="group" aria-label="Affichage"><button type="button" data-dvaff="mois" aria-pressed="'+(aff==="mois")+'">Par mois</button><button type="button" data-dvaff="compte" aria-pressed="'+(aff==="compte")+'">Par compte</button><button type="button" data-dvaff="liste" aria-pressed="'+(aff==="liste")+'">Liste</button></div>'+
     (DVUI.grp==="compte"?'<span class="sub">'+pl(tree.length,"compte")+' · '+pl(L.length,"dossier")+' · '+eur(T)+' HT · ouvrez un compte pour voir ses devis</span>':'')+'<span class="grow"></span>'+
     (tree?'<button type="button" class="more" data-act="dvgall" data-o="1">Tout déplier</button><button type="button" class="more" data-act="dvgall" data-o="0">Tout replier</button>':'')+'</div>'+
-   '<div class="list-wrap"><table class="tbl dv-tbl"><thead><tr>'+th("date","Date · N°")+th("compte","Compte · objet")+'<th>Prestations</th>'+th("mt","Montant HT","r")+th("statut","Statut")+'<th>Réalisation</th></tr></thead><tbody>'+body+'</tbody></table></div>'+
+   '<div class="list-wrap"><table class="tbl dv-tbl"><thead><tr>'+(DVUI.grp==="compte"?th("compte","Compte","",2)+th("nb","Dossiers")+th("mt","Montant global HT","r")+th("taux","Statut · transformation")+th("real","Réalisé"):th("date","Date · N°")+th("compte","Compte · objet")+th("presta","Prestations")+th("mt","Montant HT","r")+th("statut","Statut")+th("real","Réalisation"))+'</tr></thead><tbody>'+body+'</tbody></table></div>'+
    '<div class="pager">'+(shown>=lim?'<button class="btn" type="button" data-act="dvmore">Afficher plus</button>':'')+'<span class="sub">'+pl(L.length,"devis","devis")+' · '+eur(T)+' HT</span></div>';
   el.innerHTML=h}
 document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("button");if(!t||S.tab!=="devis")return;const d=t.dataset;
