@@ -106,7 +106,7 @@ function renderTdb(){
       (dv.length?'<div class="mini">'+dv.slice(0,8).map(k=>row(k,eur(k.histo.dv.m),pl(k.histo.dv.n,"devis","devis")+(k.histo.dv.d?" · dernier le "+fdate(k.histo.dv.d):"")+(FNOM[famOf(k)]?" · "+esc(FNOM[famOf(k)]):""),"Relance devis en attente")).join("")+'</div>':'<p class="hint">Aucun devis en attente.</p>')+'</div>';W.perdus=
       '<div class="panel"><div class="ph"><h2>Clients perdus à reconquérir</h2><span class="sub num">'+lost.length+' · '+eur(lost.reduce((s,k)=>s+hCA(k,yp),0))+' en '+yp+'</span><button type="button" class="more" data-famgo="" data-kvset="perdus">Tous</button></div>'+
       (lost.length?'<div class="mini">'+lost.slice(0,8).map(k=>row(k,eur(hCA(k,yp)),"Dernière facture le "+fdate(k.histo.last)+(k.histo.st==="relance"?" · pièce "+k.histo.y1+" sans facture":"")+(FNOM[famOf(k)]?" · "+esc(FNOM[famOf(k)]):""),"Reconquête client")).join("")+'</div>':'<p class="hint">Aucun client perdu.</p>')+'</div>'}
-  W.notes=nbPanel();W.suividevis=dvWidget();h+=dashHTML(W);
+  W.notes=nbPanel();W.suividevis=dvWidget();W.crs=crWidget();h+=dashHTML(W);
   el.innerHTML=h;dashFit();dashObs();nbGrowAll(el);nbBadge();
   const oi=$("#objIn");if(oi)oi.addEventListener("change",()=>{S.settings.objectif=Math.max(0,parseInt(oi.value,10)||0);saveSettings();renderTdb()});
 }

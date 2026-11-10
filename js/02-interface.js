@@ -77,7 +77,7 @@ function render(){
   renderNav();
   const t=S.tab;
   if(t==="tdb")renderTdb();else if(t==="agenda")renderAgenda();else if(t==="comptes")renderComptes();else if(t==="compte")renderCompte();
-  else if(t==="cibles")renderCibles();else if(t==="mailing")renderMailing();else if(t==="pac")renderPac();else if(t==="bilan")renderBilan();else if(t==="devis")renderDevis();else if(t==="analyse")renderAnalyse();
+  else if(t==="cibles")renderCibles();else if(t==="mailing")renderMailing();else if(t==="pac")renderPac();else if(t==="bilan")renderBilan();else if(t==="devis")renderDevis();else if(t==="analyse")renderAnalyse();else if(t==="cr")renderCR();
   if(window.scrollY!==sy)window.scrollTo(0,sy);
 }
 const pageH=(crumb,title,sub,tools)=>'<div class="page-h"><div class="grow">'+(crumb?'<span class="crumb">'+crumb+'</span>':'')+'<h2>'+title+'</h2>'+(sub?'<p class="sub">'+sub+'</p>':'')+'</div>'+(tools?'<div class="bar">'+tools+'</div>':'')+'</div>';

@@ -26,6 +26,7 @@ Les données restent dans le navigateur (IndexedDB) : faire régulièrement une 
   - `15-analyse.js` : page Analyse des devis (objectif, N/N-1, prévisionnel, répartitions)
   - `16-preparation-rdv.js` : fiche imprimable de préparation de RDV
   - `17-recherche.js` : recherche globale (Ctrl+K)
+  - `19-comptes-rendus.js` : page Comptes rendus (recherche plein texte, filtres, impression de la sélection) et bloc du tableau de bord ; chargé juste avant le démarrage
   - `18-demarrage.js` : événements et démarrage (toujours en dernier)
 
 ## Nouvelle version

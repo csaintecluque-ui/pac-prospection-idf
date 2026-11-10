@@ -415,7 +415,7 @@ function viewAction(id){const a=S.actions.find(x=>x.id===id);if(!a)return;if(!vi
   modalBig()}
 
 /* ================= V3.6 · Tableau de bord personnalisable et bloc-notes ================= */
-const DW=[["kpis","Indicateurs",12],["suividevis","Suivi de mes devis",12],["cal","Calendrier",8],["todo","À faire",4],["prioA","Priorité A sans prochaine action",4],["recent","Dernières actions réalisées",4],["notes","Bloc-notes",4],
+const DW=[["kpis","Indicateurs",12],["suividevis","Suivi de mes devis",12],["cal","Calendrier",8],["todo","À faire",4],["prioA","Priorité A sans prochaine action",4],["recent","Dernières actions réalisées",4],["crs","Derniers comptes rendus",4],["notes","Bloc-notes",4],
   ["devis","Devis en attente (historique importé)",6],["perdus","Clients perdus à reconquérir",6],["pipe","Pipeline des cibles",4],["visites","Visites réalisées par mois",4],["pac","Plan d'action (PAC)",4]];
 const DWT=Object.fromEntries(DW.map(x=>[x[0],x[1]]));
 let DEDIT=false,DRO=null,DMV=null,DRS=null;
