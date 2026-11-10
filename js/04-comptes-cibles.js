@@ -33,12 +33,13 @@ function renderComptes(){
     '<div class="field-s"><label for="kDp">Département</label><select id="kDp" data-kf="dp"><option value="">Tous</option>'+DEPTS.filter(([d])=>d===U.dp||S.comptes.some(k=>k.dept===d)).map(([d,n])=>'<option value="'+d+'"'+(U.dp===d?' selected':'')+'>'+esc(d+" · "+n)+'</option>').join("")+'</select></div>'+
     '<div class="field-s"><label for="kAg">Agence</label><select id="kAg" data-kf="ag"><option value="">Toutes</option>'+uniq(k=>k.agence).map(s=>'<option'+(U.ag===s?' selected':'')+'>'+esc(s)+'</option>').join("")+'</select></div>'+
     '<div class="field-s"><label for="kSort">Trier par</label><select id="kSort" data-kf="sort"><option value="next"'+(so==="next"?' selected':'')+'>Prochaine action</option><option value="last"'+(so==="last"?' selected':'')+'>Dernière activité</option><option value="name"'+(so==="name"?' selected':'')+'>Nom</option><option value="ca"'+(so==="ca"?' selected':'')+'>CA facturé</option><option value="devis"'+(so==="devis"?' selected':'')+'>Devis en attente</option></select></div></div>';
-  if(!L.length){h+='<div class="list-wrap"><div class="empty"><h3>Aucun compte dans cette vue</h3><p>Changez de vue ou retirez un filtre.</p></div></div>';el.innerHTML=h;return}
+  if(!L.length){h+=grpSugBar(U.v)+'<div class="list-wrap"><div class="empty"><h3>Aucun compte dans cette vue</h3><p>Changez de vue ou retirez un filtre.</p></div></div>';el.innerHTML=h;return}
   /* Groupes : les sites d'un groupe présent dans la liste se rangent sous lui (flèche pour les déplier) */
   const T=LT.filter(k=>!grpOf(k)),nHid=L.filter(k=>grpOf(k)).length,hasQ=!!String(U.q||"").trim();
   /* Ouvert : déplié à la main, ou automatiquement pendant une recherche qui trouve un de ses sites (sauf si replié à la main) */
   const kxOpen=k=>KXO.has(k.id)||(hasQ&&!KXC.has(k.id)&&sitesOf(k.id).some(s=>inL.has(s.id)));
   const t=todayISO(),shown=T.slice(0,U.lim),gShown=shown.filter(isGrp),allOpen=gShown.length&&gShown.every(kxOpen);
+  h+=grpSugBar(U.v);
   if(gShown.length)h+='<div class="kx-bar"><span class="sub">'+pl(gShown.length,"groupe")+' dans la liste · leurs sites se rangent sous la ligne du groupe</span><button type="button" class="more" data-kxall="1">'+(allOpen?'Tout replier':'Déplier tous les groupes')+'</button></div>';
   h+='<div class="list-wrap"><table class="tbl"><thead><tr><th>Compte</th><th>Secteur</th><th>Contacts</th><th>Campagnes</th><th>Dernière activité</th><th>Prochaine action</th><th>Mailing</th><th class="r">CA facturé</th></tr></thead><tbody>'+
    shown.map(k0=>{const row=(k,sub)=>{const cts=ctOf(k.id),p=principal(k.id),cs=cibOf(k.id),n=nxt.has(k.id)?nxt.get(k.id):nextOf(k.id),la=lst.has(k.id)?lst.get(k.id):lastOf(k.id),ml=mlOf(k.id),sent=ml.filter(m=>m.envoye).sort((a,b)=>(b.dateEnvoi||"").localeCompare(a.dateEnvoi||""))[0],ca=caOf(k.id);

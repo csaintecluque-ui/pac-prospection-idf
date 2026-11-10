@@ -1107,3 +1107,22 @@ tr.k-site .co b{font-weight:500}
 .kx-s{display:block;font-size:11.5px;color:var(--accent)}
 tr.k-site.k-out td{opacity:.55}
 tr.k-site .co{flex-wrap:nowrap;align-items:flex-start}tr.k-site .co b{min-width:0}tr.k-site .kx-l{margin-top:2px}
+
+/* ---------- Suggestions de groupes (V3.35) ---------- */
+.grp-sug{display:flex;align-items:center;gap:12px;margin-bottom:10px;border-color:color-mix(in srgb,var(--accent) 35%,var(--line));background:color-mix(in srgb,var(--surface) 80%,var(--accent-soft));color:var(--fg)}
+.grp-sug>svg{width:16px;height:16px;flex:none;color:var(--accent)}
+.grp-sug .more{background:none;border:0;padding:0;color:var(--accent);font:500 12.5px var(--f-ui);cursor:pointer}
+.gsm-l{display:flex;flex-direction:column;gap:10px}
+.gsm{border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.gsm.off{opacity:.5}
+.gsm-h{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--surface-2);flex-wrap:wrap}
+.gsm-on input{accent-color:var(--accent);width:17px;height:17px;margin:0}
+.gsm-n{font-weight:600;width:240px;max-width:100%;padding:5px 8px}
+.gsm-h .more{background:none;border:0;padding:0;color:var(--muted);font:500 12.5px var(--f-ui);cursor:pointer}
+.gsm-h .more:hover{color:var(--bad);text-decoration:underline}
+.gsm-m .ga-o:first-child{border-top:0}
+.gsm-h{flex-wrap:nowrap}
+.gsm-on{display:flex;flex:none}
+.gsm-on input{width:17px!important;flex:none}
+.gsm-h .gsm-n{flex:0 1 280px;width:auto;min-width:120px}
+.gsm-h>.sub{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

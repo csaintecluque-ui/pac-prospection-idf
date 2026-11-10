@@ -146,3 +146,80 @@ document.addEventListener("keydown",e=>{if(GA&&e.key==="Enter"&&e.target&&e.targ
 document.addEventListener("input",e=>{if(GA&&e.target&&e.target.id==="ga-q"){GA.q=e.target.value;gaDraw()}});
 /* Nouvelle recherche : les groupes repliés à la main pendant la précédente se rouvrent automatiquement */
 document.addEventListener("input",e=>{if(e.target&&e.target.id==="kQ")KXC.clear()});
+
+/* ================= Suggestions de groupes : comptes au même début de nom ================= */
+/* Mots ignorés en tête de nom (formes juridiques, articles) */
+const GSTOP=new Set(["sa","sas","sasu","sarl","eurl","sca","sci","snc","ste","societe","ets","etablissements","etablissement","groupe","group","the","l","la","le","les","cie","compagnie","de","du","des","d"]);
+/* Premiers mots trop courants pour suffire seuls : il faut alors deux mots communs */
+const GGEN=new Set(["ville","mairie","commune","communaute","agglomeration","departement","conseil","region","centre","hopital","clinique","ehpad","residence","copropriete","syndicat","sdc","asl","aful","entreprise","entreprises","association","cabinet","agence","fonciere","immobiliere","immobilier","promotion","lycee","college","ecole","universite","institut","office","opac","oph","paris","france","batiment","bureau","bureaux","maison","transports","services","service","habitat","logement","logements","atelier","ateliers","construction","constructions","sci","holding","union","federation","chambre","caisse","banque","credit"]);
+const GPLACE=new Set(["Contacts sans compte","Actions sans compte","Devis sans compte","Sans nom"]);
+/* Mots significatifs du nom, avec leur position dans le texte d'origine (articles et formes juridiques retirés) */
+function gTok(nom){const s=String(nom||""),re=/[^\s\-–—,.;:\/()'’"«»&+]+/g,T=[];let m;
+  while((m=re.exec(s))){const n=nh(m[0]);if(n&&!GSTOP.has(n))T.push({n,a:m.index,b:m.index+m[0].length})}return T}
+/* Un premier mot trop courant ou très court ne suffit pas : il faut deux mots communs */
+const gNeed2=f=>GGEN.has(f)||f.length<=3;
+let GSUG=null,GSUGV=-1;
+function grpSuggest(){if(GSUG&&GSUGV===S.ver)return GSUG;const ign=new Set(S.settings.grpIgn||[]),B=new Map();
+  S.comptes.forEach(k=>{if(GPLACE.has(k.nom)||grpOf(k))return;const T=gTok(k.nom);if(!T.length)return;const f=T[0].n;if(f.length<2||/^\d+$/.test(f))return;
+    const key=gNeed2(f)?(T[1]?f+" "+T[1].n:""):f;if(!key)return;let l=B.get(key);if(!l)B.set(key,l=[]);l.push({k,T})});
+  const out=[];
+  B.forEach((L,key)=>{if(L.length<2)return;
+    /* Préfixe de mots commun à tous les comptes du paquet */
+    let n=0;const min=Math.min(...L.map(x=>x.T.length));while(n<min&&L.every(x=>x.T[n].n===L[0].T[n].n))n++;
+    if(n<(gNeed2(L[0].T[0].n)?2:1))return;
+    const ref=L.slice().sort((a,b)=>a.k.nom.length-b.k.nom.length)[0],name=ref.k.nom.slice(ref.T[0].a,ref.T[n-1].b).trim();
+    const pk=nh(name);if(ign.has(pk))return;
+    let head=findCompte(name);if(head){const top=grpOf(head);if(top)head=top}
+    const members=L.map(x=>x.k).filter(k=>(!head||k.id!==head.id)&&!isGrp(k)&&!(head&&k.groupeId===head.id));
+    if(head?members.length<1:members.length<2)return;
+    out.push({key:pk,name,head:head?head.id:"",members:members.sort(byNom).map(k=>k.id)})});
+  GSUG=out.sort((a,b)=>b.members.length-a.members.length||a.name.localeCompare(b.name,"fr"));GSUGV=S.ver;return GSUG}
+/* Bandeau de la liste des comptes */
+function grpSugBar(view){const L=grpSuggest(),n=L.length;if(!n)return "";const hid=(S.settings.grpSugHide||0)>=n;
+  if(hid&&view!=="groupes")return "";
+  return '<div class="notice grp-sug">'+I_PLUS+'<span class="grow"><b>'+pl(n,"groupe possible","groupes possibles")+'</b> : des comptes ont le même début de nom ('+esc(L.slice(0,4).map(x=>x.name).join(", "))+(n>4?"…":"")+').</span><button type="button" class="btn" data-gact="gsug">Voir les suggestions</button>'+(hid?'':'<button type="button" class="more" data-gact="gsughide" title="Le bandeau revient si de nouvelles suggestions apparaissent ; toujours accessible depuis la vue « Groupes et sites »">Masquer</button>')+'</div>'}
+let GSM=null;
+function gsugOpen(){const L=grpSuggest();if(!L.length){toast("Aucune suggestion de groupe : pas d'autres comptes au même début de nom.");return}
+  if(MODAL)closeModal();
+  GSM={L:L.map(s=>({key:s.key,name:s.name,head:s.head,members:s.members.slice(),sel:new Set(s.members),on:true})),q:""};
+  showModal(mHead("Groupes multi-sites","Groupes suggérés")+
+   '<div class="db"><p class="hint" style="margin:0">Comptes dont le nom commence par les mêmes mots. Vérifiez le nom du groupe, décochez les comptes qui n\'en font pas partie (ou toute la suggestion), puis validez. « Ignorer » retire définitivement une suggestion.</p>'+
+   '<div class="f"><label class="lbl" for="gsm-q">Filtrer</label><input type="search" id="gsm-q" placeholder="Nom de groupe ou de compte…" autocomplete="off"></div><div id="gsmL" class="gsm-l"></div></div>'+
+   '<div class="df"><span class="sub" id="gsmN"></span><span class="grow"></span><button class="btn" type="button" data-act="mclose">Annuler</button><button class="btn primary" type="button" data-gact="gsugok">Valider</button></div>',"gsug");
+  modalBig();gsmDraw()}
+function gsmDraw(){const box=$("#gsmL");if(!box||!GSM)return;const w=nh(GSM.q).split(" ").filter(Boolean);
+  const vis=(s)=>!w.length||w.every(t=>nh([s.name,...s.members.map(id=>(kOf(id)||{}).nom)].join(" ")).includes(t));
+  box.innerHTML=GSM.L.map((s,i)=>{if(!vis(s))return "";const h=kOf(s.head);
+    return '<div class="gsm'+(s.on?'':' off')+'"><div class="gsm-h"><label class="gsm-on"><input type="checkbox" data-gson="'+i+'"'+(s.on?' checked':'')+' aria-label="Retenir le groupe '+esc(s.name)+'"></label>'+
+      '<input type="text" class="gsm-n" data-gsn="'+i+'" value="'+esc(s.name)+'" aria-label="Nom du groupe">'+
+      '<span class="sub">'+(h?(isGrp(h)?'groupe existant · '+pl(sitesOf(h.id).length,"site"):'compte existant « '+esc(h.nom)+' » → devient le groupe'):'nouveau compte groupe')+'</span>'+
+      '<span class="grow"></span><button type="button" class="more" data-gact="gsign" data-i="'+i+'">Ignorer</button></div>'+
+      '<div class="gsm-m">'+s.members.map(id=>{const k=kOf(id);if(!k)return "";return '<label class="ga-o"><input type="checkbox" data-gsm="'+i+'" data-id="'+esc(id)+'"'+(s.sel.has(id)?' checked':'')+'><span><b>'+esc(k.nom)+'</b><span class="sub">'+esc(kInfo(k))+'</span></span></label>'}).join("")+'</div></div>'}).join("")||'<p class="hint">Aucune suggestion pour ce filtre.</p>';
+  gsmCount()}
+function gsmCount(){const n=$("#gsmN");if(!n||!GSM)return;const on=GSM.L.filter(s=>s.on&&s.sel.size),m=on.reduce((a,s)=>a+s.sel.size,0);
+  n.textContent=pl(on.length,"groupe")+" · "+pl(m,"compte")+" à rattacher";const b=document.querySelector('#modal [data-gact="gsugok"]');if(b)b.disabled=!on.length}
+function gsugOk(){if(!GSM)return;let ng=0,nk=0;
+  GSM.L.forEach(s=>{if(!s.on||!s.sel.size)return;const name=String(s.name||"").trim();if(!name)return;
+    let g=findCompte(name);if(g){const top=grpOf(g);if(top)g=top}
+    const ids=[...s.sel].filter(id=>kOf(id)&&(!g||id!==g.id));if(!ids.length)return;
+    if(!g){const K=ids.map(kOf),cnt=f=>{const m=new Map();K.forEach(k=>{if(k[f])m.set(k[f],(m.get(k[f])||0)+1)});return [...m.entries()].sort((a,b)=>b[1]-a[1]).map(x=>x[0])[0]||""};
+      const ty=K.some(k=>k.type==="Client existant")?"Client existant":K.some(k=>k.type==="Prescripteur")?"Prescripteur":"Prospect";
+      g=ensureCompte(name,{type:ty,segment:cnt("segment"),typologie:cnt("typologie"),famille:cnt("famille"),origine:"groupe"})}
+    if(g.groupeId){g.groupeId=""}
+    let added=0;ids.forEach(id=>{const k=kOf(id);if(isGrp(k)||k.groupeId===g.id)return;k.groupeId=g.id;k.majLe=now();added++});
+    if(added){ng++;nk+=added}});
+  bump();grpRepair();GSM=null;closeModal();commit();
+  toast(ng?pl(ng,"groupe")+" créé"+(ng>1?"s":"")+" ou complété"+(ng>1?"s":"")+" · "+pl(nk,"compte")+" rattaché"+(nk>1?"s":""):"Aucun changement")}
+function gsugIgnore(i){if(!GSM)return;const s=GSM.L[i];if(!s)return;const ig=S.settings.grpIgn||(S.settings.grpIgn=[]);if(!ig.includes(s.key))ig.push(s.key);
+  GSM.L.splice(i,1);lsSave();gsmDraw();toast("Suggestion « "+s.name+" » ignorée")}
+document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("[data-gact]");if(!t)return;const a=t.dataset.gact;
+  if(a==="gsug"){gsugOpen();return}
+  if(a==="gsugok"){gsugOk();return}
+  if(a==="gsign"){gsugIgnore(+t.dataset.i);return}
+  if(a==="gsughide"){S.settings.grpSugHide=grpSuggest().length;lsSave();render();toast("Bandeau masqué : les suggestions restent dans la vue « Groupes et sites »");return}});
+document.addEventListener("change",e=>{const t=e.target;if(!GSM||!t.matches)return;
+  if(t.matches("input[data-gson]")){const s=GSM.L[+t.dataset.gson];s.on=t.checked;t.closest(".gsm").classList.toggle("off",!s.on);gsmCount();return}
+  if(t.matches("input[data-gsm]")){const s=GSM.L[+t.dataset.gsm];t.checked?s.sel.add(t.dataset.id):s.sel.delete(t.dataset.id);gsmCount();return}});
+document.addEventListener("input",e=>{const t=e.target;if(!GSM||!t)return;
+  if(t.id==="gsm-q"){GSM.q=t.value;gsmDraw();return}
+  if(t.matches&&t.matches("input[data-gsn]")){GSM.L[+t.dataset.gsn].name=t.value}});
