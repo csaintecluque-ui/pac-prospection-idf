@@ -44,7 +44,7 @@ function grpApply(k){if(!("_grp" in k))return true;const name=String(k._grp||"")
 const grpHeadBtn=k=>grpOf(k)?'':'<button class="btn" type="button" data-gact="gsite" data-g="'+esc(k.id)+'" title="Créer un site rattaché à ce compte (groupe multi-sites)">'+I_PLUS+'Site</button>';
 function grpTags(k){const g=grpOf(k),n=sitesOf(k.id).length;
   return g?'<button type="button" class="tag grp" data-kopen="'+esc(g.id)+'" title="Ouvrir la fiche du groupe">Site du groupe '+esc(g.nom)+'</button>':n?'<span class="tag grp">Groupe · '+pl(n,"site")+'</span>':''}
-const grpListTag=k=>{const g=grpOf(k),n=sitesOf(k.id).length;return g?'<span class="ty grp" title="Site du groupe '+esc(g.nom)+'">'+esc(g.nom)+'</span>':n?'<span class="ty grp">Groupe · '+pl(n,"site")+'</span>':''};
+const grpListTag=k=>{const g=grpOf(k),n=sitesOf(k.id).length;return g?'<span class="ty grp" title="Site du groupe '+esc(g.nom)+'">'+esc(g.nom)+'</span>':n?'<span class="ty grp">Groupe</span>':''};
 const gBtns=gid=>'<div class="qa"><button class="btn" type="button" data-anew="note" data-k="'+esc(gid)+'">'+I_EV.note+'Note</button><button class="btn" type="button" data-anew="visite" data-cr="1" data-k="'+esc(gid)+'">'+I_CR+'Compte rendu</button><button class="btn" type="button" data-kedit="'+esc(gid)+'">Modifier les infos du groupe</button></div>';
 /* Ligne du panneau Informations */
 function grpKv(k){const g=grpOf(k),n=sitesOf(k.id).length;
@@ -117,6 +117,16 @@ function gaOk(){if(!GA)return;const gid=GA.g,g=kOf(gid);if(!g){closeModal();retu
   if(add&&g.groupeId){g.groupeId="";g.majLe=now()}
   bump();grpRepair();GA=null;closeModal();commit();
   toast(add||rem?[add?pl(add,"site")+" rattaché"+(add>1?"s":""):"",rem?pl(rem,"site")+" détaché"+(rem>1?"s":""):""].filter(Boolean).join(" · ")+" · groupe « "+g.nom+" »":"Aucun changement")}
+
+/* Liste des comptes : groupes dépliés (gardé pendant la session) */
+const KXO=(()=>{try{return new Set(JSON.parse(sessionStorage.getItem("pac-idf-kxo")||"[]"))}catch(e){return new Set()}})();
+const kxoSave=()=>{try{sessionStorage.setItem("pac-idf-kxo",JSON.stringify([...KXO]))}catch(e){}};
+document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("[data-kx],[data-kxall]");if(!t)return;e.stopPropagation();
+  if(t.dataset.kxall){const G=[...document.querySelectorAll("#view-comptes [data-kx]")].map(b=>b.dataset.kx),all=G.every(id=>KXO.has(id));G.forEach(id=>all?KXO.delete(id):KXO.add(id))}
+  else{const id=t.dataset.kx;KXO.has(id)?KXO.delete(id):KXO.add(id)}
+  kxoSave();renderComptes()},true);
+document.addEventListener("keydown",e=>{const t=e.target;if(!(t&&t.matches&&t.matches("#view-comptes tr.k-grp")))return;
+  if(e.key==="ArrowRight"||e.key==="ArrowLeft"){e.preventDefault();const id=t.dataset.kid,o=e.key==="ArrowRight";if(o===KXO.has(id))return;o?KXO.add(id):KXO.delete(id);kxoSave();renderComptes();const r=document.querySelector('#view-comptes tr[data-kid="'+id+'"]');if(r)r.focus({preventScroll:true})}});
 
 /* ---------- Événements propres aux groupes ---------- */
 document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("[data-gact]");if(!t)return;const a=t.dataset.gact;
