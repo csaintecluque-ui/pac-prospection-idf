@@ -225,7 +225,7 @@ function openCompte(id,preset){const src=id?kOf(id):null;kmNew=!src;kmDel=false;
   const typos=[...new Set(S.comptes.map(k=>k.typologie).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
   showModal(mHead(kmNew?"Nouveau compte":"Compte",esc(KM.nom||"Compte à renseigner"))+
   '<div class="db"><div id="kmDup" class="notice warn" hidden></div><form onsubmit="return false" style="display:flex;flex-direction:column;gap:12px">'+
-   fld("km-nom",'Nom du compte <span class="req">*</span>',KM.nom,"text",' placeholder="Nom exact du compte dans Athena"')+
+   fld("km-nom",'Nom du compte <span class="req">*</span>',KM.nom,"text",' placeholder="Nom exact du compte dans Athena"')+grpField(KM)+
    '<div class="f"><span class="lbl">Type</span><div class="seg" role="group" aria-label="Type">'+TYPES.map(t=>'<button type="button" data-ktype="'+esc(t)+'" aria-pressed="'+(KM.type===t)+'">'+esc(t)+'</button>').join("")+'</div></div>'+
    '<div class="row"><div class="f"><label class="lbl" for="km-seg">Segment</label><select id="km-seg">'+opts(SEGMENTS,KM.segment,"—")+'</select></div>'+
     '<div class="f"><label class="lbl" for="km-typo">Typologie (mailing)</label><input type="text" id="km-typo" list="kmTy" value="'+esc(KM.typologie)+'"><datalist id="kmTy">'+typos.map(t=>'<option value="'+esc(t)+'">').join("")+'</datalist></div></div>'+
@@ -236,19 +236,20 @@ function openCompte(id,preset){const src=id?kOf(id):null;kmNew=!src;kmDel=false;
    ta("km-not","Notes sur le compte",KM.notes,4,"Organisation, patrimoine, contrats en place, concurrence…")+
   '</form></div><div class="df">'+(kmNew?'':'<button class="btn danger" type="button" data-act="kdel">Supprimer</button><button class="btn ghost" type="button" data-act="kmerge">Fusionner avec…</button>')+'<span class="grow"></span><button class="btn" type="button" data-act="mclose">Annuler</button><button class="btn primary" type="button" data-act="ksave">'+(kmNew?'Créer le compte':'Enregistrer')+'</button></div>',"compte");
   setTimeout(()=>{const f=$("#km-nom");if(f&&kmNew)f.focus({preventScroll:true})},40)}
-function kmRead(){const k=KM;k.nom=vOf("km-nom");k.segment=$("#km-seg").value;k.typologie=vOf("km-typo");const kf=$("#km-fam");if(kf)k.famille=kf.value;k.dept=$("#km-dept").value;k.ville=vOf("km-ville");k.tel=vOf("km-tel");k.adresse=vOf("km-adr");k.web=vOf("km-web");k.cp=vOf("km-cp");k.siret=vOf("km-siret").replace(/\s/g,"");if(!k.dept&&cpDept(k.cp))k.dept=cpDept(k.cp);k.agence=vOf("km-ag");k.apporteur=vOf("km-app");k.notes=vOf("km-not")}
+function kmRead(){const k=KM;k.nom=vOf("km-nom");k.segment=$("#km-seg").value;k.typologie=vOf("km-typo");const kf=$("#km-fam");if(kf)k.famille=kf.value;k.dept=$("#km-dept").value;k.ville=vOf("km-ville");k.tel=vOf("km-tel");k.adresse=vOf("km-adr");k.web=vOf("km-web");k.cp=vOf("km-cp");k.siret=vOf("km-siret").replace(/\s/g,"");if(!k.dept&&cpDept(k.cp))k.dept=cpDept(k.cp);k.agence=vOf("km-ag");k.apporteur=vOf("km-app");k.notes=vOf("km-not");const kg=$("#km-grp");if(kg)k._grp=kg.value.trim();else delete k._grp}
 function kSave(){kmRead();const k=KM;
   if(!k.nom){toast("Renseignez le nom du compte.");$("#km-nom").focus({preventScroll:true});return}
   const other=findCompte(k.nom);
   if(other&&other.id!==k.id){const n=$("#kmDup");n.hidden=false;n.innerHTML='<b>Un compte porte déjà ce nom</b> : '+esc(other.nom)+'. <button class="btn" type="button" data-kopen="'+esc(other.id)+'">Ouvrir ce compte</button>'+(kmNew?'':' <button class="btn" type="button" data-act="kmergeto" data-to="'+esc(other.id)+'">Fusionner dans ce compte</button>');return}
+  if(!grpApply(k))return;
   const wasNew=kmNew;put("comptes",k);
   cibOf(k.id).forEach(c=>{c.compte=k.nom});bump();
   closeModal();lsSave();
   if(wasNew){showTab("compte",k.id);toast("Compte créé")}else{render();if(D)drawDrawer();toast("Compte enregistré")}}
 function kDelete(btn){const k=KM,nc=cibOf(k.id).length,nm=mlOf(k.id).length,nd=dvOf(k.id).length;
   if(nc||nm||nd){toast("Ce compte a "+[nc?pl(nc,"cible"):"",nm?pl(nm,"ligne")+" de mailing":"",nd?pl(nd,"devis","devis"):""].filter(Boolean).join(" et ")+" : supprimez-les ou fusionnez le compte.");return}
-  if(!kmDel){kmDel=true;btn.classList.add("armed");btn.textContent="Supprimer le compte, ses contacts et ses actions";return}
-  const id=k.id;hDel(id);S.contacts=S.contacts.filter(c=>c.compteId!==id);S.actions=S.actions.filter(a=>a.compteId!==id);drop("comptes",id);
+  if(!kmDel){kmDel=true;btn.classList.add("armed");btn.textContent="Supprimer le compte, ses contacts et ses actions"+(sitesOf(k.id).length?" (ses "+pl(sitesOf(k.id).length,"site")+" seront détachés)":"");return}
+  const id=k.id;hDel(id);S.comptes.forEach(x=>{if(x.groupeId===id)x.groupeId=""});S.contacts=S.contacts.filter(c=>c.compteId!==id);S.actions=S.actions.filter(a=>a.compteId!==id);drop("comptes",id);
   closeModal();lsSave();showTab("comptes");toast("Compte supprimé")}
 function kMergeMenu(){kmRead();const k=KM;
   showModal(mHead("Fusionner","Fusionner « "+esc(k.nom)+" » dans un autre compte")+
@@ -264,7 +265,8 @@ function mergeComptes(srcId,dstId){const a=kOf(srcId),b=kOf(dstId);if(!a||!b||a.
   S.mailing.forEach(m=>{if(m.compteId===a.id){m.compteId=b.id;if(map[m.contactId])m.contactId=map[m.contactId]}});
   S.cibles.forEach(c=>{if(c.compteId===a.id){c.compteId=b.id;c.compte=b.nom}});
   S.devis.forEach(d=>{if(d.compteId===a.id){d.compteId=b.id;if(map[d.contactId])d.contactId=map[d.contactId]}});
-  S.comptes=S.comptes.filter(x=>x.id!==a.id);b.majLe=now();bump();restage(b.id);return true}
+  S.comptes.forEach(x=>{if(x.groupeId===a.id)x.groupeId=b.id});if(b.groupeId===b.id||b.groupeId===a.id)b.groupeId="";
+  S.comptes=S.comptes.filter(x=>x.id!==a.id);b.majLe=now();bump();grpRepair();restage(b.id);return true}
 function kMergeGo(toId){const dst=toId?kOf(toId):findCompte(vOf("km-to"));const src=KM;
   if(!dst){toast("Choisissez un compte existant dans la liste.");return}
   if(dst.id===src.id){toast("Choisissez un autre compte.");return}

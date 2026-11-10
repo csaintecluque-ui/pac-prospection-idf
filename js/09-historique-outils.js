@@ -304,7 +304,7 @@ function renderQk(){const el=$("#qk");if(!el)return;if(el.dataset.done){nbBadge(
 /* ---------- Recherche de compte (nom, ville, contact, e-mail, typologie…) ---------- */
 let KSX=null,KSXV=-1,KC_I=0;
 function kIndex(){if(KSX&&KSXV===S.ver)return KSX;
-  KSX=S.comptes.map(k=>({k,n:nh(k.nom),h:nh([k.nom,k.ville,k.typologie,k.segment,k.agence,k.apporteur,ctOf(k.id).map(c=>c.nom+" "+c.mail).join(" ")].join(" "))}));KSXV=S.ver;return KSX}
+  KSX=S.comptes.map(k=>({k,n:nh(k.nom),h:nh([k.nom,grpName(k),k.ville,k.typologie,k.segment,k.agence,k.apporteur,ctOf(k.id).map(c=>c.nom+" "+c.mail).join(" ")].join(" "))}));KSXV=S.ver;return KSX}
 function kRecent(){const seen=new Set(),out=[];if(S.tab==="compte"&&kOf(S.kid)){out.push(kOf(S.kid));seen.add(S.kid)}
   S.actions.filter(a=>a.origine!=="mailing").sort((a,b)=>String(b.majLe||"").localeCompare(String(a.majLe||""))).some(a=>{if(!seen.has(a.compteId)&&kOf(a.compteId)){seen.add(a.compteId);out.push(kOf(a.compteId))}return out.length>=8});
   return out}
@@ -312,7 +312,8 @@ function kSearch(q,lim){const w=nh(q).split(" ").filter(Boolean);if(!w.length)re
   for(const x of kIndex()){if(!w.every(t=>x.h.includes(t)))continue;const s=x.n===full?100:x.n.startsWith(full)?80:w.every(t=>x.n.includes(t))?60:20;R.push([s,x.k])}
   return R.sort((a,b)=>b[0]-a[0]||a[1].nom.localeCompare(b[1].nom,"fr")).slice(0,lim||12).map(r=>r[1])}
 function kInfo(k){const h=k.histo,p=principal(k.id);
-  return [k.type,k.dept?dLabel(k.dept):"",k.ville,FNOM[famOf(k)]||k.typologie||k.segment,p?p.nom:"",h?"CA "+h.y1+" : "+eur(hCA(k)):""].filter(Boolean).join(" · ")}
+  const g=grpOf(k),ns=sitesOf(k.id).length;
+  return [k.type,g?"site de "+g.nom:ns?"groupe · "+pl(ns,"site"):"",k.dept?dLabel(k.dept):"",k.ville,FNOM[famOf(k)]||k.typologie||k.segment,p?p.nom:"",h?"CA "+h.y1+" : "+eur(hCA(k)):""].filter(Boolean).join(" · ")}
 function kcHTML(a,k){return '<div class="f"><label class="lbl" for="am-k">Compte <span class="req">*</span></label><div class="kc"><input type="search" id="am-k" value="'+esc(a._k)+'" placeholder="Rechercher un compte : nom, ville, contact, e-mail…" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="kcList" aria-autocomplete="list"><div class="kc-list" id="kcList" role="listbox" hidden></div></div>'+
   (k?'<p class="hint kc-sel">'+esc(kInfo(k))+'</p>':a._k?'<p class="hint">Nouveau compte : il sera créé à l\'enregistrement.</p>':'<p class="hint">Tapez quelques lettres : la liste se filtre sur le nom, la ville, les contacts et leurs e-mails.</p>')+'</div>'}
 function renderKc(){const inp=$("#am-k"),box=$("#kcList");if(!inp||!box)return;const q=inp.value.trim(),L=kSearch(q,12);KC_I=0;
@@ -382,7 +383,7 @@ function tlItem(x,cs){const ct=ctById(x.contactId),who=[ct?ct.nom:"",x.interlocu
   return '<div class="tl-i'+(x.statut==="annule"?' annule':'')+(op?' open':'')+'" '+(x.mailing?'data-mopen="'+esc(x.id)+'"':'data-aid="'+esc(x.id)+'"')+'><span class="eic eic-'+esc(x.type)+'">'+(I_EV[x.type]||I_EV.autre)+'</span>'+
    '<div style="min-width:0;display:flex;flex-direction:column;gap:3px"><div class="eh"><span class="num">'+(x.date?fdate(x.date):"—")+'</span><b>'+esc(x.mailing?"Mailing":ESHORT[x.type]||x.type)+'</b>'+
     (x.statut==="annule"?'<span class="pill tone-grey">Annulé</span>':'')+(x.cr?'<span class="pill tone-info">Compte rendu</span>':'')+(x.resultat?'<span class="pill tone-'+(/^(Joint|Réponse|Appel reçu|Mail reçu|Rencontr|Relancé)/.test(x.resultat)?"ok":"info")+'">'+esc(x.resultat)+'</span>':'')+
-    '<span class="sub grow">'+esc(who)+(cb&&cs.length>1?' · '+esc(campShort(cb)):'')+'</span>'+
+    (x._site?'<span class="pill tone-grey" title="Site du groupe">'+esc(x._site)+'</span>':'')+'<span class="sub grow">'+esc(who)+(cb&&cs.length>1?' · '+esc(campShort(cb)):'')+'</span>'+
     (has?'<button type="button" class="tgb'+(op?'':' has')+'" data-tlx="'+esc(id)+'" aria-expanded="'+op+'" title="'+(op?'Replier':'Déplier')+'" aria-label="'+(op?'Replier':'Déplier')+' le détail">'+CHEV+'</button>':'')+'</div>'+
     (x.objet?'<div class="eobj">'+esc(x.objet)+'</div>':'')+
     (op?(x.details?'<p class="edet">'+esc(x.details)+'</p>':'')+(x.cr?crHTML(x):'')+(x.suite?'<div class="sub">Suite : '+esc(x.suite)+'</div>':'')

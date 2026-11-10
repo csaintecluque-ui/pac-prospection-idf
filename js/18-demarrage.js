@@ -47,7 +47,7 @@ document.addEventListener("click",async e=>{
     else if(!kid&&S.tab==="compte")kid=S.kid;
     closeModal();openAction({type:d.anew,compteId:kid,cibleId:cid,objet:d.obj||"",cr:!!d.cr});return}
   if(d.tlx){TLO.has(d.tlx)?TLO.delete(d.tlx):TLO.add(d.tlx);renderCompte();return}
-  if(d.act==="tlall"){const k=kOf(S.kid);if(!k)return;const ids=actOf(k.id).filter(a=>a.statut!=="afaire"&&(a.details||a.cr||a.suite)).map(a=>"a"+a.id);const all=ids.every(x=>TLO.has(x));ids.forEach(x=>all?TLO.delete(x):TLO.add(x));renderCompte();return}
+  if(d.act==="tlall"){const k=kOf(S.kid);if(!k)return;const ids=actOf(k.id).concat(grpTlIds(k)).filter(a=>a.statut!=="afaire"&&(a.details||a.cr||a.suite)).map(a=>"a"+a.id);const all=ids.every(x=>TLO.has(x));ids.forEach(x=>all?TLO.delete(x):TLO.add(x));renderCompte();return}
   if(d.act==="rvedit"&&RV){const id=RV.id;openAction({id});return}
   if(d.aid&&!t.matches("button.ck")){closeModal();viewAction(d.aid);return}
   if(d.mopen){mEditMenu(d.mopen);return}

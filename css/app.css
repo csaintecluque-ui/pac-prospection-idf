@@ -1041,3 +1041,24 @@ body.cal-dragging,body.cal-dragging *{cursor:grabbing!important;user-select:none
 .dv-bk .num{font-size:12.5px;white-space:nowrap}
 .dv-bk .num.p{text-align:right}
 .dv-bk .num.a{font-size:12px;color:var(--muted)}
+
+/* ---------- Groupes multi-sites (V3.30) ---------- */
+.ty.grp{background:var(--accent-soft);color:var(--accent)}
+.tag.grp{font-family:var(--f-label);font-size:11.5px;color:var(--accent);border-color:color-mix(in srgb,var(--accent) 40%,var(--line));background:none}
+button.tag.grp{cursor:pointer}
+button.tag.grp:hover{background:var(--accent-soft)}
+.grp-p{border-left:3px solid var(--copper)}
+.grp-p .tl .tl-i{padding:8px 2px}
+.gsites{display:flex;flex-direction:column}
+.gsite{display:flex;flex-direction:column;gap:2px;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:8px 4px;cursor:pointer;font:inherit;color:inherit;border-radius:4px}
+.gsite:first-child{border-top:0}
+.gsite:hover{background:var(--surface-2)}
+.gsite b{font-weight:600}
+.gsite .late{color:var(--bad)}
+.ga-l{display:flex;flex-direction:column;max-height:46vh;overflow:auto;border:1px solid var(--line);border-radius:8px;min-height:60px}
+.ga-h{font:600 11px var(--f-label);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:8px 10px 5px;background:var(--surface-2);position:sticky;top:0}
+.ga-o{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-top:1px solid var(--line);cursor:pointer}
+.ga-h+.ga-o{border-top:0}
+.ga-o:hover{background:var(--surface-2)}
+.ga-o input{accent-color:var(--accent);margin-top:3px;width:16px;height:16px;flex:none}
+.ga-o>span{display:flex;flex-direction:column;min-width:0}

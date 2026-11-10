@@ -20,6 +20,7 @@ Les données restent dans le navigateur (IndexedDB) : faire régulièrement une 
   - `09-historique-outils.js` : historique clients, stockage, actions rapides, comptes rendus, tableau de bord personnalisable, bloc-notes, bilan
   - `10-devis.js` : suivi des devis et imports Word / PDF / Excel
   - `11-comptes-calendrier.js` : comptes à compléter, glisser-déposer dans le calendrier
+  - `12-groupes.js` : groupes multi-sites (compte tête de groupe, sites rattachés, notes et comptes rendus communs)
   - `13-relances.js` : relances des devis en attente, mail prêt à envoyer
   - `14-quoi-de-neuf.js` : récapitulatif après chaque import Excel des pièces
   - `15-analyse.js` : page Analyse des devis (objectif, N/N-1, prévisionnel, répartitions)

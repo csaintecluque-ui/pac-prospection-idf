@@ -45,7 +45,7 @@ function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTi
 const nh=x=>String(x==null?"":x).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
 const now=()=>new Date().toISOString();
 const S={open:new Set(),mode:"wait",cibles:[],comptes:[],contacts:[],actions:[],plans:[],pac:[],mailing:[],devis:[],settings:{objectif:8},writable:true,view:"actives",tab:"tdb",kid:"",db:null,downloads:null,ver:0};
-const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.29";
+const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.30";
 let STORE="ls"; /* "idb" dès que les données sont dans la base du navigateur */
 const IN_FRAME=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 const TYPE_RANK={"Client existant":3,"Prescripteur":2,"Prospect":1};
@@ -65,7 +65,7 @@ function norm(c){const b=blank();const o=Object.assign(b,c||{});o.opp=Object.ass
   o.bu=Array.isArray(o.bu)?o.bu:[];o.prestations=Array.isArray(o.prestations)?o.prestations:[];o.leadIds=Array.isArray(o.leadIds)?o.leadIds:[];
   if(!SIDX.hasOwnProperty(o.etape))o.etape="a_qualifier";if(!o.dept)o.dept=guessDept(o);return o}
 /* Compte, contact, action */
-function kblank(){return {nom:"",type:"Prospect",segment:"",typologie:"",famille:"",siret:"",cp:"",dept:"",adresse:"",ville:"",web:"",tel:"",agence:"",apporteur:"",notes:"",origine:"",contrat:false,sousTypo:"",fiab:"",histo:null}}
+function kblank(){return {nom:"",type:"Prospect",segment:"",typologie:"",famille:"",siret:"",cp:"",dept:"",adresse:"",ville:"",web:"",tel:"",agence:"",apporteur:"",notes:"",origine:"",contrat:false,sousTypo:"",fiab:"",histo:null,groupeId:""}}
 const knorm=x=>Object.assign(kblank(),x||{});
 function ctblank(){return {compteId:"",nom:"",fonction:"",tel:"",mail:"",notes:"",principal:false}}
 const ctnorm=x=>{const o=Object.assign(ctblank(),x||{});o.principal=!!o.principal;return o};
@@ -78,7 +78,7 @@ const bump=()=>{S.ver++};
 function IX(){if(IXC&&IXV===S.ver)return IXC;
   const g=(arr,k)=>{const m=new Map();for(const x of arr){const v=x[k];if(!v)continue;let l=m.get(v);if(!l)m.set(v,l=[]);l.push(x)}return m};
   const byName=new Map();S.comptes.forEach(k=>{const n=nh(k.nom);if(n&&!byName.has(n))byName.set(n,k)});
-  IXC={compte:new Map(S.comptes.map(k=>[k.id,k])),byName,cib:g(S.cibles,"compteId"),ct:g(S.contacts,"compteId"),act:g(S.actions,"compteId"),ml:g(S.mailing,"compteId"),
+  IXC={compte:new Map(S.comptes.map(k=>[k.id,k])),byName,cib:g(S.cibles,"compteId"),ct:g(S.contacts,"compteId"),act:g(S.actions,"compteId"),ml:g(S.mailing,"compteId"),grp:g(S.comptes,"groupeId"),
     contact:new Map(S.contacts.map(c=>[c.id,c])),cible:new Map(S.cibles.map(c=>[c.id,c]))};
   IXV=S.ver;return IXC}
 const kOf=id=>id?IX().compte.get(id)||null:null;
@@ -197,7 +197,7 @@ function repairLinks(){
   S.contacts.forEach(ct=>{if(!kids.has(ct.compteId)){const k=ensureCompte("Contacts sans compte");ct.compteId=k.id}});
   S.actions.forEach(a=>{if(!kids.has(a.compteId)){const k=ensureCompte("Actions sans compte");a.compteId=a.compteId&&kids.has(a.compteId)?a.compteId:k.id}});
   S.devis.forEach(d=>{if(!kids.has(d.compteId)){const k=ensureCompte("Devis sans compte");d.compteId=k.id}});
-  S.cibles.forEach(c=>{const k=kOf(c.compteId);if(k&&c.compte!==k.nom)c.compte=k.nom});bump()}
+  S.cibles.forEach(c=>{const k=kOf(c.compteId);if(k&&c.compte!==k.nom)c.compte=k.nom});bump();grpRepair()}
 
 /* ---------- Persistance (navigateur) ---------- */
 function setSync(mode,txt){S.mode=mode;const a=$("#sync"),b=$("#syncTxt");if(a)a.dataset.s=mode;if(b)b.textContent=txt}
