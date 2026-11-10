@@ -1083,3 +1083,7 @@ button.tag.grp:hover{background:var(--accent-soft)}
 .crw-i .grow{display:flex;flex-direction:column;min-width:0}
 .crw-i .grow .sub{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media (max-width:820px){.cr-bar{grid-template-columns:1fr}.cr-g{grid-template-columns:1fr}}
+.grp-hint{display:flex;align-items:center;gap:10px;border-top:1px solid var(--line);padding-top:10px}
+.ga-new{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:var(--accent-soft);color:var(--accent);border:0;border-bottom:1px solid var(--line);padding:10px 12px;font:inherit;cursor:pointer}
+.ga-new svg{width:15px;height:15px;flex:none}
+.ga-new:hover{filter:brightness(.97)}
