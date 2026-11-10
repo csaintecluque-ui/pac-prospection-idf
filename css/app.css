@@ -1105,3 +1105,5 @@ tr.k-site td:first-child{padding-left:30px;box-shadow:inset 3px 0 0 var(--copper
 tr.k-site .co b{font-weight:500}
 .kx-l{flex:none;width:10px;height:10px;border-left:1.5px solid var(--muted);border-bottom:1.5px solid var(--muted);border-bottom-left-radius:3px;margin:-6px 2px 0 0;opacity:.7}
 .kx-s{display:block;font-size:11.5px;color:var(--accent)}
+tr.k-site.k-out td{opacity:.55}
+tr.k-site .co{flex-wrap:nowrap;align-items:flex-start}tr.k-site .co b{min-width:0}tr.k-site .kx-l{margin-top:2px}

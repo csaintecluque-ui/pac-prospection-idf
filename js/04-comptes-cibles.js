@@ -11,12 +11,14 @@ function kBase(){const U=UI.kv,words=nh(U.q).split(" ").filter(Boolean);
     return true})}
 function renderComptes(){
   const el=$("#view-comptes"),U=UI.kv,B=kBase(),v=KV.find(x=>x[0]===U.v)||KV[0],L=B.filter(v[2]);
-  const nxt=new Map(),lst=new Map();L.forEach(k=>{nxt.set(k.id,nextOf(k.id));lst.set(k.id,lastOf(k.id))});
+  /* Groupes : dès qu'un site est dans la vue, son groupe l'est aussi (même sans correspondre au filtre) et ses sites se rangent dessous */
+  const inL=new Set(L.map(k=>k.id)),LT=L.slice();L.forEach(k=>{const g=grpOf(k);if(g&&!inL.has(g.id)&&!LT.includes(g))LT.push(g)});
+  const nxt=new Map(),lst=new Map();LT.forEach(k=>{nxt.set(k.id,nextOf(k.id));lst.set(k.id,lastOf(k.id))});
   /* Ligne d'un groupe : prochaine action et dernière activité de l'ensemble groupe + sites (tri et affichage) */
-  L.forEach(k=>{if(!isGrp(k))return;sitesOf(k.id).forEach(s=>{const n=nextOf(s.id),l=lastOf(s.id),cn=nxt.get(k.id),cl=lst.get(k.id);
+  LT.forEach(k=>{if(!isGrp(k))return;sitesOf(k.id).forEach(s=>{const n=nextOf(s.id),l=lastOf(s.id),cn=nxt.get(k.id),cl=lst.get(k.id);
     if(n&&(!cn||aSort(n,cn)<0))nxt.set(k.id,Object.assign({},n,{_site:s.nom}));if(l&&(!cl||l.date>cl.date))lst.set(k.id,Object.assign({},l,{_site:s.nom}))})});
   const so=U.sort;
-  L.sort((a,b)=>{if(so==="name")return a.nom.localeCompare(b.nom,"fr");
+  LT.sort((a,b)=>{if(so==="name")return a.nom.localeCompare(b.nom,"fr");
     if(so==="last"){const x=lst.get(a.id),y=lst.get(b.id);return ((y&&y.date)||"").localeCompare((x&&x.date)||"")||a.nom.localeCompare(b.nom,"fr")}
     if(so==="ca"){const yp=String(new Date().getFullYear()-1),sc=k=>k.histo?hCA(k)+hCA(k,yp):caOf(k.id);return sc(b)-sc(a)||a.nom.localeCompare(b.nom,"fr")}
     if(so==="devis")return ((b.histo&&b.histo.dv.m)||0)-((a.histo&&a.histo.dv.m)||0)||a.nom.localeCompare(b.nom,"fr");
@@ -33,13 +35,15 @@ function renderComptes(){
     '<div class="field-s"><label for="kSort">Trier par</label><select id="kSort" data-kf="sort"><option value="next"'+(so==="next"?' selected':'')+'>Prochaine action</option><option value="last"'+(so==="last"?' selected':'')+'>Dernière activité</option><option value="name"'+(so==="name"?' selected':'')+'>Nom</option><option value="ca"'+(so==="ca"?' selected':'')+'>CA facturé</option><option value="devis"'+(so==="devis"?' selected':'')+'>Devis en attente</option></select></div></div>';
   if(!L.length){h+='<div class="list-wrap"><div class="empty"><h3>Aucun compte dans cette vue</h3><p>Changez de vue ou retirez un filtre.</p></div></div>';el.innerHTML=h;return}
   /* Groupes : les sites d'un groupe présent dans la liste se rangent sous lui (flèche pour les déplier) */
-  const inL=new Set(L.map(k=>k.id)),T=L.filter(k=>!(grpOf(k)&&inL.has(k.groupeId)));
-  const t=todayISO(),shown=T.slice(0,U.lim),gShown=shown.filter(isGrp),allOpen=gShown.length&&gShown.every(k=>KXO.has(k.id));
+  const T=LT.filter(k=>!grpOf(k)),nHid=L.filter(k=>grpOf(k)).length,hasQ=!!String(U.q||"").trim();
+  /* Ouvert : déplié à la main, ou automatiquement pendant une recherche qui trouve un de ses sites (sauf si replié à la main) */
+  const kxOpen=k=>KXO.has(k.id)||(hasQ&&!KXC.has(k.id)&&sitesOf(k.id).some(s=>inL.has(s.id)));
+  const t=todayISO(),shown=T.slice(0,U.lim),gShown=shown.filter(isGrp),allOpen=gShown.length&&gShown.every(kxOpen);
   if(gShown.length)h+='<div class="kx-bar"><span class="sub">'+pl(gShown.length,"groupe")+' dans la liste · leurs sites se rangent sous la ligne du groupe</span><button type="button" class="more" data-kxall="1">'+(allOpen?'Tout replier':'Déplier tous les groupes')+'</button></div>';
   h+='<div class="list-wrap"><table class="tbl"><thead><tr><th>Compte</th><th>Secteur</th><th>Contacts</th><th>Campagnes</th><th>Dernière activité</th><th>Prochaine action</th><th>Mailing</th><th class="r">CA facturé</th></tr></thead><tbody>'+
    shown.map(k0=>{const row=(k,sub)=>{const cts=ctOf(k.id),p=principal(k.id),cs=cibOf(k.id),n=nxt.has(k.id)?nxt.get(k.id):nextOf(k.id),la=lst.has(k.id)?lst.get(k.id):lastOf(k.id),ml=mlOf(k.id),sent=ml.filter(m=>m.envoye).sort((a,b)=>(b.dateEnvoi||"").localeCompare(a.dateEnvoi||""))[0],ca=caOf(k.id);
-    const ns=sub?0:sitesOf(k.id).length,op=ns&&KXO.has(k.id);
-    return '<tr data-kid="'+esc(k.id)+'" tabindex="0"'+(sub?' class="k-site"':ns?' class="k-grp'+(op?' open':'')+'"':'')+'><td><div class="co">'+(ns?'<button type="button" class="kx" data-kx="'+esc(k.id)+'" aria-expanded="'+!!op+'" title="'+(op?'Replier':'Afficher')+' les '+ns+' sites" aria-label="'+(op?'Replier':'Afficher')+' les sites de '+esc(k.nom)+'">'+CHEV+'</button>':sub?'<span class="kx-l" aria-hidden="true"></span>':'')+'<b>'+esc(k.nom)+'</b>'+(ns?'<button type="button" class="kx-n" data-kx="'+esc(k.id)+'">'+pl(ns,"site")+'</button>':'')+'</div><div class="sub">'+tyTag(k.type)+grpListTag(k)+(k.contrat?'<span class="ty">Contrat cadre</span>':'')+(k.histo&&(k.histo.st==="perdu"||k.histo.st==="relance")?'<span class="ty" style="background:var(--bad-soft);color:var(--bad)">Perdu</span>':'')+(k.histo&&k.histo.dv.n?'<span class="ty" style="background:var(--warn-soft);color:var(--warn)">'+pl(k.histo.dv.n,"devis","devis")+'</span>':'')+(k.dept?'<span class="ty">'+esc(k.dept)+'</span>':'')+esc([k.ville,k.agence].filter(Boolean).join(" · "))+'</div></td>'+
+    const SS=sub?[]:sitesOf(k.id),ns=SS.length,nIn=SS.filter(s=>inL.has(s.id)).length,op=ns&&kxOpen(k);
+    return '<tr data-kid="'+esc(k.id)+'" tabindex="0"'+(sub?' class="k-site'+(inL.has(k.id)?'':' k-out')+'"'+(inL.has(k.id)?'':' title="Hors de cette vue"'):ns?' class="k-grp'+(op?' open':'')+'"':'')+'><td><div class="co">'+(ns?'<button type="button" class="kx" data-kx="'+esc(k.id)+'" aria-expanded="'+!!op+'" title="'+(op?'Replier':'Afficher')+' les '+ns+' sites" aria-label="'+(op?'Replier':'Afficher')+' les sites de '+esc(k.nom)+'">'+CHEV+'</button>':sub?'<span class="kx-l" aria-hidden="true"></span>':'')+'<b>'+esc(k.nom)+'</b>'+(ns?'<button type="button" class="kx-n" data-kx="'+esc(k.id)+'">'+pl(ns,"site")+(nIn&&nIn<ns?' · '+nIn+' dans cette vue':'')+'</button>':'')+'</div><div class="sub">'+tyTag(k.type)+grpListTag(k)+(k.contrat?'<span class="ty">Contrat cadre</span>':'')+(k.histo&&(k.histo.st==="perdu"||k.histo.st==="relance")?'<span class="ty" style="background:var(--bad-soft);color:var(--bad)">Perdu</span>':'')+(k.histo&&k.histo.dv.n?'<span class="ty" style="background:var(--warn-soft);color:var(--warn)">'+pl(k.histo.dv.n,"devis","devis")+'</span>':'')+(k.dept?'<span class="ty">'+esc(k.dept)+'</span>':'')+esc([k.ville,k.agence].filter(Boolean).join(" · "))+'</div></td>'+
      '<td class="sub" style="max-width:200px">'+esc(secteurOf(k)||"—")+'</td>'+
      '<td>'+(p?'<div style="font-size:13px">'+esc(p.nom||p.mail)+'</div>':'<span class="sub">—</span>')+(cts.length>1?'<div class="sub">+ '+(cts.length-1)+' autre'+(cts.length>2?'s':'')+'</div>':'')+'</td>'+
      '<td><div class="stp">'+(cs.length?cs.map(c=>'<span class="pill st-'+c.etape+'" title="'+esc(c.campagne)+'">'+esc(SL[c.etape])+'</span>').join(""):'<span class="sub">—</span>')+'</div></td>'+
@@ -47,8 +51,8 @@ function renderComptes(){
      '<td>'+(n?'<div class="nx"><span class="d'+(n.date&&n.date<t?' late':'')+'">'+esc(n.date?fdate(n.date):"Sans date")+'</span><span class="l">'+esc(n.objet||ALBL[n.type])+(n._site?'<span class="kx-s">'+esc(n._site)+'</span>':'')+'</span></div>':'<span class="sub">—</span>')+'</td>'+
      '<td>'+(ml.length?(sent?'<div class="nx"><span class="d">'+fdate(sent.dateEnvoi)+'</span><span class="l">envoyé'+(sent.relance&&!sent.relanceFaite?' · relance '+fdate(sent.relance):'')+'</span></div>':'<span class="sub">'+esc(ml[0].liste||"Liste")+' · à envoyer</span>'):'<span class="sub">—</span>')+'</td>'+
      '<td class="r num">'+(k.histo?eur(hCA(k))+'<div class="sub">'+k.histo.y0+' : '+eur(hCA(k,k.histo.y0))+'</div>':ca?eur(ca)+'<div class="sub">mailing</div>':'<span class="sub">—</span>')+'</td></tr>'};
-    return row(k0)+(isGrp(k0)&&KXO.has(k0.id)?sitesOf(k0.id).slice().sort(byNom).map(s=>row(s,true)).join(""):"")}).join("")+'</tbody></table></div>'+
-   '<div class="pager">'+(T.length>shown.length?'<button class="btn" type="button" data-act="kmore">Afficher '+Math.min(150,T.length-shown.length)+' de plus</button>':'')+'<span class="sub">'+shown.length+' sur '+pl(T.length,"compte")+(T.length<L.length?' · '+pl(L.length-T.length,"site")+' rangé'+(L.length-T.length>1?'s':'')+' sous '+(gShown.length>1?'leur groupe':'son groupe'):'')+'</span></div>';
+    return row(k0)+(isGrp(k0)&&kxOpen(k0)?sitesOf(k0.id).slice().sort((a,b)=>(inL.has(b.id)-inL.has(a.id))||byNom(a,b)).map(s=>row(s,true)).join(""):"")}).join("")+'</tbody></table></div>'+
+   '<div class="pager">'+(T.length>shown.length?'<button class="btn" type="button" data-act="kmore">Afficher '+Math.min(150,T.length-shown.length)+' de plus</button>':'')+'<span class="sub">'+shown.length+' sur '+pl(T.length,"ligne")+(nHid?' · '+pl(nHid,"site")+' rangé'+(nHid>1?'s':'')+' sous '+(gShown.length>1?'leur groupe':'son groupe'):'')+'</span></div>';
   el.innerHTML=h;
 }
 

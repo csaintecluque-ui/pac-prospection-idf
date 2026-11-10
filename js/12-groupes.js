@@ -120,13 +120,16 @@ function gaOk(){if(!GA)return;const gid=GA.g,g=kOf(gid);if(!g){closeModal();retu
 
 /* Liste des comptes : groupes dépliés (gardé pendant la session) */
 const KXO=(()=>{try{return new Set(JSON.parse(sessionStorage.getItem("pac-idf-kxo")||"[]"))}catch(e){return new Set()}})();
+const KXC=new Set(); /* groupes repliés à la main pendant une recherche */
 const kxoSave=()=>{try{sessionStorage.setItem("pac-idf-kxo",JSON.stringify([...KXO]))}catch(e){}};
+const kxIsOpen=id=>{const r=document.querySelector('#view-comptes tr.k-grp[data-kid="'+id+'"]');return !!(r&&r.classList.contains("open"))};
+const kxSet=(id,o)=>{if(o){KXO.add(id);KXC.delete(id)}else{KXO.delete(id);KXC.add(id)}};
 document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("[data-kx],[data-kxall]");if(!t)return;e.stopPropagation();
-  if(t.dataset.kxall){const G=[...document.querySelectorAll("#view-comptes [data-kx]")].map(b=>b.dataset.kx),all=G.every(id=>KXO.has(id));G.forEach(id=>all?KXO.delete(id):KXO.add(id))}
-  else{const id=t.dataset.kx;KXO.has(id)?KXO.delete(id):KXO.add(id)}
+  if(t.dataset.kxall){const G=[...new Set([...document.querySelectorAll("#view-comptes .kx[data-kx]")].map(b=>b.dataset.kx))],all=G.every(kxIsOpen);G.forEach(id=>kxSet(id,!all))}
+  else{const id=t.dataset.kx;kxSet(id,!kxIsOpen(id))}
   kxoSave();renderComptes()},true);
 document.addEventListener("keydown",e=>{const t=e.target;if(!(t&&t.matches&&t.matches("#view-comptes tr.k-grp")))return;
-  if(e.key==="ArrowRight"||e.key==="ArrowLeft"){e.preventDefault();const id=t.dataset.kid,o=e.key==="ArrowRight";if(o===KXO.has(id))return;o?KXO.add(id):KXO.delete(id);kxoSave();renderComptes();const r=document.querySelector('#view-comptes tr[data-kid="'+id+'"]');if(r)r.focus({preventScroll:true})}});
+  if(e.key==="ArrowRight"||e.key==="ArrowLeft"){e.preventDefault();const id=t.dataset.kid,o=e.key==="ArrowRight";if(o===kxIsOpen(id))return;kxSet(id,o);kxoSave();renderComptes();const r=document.querySelector('#view-comptes tr[data-kid="'+id+'"]');if(r)r.focus({preventScroll:true})}});
 
 /* ---------- Événements propres aux groupes ---------- */
 document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("[data-gact]");if(!t)return;const a=t.dataset.gact;
@@ -141,3 +144,5 @@ document.addEventListener("change",e=>{const t=e.target;if(!GA||!t.matches)retur
   if(t.matches("input[data-ganw]")&&!t.checked){GA.nw.splice(+t.dataset.ganw,1);gaDraw()}});
 document.addEventListener("keydown",e=>{if(GA&&e.key==="Enter"&&e.target&&e.target.id==="ga-q"){e.preventDefault();const b=document.querySelector('[data-gact="ganew"]');if(b)gaNew()}});
 document.addEventListener("input",e=>{if(GA&&e.target&&e.target.id==="ga-q"){GA.q=e.target.value;gaDraw()}});
+/* Nouvelle recherche : les groupes repliés à la main pendant la précédente se rouvrent automatiquement */
+document.addEventListener("input",e=>{if(e.target&&e.target.id==="kQ")KXC.clear()});
