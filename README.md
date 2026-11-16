@@ -12,7 +12,7 @@ Les données restent dans le navigateur (IndexedDB) : faire régulièrement une 
   - `01-socle.js` : référentiels, utilitaires, modèle de données, migration, enregistrement
   - `02-interface.js` : navigation, fenêtres, actions, contacts, comptes
   - `03-agenda-tableau-de-bord.js` : calendrier, tableau de bord, agenda
-  - `04-comptes-cibles.js` : liste des comptes, fiche compte, cibles et campagnes
+  - `04-comptes-cibles.js` : liste des comptes, fiche compte, cibles et campagnes, gestion des campagnes (renommer, fusionner, supprimer)
   - `05-pac.js` : plan d'action commercial
   - `06-sauvegarde-doublons.js` : export, sauvegarde, restauration, copie de cibles, doublons
   - `07-mailing.js` : mailing

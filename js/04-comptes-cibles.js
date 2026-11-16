@@ -141,17 +141,17 @@ function filtered(){
 }
 function fillSelect(sel,opts,label){const cur=sel.value;sel.innerHTML='<option value="">'+label+'</option>'+opts.map(o=>'<option'+(o===cur?' selected':'')+'>'+esc(o)+'</option>').join("")}
 const campShort=c=>(c.campagne?c.campagne.replace(/^PAC IDF – /,""):"Sans campagne");
-function renderCampStrip(){const camps=[...new Set(S.cibles.map(c=>c.campagne).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr")),cur=$("#fCa").value;
+function renderCampStrip(){const camps=campList(),cur=$("#fCa").value;
   const order=["a_qualifier","cible","rdv","visite","opportunite","gagne","sans_suite"],col={a_qualifier:"var(--grey)",cible:"var(--info)",rdv:"var(--warn)",visite:"var(--accent)",opportunite:"var(--opp-open)",gagne:"var(--ok)",sans_suite:"var(--bad)"};
   $("#camps").innerHTML=camps.length>1?camps.map(cp=>{const C=S.cibles.filter(c=>c.campagne===cp),n=C.length,v=C.reduce((s,c)=>s+visitsDone(c),0),o=C.filter(c=>c.opp.creee).length;
-    return '<button type="button" class="camp" data-camp="'+esc(cp)+'" aria-pressed="'+(cur===cp)+'"><b>'+esc(cp.replace(/^PAC IDF – /,""))+'</b><span class="cs"><span>'+pl(n,"cible")+'</span><span>'+pl(v,"visite")+'</span><span>'+pl(o,"opp.","opp.")+'</span></span><span class="bar5">'+order.map(k=>{const m=C.filter(c=>c.etape===k).length;return m?'<i style="width:'+(m/n*100)+'%;background:'+col[k]+'" title="'+esc(SL[k])+' : '+m+'"></i>':''}).join("")+'</span></button>'}).join(""):"";
+    return '<button type="button" class="camp" data-camp="'+esc(cp)+'" title="'+esc(cp)+'" aria-pressed="'+(cur===cp)+'"><b>'+esc(cp.replace(/^PAC IDF – /,""))+'</b><span class="cs"><span>'+pl(n,"cible")+'</span><span>'+pl(v,"visite")+'</span><span>'+pl(o,"opp.","opp.")+'</span></span><span class="bar5">'+order.map(k=>{const m=C.filter(c=>c.etape===k).length;return m?'<i style="width:'+(m/n*100)+'%;background:'+col[k]+'" title="'+esc(SL[k])+' : '+m+'"></i>':''}).join("")+'</span></button>'}).join(""):"";
   $("#camps").hidden=camps.length<2}
 function renderCibles(){
   $("#views").innerHTML=VIEWS.map(v=>'<button type="button" class="chip" aria-pressed="'+(S.view===v.k)+'" data-view="'+v.k+'">'+esc(v.l)+'<span class="n num">'+S.cibles.filter(v.f).length+'</span></button>').join("");
   fillSelect($("#fBu"),BUS,"Toutes");
   {const sel=$("#fDp"),cur=sel.value;const used=[...new Set(S.cibles.map(c=>c.dept).filter(Boolean))].sort();
    sel.innerHTML='<option value="">Tous</option>'+used.map(d=>'<option value="'+esc(d)+'"'+(d===cur?' selected':'')+'>'+esc(dLabel(d))+' ('+S.cibles.filter(c=>c.dept===d).length+')</option>').join("")+(S.cibles.some(c=>!c.dept)?'<option value="__"'+(cur==="__"?' selected':'')+'>Non renseigné</option>':'');}
-  {const sel=$("#fCa"),cur=sel.value;const used=[...new Set(S.cibles.map(c=>c.campagne).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
+  {const sel=$("#fCa"),cur=sel.value;const used=campList();
    sel.innerHTML='<option value="">Toutes</option>'+used.map(x=>'<option value="'+esc(x)+'"'+(x===cur?' selected':'')+'>'+esc(x.replace(/^PAC IDF – /,""))+' ('+S.cibles.filter(c=>c.campagne===x).length+')</option>').join("")+(S.cibles.some(c=>!c.campagne)?'<option value="__"'+(cur==="__"?' selected':'')+'>Sans campagne</option>':'');}
   fillSelect($("#fAg"),[...new Set(S.cibles.map(c=>c.agence).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr")),"Toutes");
   const act=S.cibles.filter(isActive);
@@ -225,7 +225,7 @@ function openDrawer(id,preset){
   const db=document.querySelector("#drawer .db");if(db)db.scrollTop=0;
   setTimeout(()=>{const f=$("#d-compte");if(f&&isNew&&!D.compteId)f.focus({preventScroll:true})},30);
 }
-function closeDrawer(){$("#scrim").hidden=true;$("#drawer").hidden=true;$("#drawer").classList.remove("wide");D=null;P=null;ME=null;CP=null;PIMP=null;DUP=null;MIMP=null;IMP=null}
+function closeDrawer(){$("#scrim").hidden=true;$("#drawer").hidden=true;$("#drawer").classList.remove("wide");D=null;P=null;ME=null;CP=null;PIMP=null;DUP=null;MIMP=null;IMP=null;CG=null}
 function opts(list,cur,empty){if(cur&&!list.includes(cur))list=list.concat([cur]);return (empty!=null?'<option value="">'+esc(empty)+'</option>':'')+list.map(o=>'<option'+(o===cur?' selected':'')+'>'+esc(o)+'</option>').join("")}
 function checks(name,list,sel,lab){return '<div class="checks">'+list.map(it=>{const v=Array.isArray(it)?it[0]:it,l=Array.isArray(it)?it[0]+" · "+it[1]:it;return '<label><input type="checkbox" data-arr="'+name+'" value="'+esc(v)+'"'+(sel.includes(v)?' checked':'')+'>'+esc(lab?lab(it):l)+'</label>'}).join("")+'</div>'}
 function drawDrawer(){
@@ -295,6 +295,7 @@ function readForm(){
 }
 async function doSave(keepOpen){
   readForm();
+  if(D.campagne)D.campagne=campCanon(D.campagne);
   let k=kOf(D.compteId);
   if(!k){if(!D.compte){toast("Renseignez le nom du compte.");const f=$("#d-compte");if(f)f.focus({preventScroll:true});return false}
     k=findCompte(D.compte)||ensureCompte(D.compte,{origine:"cible",dept:D.dept||""})}
@@ -322,3 +323,110 @@ function mergeGroup(g){
   const ord=["a_qualifier","cible","rdv","visite","opportunite","gagne"];g.forEach(x=>{if(ord.indexOf(x.etape)>ord.indexOf(m.etape))m.etape=x.etape});
   const cr=g.map(x=>x.creeLe).filter(Boolean).sort()[0];if(cr)m.creeLe=cr;
   const r=norm(m);autoStage(r);return r}
+
+/* ================= Gestion des campagnes : renommer, fusionner, supprimer =================
+   Une campagne n'existe que par le champ « Campagne » de ses cibles : la renommer ou la supprimer,
+   c'est modifier ces cibles et les lignes du PAC qui y sont reliées. Les comptes, contacts et actions
+   ne changent pas. Chaque opération s'annule tant que le panneau reste ouvert. */
+const CAMP_PFX=/^PAC IDF – /;
+const campLbl=x=>String(x||"").replace(CAMP_PFX,"");
+const campKey=x=>nh(campLbl(x));
+const campList=()=>[...new Set(S.cibles.map(c=>c.campagne).filter(Boolean))].sort((a,b)=>campLbl(a).localeCompare(campLbl(b),"fr")||a.localeCompare(b,"fr"));
+/* Nom saisi ou importé → nom exact d'une campagne existante quand seuls le préfixe « PAC IDF – », la casse, les accents ou la ponctuation diffèrent */
+function campCanon(name){const v=String(name||"").trim();if(!v)return "";const L=campList();if(L.includes(v))return v;const k=campKey(v);return (k&&L.find(x=>campKey(x)===k))||v}
+let CG=null;
+const cgCibles=cp=>S.cibles.filter(c=>c.campagne===cp);
+const cgPac=cp=>S.pac.filter(p=>(p.campagnes||[]).includes(cp));
+/* Campagne qui reste lors d'une fusion de deux noms jumeaux : celle reliée au PAC, puis celle qui a le plus de cibles */
+const cgKeep=g=>g.slice().sort((a,b)=>cgPac(b).length-cgPac(a).length||cgCibles(b).length-cgCibles(a).length)[0];
+function campManage(){
+  if(!S.writable){toast("Modification impossible ici : ouvrez Registre en pleine page.");return}
+  if(!CG)CG={sel:-1,mode:"",undo:null};
+  const L=campList(),d=$("#drawer"),nSans=S.cibles.filter(c=>!c.campagne).length;
+  if(CG.sel>=L.length){CG.sel=-1;CG.mode=""}
+  const groups={};L.forEach(cp=>{const k=campKey(cp);(groups[k]=groups[k]||[]).push(cp)});
+  const twins=Object.values(groups).filter(g=>g.length>1);
+  const row=(cp,i)=>{const C=cgCibles(cp),v=C.reduce((s,c)=>s+visitsDone(c),0),o=C.filter(c=>c.opp.creee).length,np=cgPac(cp).length,open=CG.sel===i;
+    return '<div class="cg-r'+(open?' on':'')+'"><div class="grow"><b>'+esc(campLbl(cp))+'</b>'+
+      '<span class="sub">'+[pl(C.length,"cible"),pl(v,"visite"),pl(o,"opp.","opp."),np?"reliée à "+pl(np,"ligne")+" du PAC":""].filter(Boolean).join(" · ")+'</span>'+
+      (cp!==campLbl(cp)?'<span class="sub">Nom enregistré : '+esc(cp)+'</span>':'')+'</div>'+
+      '<div class="bar"><button class="btn ghost" type="button" data-cgedit="'+i+'"'+(open&&CG.mode==="edit"?' aria-pressed="true"':'')+'>Renommer</button>'+
+      '<button class="btn ghost danger" type="button" data-cgdel="'+i+'"'+(open&&CG.mode==="del"?' aria-pressed="true"':'')+'>Supprimer</button></div>'+
+      (open&&CG.mode==="edit"?cgEditBox(cp,L):'')+(open&&CG.mode==="del"?cgDelBox(cp):'')+'</div>'};
+  d.innerHTML='<div class="dh"><div class="grow"><span class="lbl">Cibles &amp; campagnes</span><h2 id="dTitle">Gérer les campagnes</h2>'+
+    '<p class="hint" style="margin-top:4px">Une campagne n\'existe que par ses cibles : la renommer, la fusionner ou la supprimer modifie le champ « Campagne » de ses cibles. Les comptes, les contacts et l\'historique des actions ne sont pas touchés.</p></div>'+
+    '<button class="btn ghost" type="button" data-act="close">Fermer</button></div>'+
+  '<div class="db">'+
+    (CG.undo?'<div class="notice cg-undo"><span class="grow">'+esc(CG.undo.txt)+'</span><button class="btn" type="button" data-act="cgundo">Annuler</button></div>':'')+
+    twins.map(g=>{const keep=cgKeep(g),n=g.filter(x=>x!==keep).reduce((s,x)=>s+cgCibles(x).length,0);
+      return '<div class="notice warn cg-twin"><span class="grow"><b>« '+esc(campLbl(keep))+' » existe en '+g.length+' exemplaires</b> : les noms ne diffèrent que par un préfixe, la casse ou la ponctuation. La fusion regroupe les '+pl(n,"cible")+' dans la campagne de '+pl(cgCibles(keep).length,"cible")+'.</span>'+
+        '<button class="btn primary" type="button" data-cgtwin="'+esc(keep)+'">Fusionner</button></div>'}).join("")+
+    (L.length?'<div class="cg-l">'+L.map(row).join("")+'</div>':'<p class="hint">Aucune campagne pour l\'instant : elles viennent de vos cibles.</p>')+
+    (nSans?'<p class="hint">'+pl(nSans,"cible")+' sans campagne : filtre Campagne › Sans campagne.</p>':'')+
+  '</div>'+
+  '<div class="df"><span class="grow"></span><button class="btn" type="button" data-act="close">Fermer</button></div>';
+  $("#scrim").hidden=false;d.hidden=false;
+  const f=$("#cg-name");if(f&&CG.focus){CG.focus=false;f.focus({preventScroll:true});f.select()}
+}
+function cgEditBox(cp,L){
+  return '<div class="cg-ed"><div class="f"><label class="lbl" for="cg-name">Nouveau nom</label><input type="text" id="cg-name" list="cgList" value="'+esc(cp)+'" autocomplete="off">'+
+    '<datalist id="cgList">'+L.filter(x=>x!==cp).map(x=>'<option value="'+esc(x)+'">').join("")+'</datalist></div>'+
+    '<p class="hint" id="cgHint">'+cgHintTxt(cp,cp)+'</p>'+
+    '<div class="bar"><span class="grow"></span><button class="btn" type="button" data-act="cgcancel">Annuler</button><button class="btn primary" type="button" data-act="cgrename">Renommer</button></div></div>'}
+/* Le nom saisi désigne-t-il une autre campagne ? Alors renommer = fusionner dans celle-ci */
+const cgTarget=(cp,v)=>{v=String(v||"").trim();if(!v)return "";const L=campList(),o=L.find(x=>x!==cp&&(x===v||campKey(x)===campKey(v)));return o||v};
+function cgHintTxt(cp,v){const n=cgCibles(cp).length;v=String(v||"").trim();
+  if(!v)return "Saisissez le nouveau nom.";
+  const t=cgTarget(cp,v);if(t===cp)return "Choisissez un autre nom, ou celui d'une campagne existante pour fusionner les deux.";
+  if(campList().includes(t))return "<b>Fusion</b> : ce nom est celui de la campagne « "+esc(campLbl(t))+" » ("+pl(cgCibles(t).length,"cible")+"). Les "+pl(n,"cible")+" la rejoindront.";
+  return "Les "+pl(n,"cible")+" prendront ce nom."+(cgPac(cp).length?" Les lignes du PAC reliées suivent.":"")}
+function cgHint(){const L=campList(),cp=L[CG&&CG.sel],h=$("#cgHint");if(cp==null||!h)return;h.innerHTML=cgHintTxt(cp,$("#cg-name").value)}
+function cgDelBox(cp){const C=cgCibles(cp),o=C.filter(c=>c.opp.creee).length,v=C.filter(c=>visitsDone(c)>0).length;
+  return '<div class="cg-ed"><div class="radio">'+
+    '<label><input type="radio" name="cgDel" value="keep" checked> Retirer le nom de campagne : les '+pl(C.length,"cible")+' restent, en « Sans campagne »</label>'+
+    '<label><input type="radio" name="cgDel" value="drop"> Supprimer les '+pl(C.length,"cible")+' de cette campagne (étape, priorité, opportunité, notes de la cible)'+(o||v?' — dont '+[o?pl(o,"avec opportunité","avec opportunité"):"",v?pl(v,"visitée","visitées"):""].filter(Boolean).join(" et "):'')+'</label>'+
+    '</div><p class="hint">Les comptes, contacts et actions sont conservés dans les deux cas'+(cgPac(cp).length?' ; la campagne est retirée des lignes du PAC reliées':'')+'.</p>'+
+    '<div class="bar"><span class="grow"></span><button class="btn" type="button" data-act="cgcancel">Annuler</button><button class="btn danger" type="button" data-act="cgdelgo">Supprimer la campagne</button></div></div>'}
+function cgOpen(i,mode){if(!CG)CG={sel:-1,mode:"",undo:null};const same=CG.sel===+i&&CG.mode===mode;CG.sel=same?-1:+i;CG.mode=same?"":mode;CG.focus=!same&&mode==="edit";campManage()}
+/* Enregistre l'état avant l'opération pour pouvoir l'annuler */
+function cgSnap(cp){return {cibles:cgCibles(cp).map(clone),pac:cgPac(cp).map(clone),acts:[]}}
+async function cgMove(from,to){
+  const u=cgSnap(from),C=cgCibles(from);
+  S.pac.forEach(p=>{if((p.campagnes||[]).includes(from)){p.campagnes=[...new Set(p.campagnes.map(x=>x===from?to:x))];p.majLe=now()}});
+  const fa=$("#fCa");if(fa&&fa.value===from)fa.value=to;
+  if(!(await bulkApply(C.map(c=>Object.assign(clone(c),{campagne:to})),[])))return null;
+  return Object.assign(u,{n:C.length})}
+async function cgRename(){
+  const L=campList(),cp=L[CG.sel];if(cp==null)return;
+  const v=$("#cg-name").value;if(!v.trim()){toast("Saisissez le nouveau nom.");return}
+  const to=cgTarget(cp,v);if(to===cp){toast("Le nom n'a pas changé.");return}
+  const fus=L.includes(to),n0=cgCibles(to).length;
+  const u=await cgMove(cp,to);if(!u)return;
+  u.txt=fus?"« "+campLbl(cp)+" » fusionnée dans « "+campLbl(to)+" » : "+pl(n0+u.n,"cible")+" au total.":"« "+campLbl(cp)+" » renommée en « "+campLbl(to)+" ».";
+  CG={sel:-1,mode:"",undo:u};campManage();toast(fus?"Campagnes fusionnées":"Campagne renommée")}
+async function cgTwin(keep){
+  const g=campList().filter(x=>x!==keep&&campKey(x)===campKey(keep));if(!g.length)return;
+  const all={cibles:[],pac:[],acts:[],n:0};
+  for(const x of g){const u=await cgMove(x,keep);if(!u)break;all.cibles.push(...u.cibles);u.pac.forEach(p=>{if(!all.pac.some(q=>q.id===p.id))all.pac.push(p)});all.n+=u.n}
+  all.txt="Campagnes fusionnées : "+pl(cgCibles(keep).length,"cible")+" dans « "+campLbl(keep)+" ».";
+  CG={sel:-1,mode:"",undo:all};campManage();toast("Campagnes fusionnées")}
+async function cgDelete(btn){
+  const L=campList(),cp=L[CG.sel];if(cp==null)return;
+  if(!btn.classList.contains("armed")){btn.classList.add("armed");btn.textContent="Confirmer la suppression";return}
+  const drop=((document.querySelector('input[name="cgDel"]:checked')||{}).value)==="drop";
+  const u=cgSnap(cp),C=cgCibles(cp);
+  S.pac.forEach(p=>{if((p.campagnes||[]).includes(cp)){p.campagnes=p.campagnes.filter(x=>x!==cp);p.majLe=now()}});
+  const fa=$("#fCa");if(fa&&fa.value===cp)fa.value="";
+  let ok;
+  if(drop){const ids=new Set(C.map(c=>c.id));S.actions.forEach(a=>{if(ids.has(a.cibleId)){u.acts.push([a.id,a.cibleId]);a.cibleId=""}});
+    ok=await bulkApply([],[...ids]);ids.forEach(id=>S.open.delete(id))}
+  else ok=await bulkApply(C.map(c=>Object.assign(clone(c),{campagne:""})),[]);
+  if(!ok)return;
+  u.txt="« "+campLbl(cp)+" » supprimée : "+(drop?pl(C.length,"cible")+" supprimée"+(C.length>1?"s":""):pl(C.length,"cible")+" passée"+(C.length>1?"s":"")+" en « Sans campagne »")+".";
+  CG={sel:-1,mode:"",undo:u};campManage();toast("Campagne supprimée")}
+async function cgUndo(){
+  const u=CG&&CG.undo;if(!u)return;
+  u.pac.forEach(p=>{const i=S.pac.findIndex(x=>x.id===p.id);if(i>=0)S.pac[i]=p});
+  u.acts.forEach(([aid,cid])=>{const a=S.actions.find(x=>x.id===aid);if(a)a.cibleId=cid});
+  const ok=await bulkApply(u.cibles.map(clone),[]);
+  CG.undo=null;CG.sel=-1;CG.mode="";campManage();toast(ok?"Opération annulée":"Annulation impossible pour le moment.")}

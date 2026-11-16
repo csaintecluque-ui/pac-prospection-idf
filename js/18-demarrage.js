@@ -83,6 +83,15 @@ document.addEventListener("click",async e=>{
   if(t.id==="btnNew"||d.act==="new"){openDrawer(null);return}
   if(t.id==="btnExport"){exportMenu();return}
   if(t.id==="btnImport"){importMenu();return}
+  /* Gestion des campagnes */
+  if(t.id==="btnCamps"){CG=null;campManage();return}
+  if(d.cgedit!=null){cgOpen(d.cgedit,"edit");return}
+  if(d.cgdel!=null){cgOpen(d.cgdel,"del");return}
+  if(d.cgtwin!=null){await cgTwin(d.cgtwin);return}
+  if(d.act==="cgrename"){await cgRename();return}
+  if(d.act==="cgcancel"){if(CG){CG.sel=-1;CG.mode=""}campManage();return}
+  if(d.act==="cgdelgo"){await cgDelete(t);return}
+  if(d.act==="cgundo"){await cgUndo();return}
   if(t.id==="btnDelEx"){
     if(!t.classList.contains("armed")){t.classList.add("armed","danger");t.textContent="Confirmer la suppression des exemples";return}
     S.cibles=S.cibles.filter(c=>!c.exemple);bump();commit();toast("Exemples supprimés");return}
@@ -163,6 +172,7 @@ document.addEventListener("click",async e=>{
     await deleteCible(D.id);toast("Cible supprimée (le compte, ses contacts et ses actions sont conservés)");closeDrawer();return}
 });
 document.addEventListener("change",e=>{const t=e.target;
+  if(t.name==="cgDel"){const b=document.querySelector('#drawer [data-act="cgdelgo"]');if(b){b.classList.remove("armed");b.textContent="Supprimer la campagne"}return}
   if(t.id==="o-creee"){$("#oFields").hidden=!t.checked}
   if(t.matches("#drawer input[data-dg]"))dupCount();
   if(t.name==="plAxe"){const w=$("#plFamW");if(w)w.hidden=t.value!=="famille";return}
@@ -176,6 +186,7 @@ document.addEventListener("change",e=>{const t=e.target;
 function keepFocus(id,fn){const el=document.getElementById(id),pos=el?el.selectionStart:0;fn();const n=document.getElementById(id);if(n){n.focus({preventScroll:true});try{n.setSelectionRange(pos,pos)}catch(_){}}}
 let qT=null;
 document.addEventListener("input",e=>{const t=e.target;
+  if(t.id==="cg-name"){cgHint();return}
   if(t.id==="am-k"){renderKc();return}
   if(t.id==="agQ"){UI.ag.q=t.value;UI.ag.lim=250;clearTimeout(qT);qT=setTimeout(()=>keepFocus("agQ",render),180);return}
   if(t.id==="kQ"){UI.kv.q=t.value;UI.kv.lim=150;clearTimeout(qT);qT=setTimeout(()=>keepFocus("kQ",render),200);return}
@@ -183,6 +194,7 @@ document.addEventListener("input",e=>{const t=e.target;
 document.addEventListener("keydown",e=>{
   if(e.target&&e.target.id==="am-k"&&kcKey(e))return;
   if(e.key==="Escape"&&!$("#modal").hidden){closeModal();return}
+  if(e.key==="Enter"&&e.target&&e.target.id==="cg-name"){e.preventDefault();cgRename();return}
   if(e.key==="Escape"&&!$("#drawer").hidden){if(D||P||ME){stayOpen();return}closeDrawer();return}
   if(e.key==="Enter"&&e.target.matches("tr[data-id]"))openDrawer(e.target.dataset.id);
   if(e.key==="Enter"&&e.target.matches("tr[data-kid]"))showTab("compte",e.target.dataset.kid);

@@ -1126,3 +1126,14 @@ tr.k-site .co{flex-wrap:nowrap;align-items:flex-start}tr.k-site .co b{min-width:
 .gsm-on input{width:17px!important;flex:none}
 .gsm-h .gsm-n{flex:0 1 280px;width:auto;min-width:120px}
 .gsm-h>.sub{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Gestion des campagnes (renommer, fusionner, supprimer) */
+.cg-l{display:flex;flex-direction:column;gap:8px}
+.cg-r{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:9px 12px}
+.cg-r.on{border-color:var(--accent)}
+.cg-r>.grow{min-width:0;flex:1 1 220px}
+.cg-r .sub{display:block;margin-top:2px}
+.cg-r .bar{flex:none;gap:6px}
+.cg-ed{flex:1 1 100%;display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--line);padding-top:10px;margin-top:2px}
+.cg-undo,.cg-twin{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-bottom:10px}
+.cg-undo .grow,.cg-twin .grow{min-width:220px;flex:1}

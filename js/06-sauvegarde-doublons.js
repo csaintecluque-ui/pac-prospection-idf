@@ -105,7 +105,7 @@ function copyMenu(src){
 async function doCopy(){
   const src=CP;if(!src)return;const k=nh(src.compte);
   const targets=[...document.querySelectorAll("#drawer input[data-cp]:checked")].map(i=>({camp:i.dataset.cp,dept:deptFromCamp(i.dataset.cp)}));
-  const nv=$("#cp-new").value.trim();
+  const nv=campCanon($("#cp-new").value);
   if(nv){if(nv===src.campagne){toast("C'est déjà la campagne de cette fiche.");return}
     if(S.cibles.some(x=>x.campagne===nv&&nh(x.compte)===k)){toast("Ce compte est déjà dans « "+nv+" ».");return}
     if(!targets.some(t=>t.camp===nv))targets.push({camp:nv,dept:$("#cp-dept").value||deptFromCamp(nv)})}

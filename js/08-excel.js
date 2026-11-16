@@ -516,7 +516,7 @@ function drawImportPreview(fname){
   const byName={};S.cibles.forEach(c=>{const k=nh(c.compte);if(k)(byName[k]=byName[k]||[]).push(c)});
   const byLead={};S.cibles.forEach(x=>x.leadIds.forEach(id=>{byLead[id]=x}));
   const effDept=c=>c.dept||guessDept(Object.assign(blank(),c));
-  const recs=I.recs.map(toCible),rowsByName={};recs.forEach(c=>{const k=nh(c.compte);if(k)rowsByName[k]=(rowsByName[k]||0)+1});
+  const recs=I.recs.map(toCible),rowsByName={};recs.forEach(c=>{if(c.campagne)c.campagne=campCanon(c.campagne)});recs.forEach(c=>{const k=nh(c.compte);if(k)rowsByName[k]=(rowsByName[k]||0)+1});
   const used=new Set();
   const findEx=c=>{const k=nh(c.compte),all=byName[k]||[],same=all.filter(x=>!used.has(x.id));if(!same.length)return null;const d=effDept(c);
     if(d)return same.find(x=>x.dept===d)||same.find(x=>!x.dept)||(all.length===1&&rowsByName[k]===1?same[0]:null);
