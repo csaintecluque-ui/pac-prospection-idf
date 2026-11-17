@@ -1166,3 +1166,30 @@ tbody tr.picked td.pick{box-shadow:inset 3px 0 0 var(--accent)}
 @media print{.pickbar,.pick{display:none!important}}
 /* Le message passe au-dessus de la barre de sélection plutôt que dessus */
 body:has(#view-cibles:not([hidden]) #pickBar:not([hidden])) .toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+
+/* Réunions de synergie (Café Commerce, inter-BU…) */
+.eic-rs{background:color-mix(in srgb,var(--accent) 14%,var(--surface));color:var(--accent)}
+.eic-rs svg{width:14px;height:14px}
+.pill.tone-rs{background:color-mix(in srgb,var(--accent) 14%,var(--surface));color:var(--accent)}
+.rs-c{border-left:3px solid color-mix(in srgb,var(--accent) 55%,var(--line))}
+.rs-cs{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+.rs-cs .lk{font-size:12.5px}
+.rs-affw{grid-column:1/-1;display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--line);padding-top:14px}
+.rs-affh{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}
+.rs-affh h3{margin:0;font-size:14px;font-weight:600}
+.rs-aff{display:flex;flex-direction:column;gap:6px}
+.rs-al{display:grid;grid-template-columns:minmax(150px,1.2fr) minmax(120px,.9fr) minmax(160px,1.4fr) minmax(150px,1.2fr) 32px;gap:8px;align-items:center}
+.rs-alh{font-size:11.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.rs-al input.known{border-color:color-mix(in srgb,var(--accent) 60%,var(--line));background:color-mix(in srgb,var(--accent) 6%,var(--surface))}
+.rs-adel{padding:6px;justify-content:center}
+.rs-adel svg{width:14px;height:14px}
+@media (max-width:900px){.rs-al{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 32px}.rs-alh{display:none}.rs-al [data-f="besoin"],.rs-al [data-f="suite"]{grid-column:span 1}.rs-al .rs-adel{grid-row:1;grid-column:3}}
+.modal.compact .rs-al{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 32px}.modal.compact .rs-alh{display:none}.modal.compact .rs-al .rs-adel{grid-row:1;grid-column:3}
+.rs-vl{display:flex;flex-direction:column}
+.rs-v{display:flex;flex-direction:column;gap:3px;padding:10px 0;border-top:1px solid var(--line)}
+.rs-v:first-child{border-top:0;padding-top:2px}
+.rs-vk{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
+.rs-vb{font-size:14.5px;line-height:1.5;white-space:pre-wrap}
+.rs-vs{font-size:13.5px;color:var(--muted)}
+.rs-vs .lbl{margin-right:6px}
+.rs-pt{font-size:14px}

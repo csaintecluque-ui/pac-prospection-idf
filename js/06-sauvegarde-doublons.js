@@ -11,7 +11,7 @@ async function restore(text){
   const before={c:S.cibles.length,k:S.comptes.length,ct:S.contacts.length,a:S.actions.length,m:S.mailing.length,p:S.pac.length};
   if(j.schema===SCHEMA){
     const up=(coll,list,nf)=>{(list||[]).forEach(x=>{const o=nf(x);if(!o.id)o.id=uid();const i=S[coll].findIndex(y=>y.id===o.id);if(i>=0)S[coll][i]=o;else S[coll].push(o)})};
-    up("comptes",j.comptes,knorm);up("contacts",j.contacts,ctnorm);up("actions",j.actions,anorm);up("cibles",j.cibles,norm);up("mailing",j.mailing,mnorm);up("devis",j.devis,dvnorm);
+    up("comptes",j.comptes,knorm);up("contacts",j.contacts,ctnorm);up("actions",j.actions,anorm);up("cibles",j.cibles,norm);up("mailing",j.mailing,mnorm);up("devis",j.devis,dvnorm);up("reunions",j.reunions,rsnorm);
     (j.plans||[]).forEach(p=>{if(!S.plans.some(x=>x.id===p.id))S.plans.push(p)});up("pac",j.pac,pnorm);
     if(j.settings)S.settings=Object.assign({},j.settings,{lastBackup:S.settings.lastBackup||j.settings.lastBackup,migrationV3:S.settings.migrationV3});
     bump();ensurePlans();repairLinks()}
@@ -27,7 +27,7 @@ async function restore(text){
   if(j.histo&&typeof j.histo==="object"){try{await hPutMany(new Map(Object.entries(j.histo)))}catch(e){}}
   lsSave();closeDrawer();render();
   const d=(a,b)=>a-b;
-  toast("Restauré · "+[pl(S.cibles.length,"cible"),pl(S.comptes.length,"compte")+(S.comptes.length>before.k?" (+"+d(S.comptes.length,before.k)+")":""),pl(S.actions.length,"action"),pl(S.mailing.length,"ligne")+" de mailing",pl(S.pac.length,"ligne")+" de PAC"].join(" · "));
+  toast("Restauré · "+[pl(S.cibles.length,"cible"),pl(S.comptes.length,"compte")+(S.comptes.length>before.k?" (+"+d(S.comptes.length,before.k)+")":""),pl(S.actions.length,"action"),pl(S.mailing.length,"ligne")+" de mailing",pl(S.pac.length,"ligne")+" de PAC",S.reunions.length?pl(S.reunions.length,"réunion","réunions"):""].filter(Boolean).join(" · "));
 }
 function exportMenu(){
   const rows=[["Compte","Type","Secteur","Département","Contact principal","Fonction","Téléphone","E-mail","Agence","BU d'origine","Apporteur","Source","Campagne","Diagnostics visés","Potentiel annuel (€)","Priorité","Étape","Motif sans suite","Prochaine action","Quoi","Visites réalisées","Opportunité","Montant opp. (€)","Statut opp.","N° devis","Notes"]]

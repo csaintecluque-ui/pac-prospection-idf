@@ -240,7 +240,7 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 const persistReq=()=>{try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}};
 function applyState(r){
   S.cibles=(r.cibles||[]).map(norm);S.comptes=(r.comptes||[]).map(knorm);S.contacts=(r.contacts||[]).map(ctnorm);S.actions=(r.actions||[]).map(anorm);
-  S.plans=Array.isArray(r.plans)?r.plans:[];S.pac=(r.pac||[]).map(pnorm);S.mailing=(r.mailing||[]).map(mnorm);S.devis=(r.devis||[]).map(dvnorm);S.settings=Object.assign({objectif:8},r.settings||{});bump()}
+  S.plans=Array.isArray(r.plans)?r.plans:[];S.pac=(r.pac||[]).map(pnorm);S.mailing=(r.mailing||[]).map(mnorm);S.devis=(r.devis||[]).map(dvnorm);S.reunions=(r.reunions||[]).map(rsnorm);S.settings=Object.assign({objectif:8},r.settings||{});bump()}
 async function loadState(){
   let idbOK=true,st;
   try{st=await appGet("state")}catch(e){idbOK=false}
@@ -299,7 +299,7 @@ function renum(){S.plans.slice().sort(plSort).forEach((x,k)=>x.ordre=k+1);bump()
 const QK=[["visite","RDV"],["appel","Appel"],["mail","Mail"],["tache","Rappel"],["note","Note"],["cr","Compte rendu"]];
 const I_CR=SV+'<path d="M4 1.8h6l2.5 2.5v9.9H4z"/><path d="M10 1.8v2.5h2.5M6 7h4.5M6 9.3h4.5M6 11.6h3"/></svg>';
 function renderQk(){const el=$("#qk");if(!el)return;if(el.dataset.done){nbBadge();return}el.dataset.done="1";
-  el.innerHTML=QK.map(([t,l])=>'<button type="button" data-anew="'+(t==="cr"?"visite":t)+'"'+(t==="cr"?' data-cr="1"':'')+' data-qk="1" title="'+esc(t==="cr"?"Rédiger un compte rendu":"Nouveau : "+l)+'">'+(t==="cr"?I_CR:I_EV[t])+'<span>'+esc(l)+'</span></button>').join("")+'<button type="button" data-dvnew="1" title="Nouveau devis">'+I_DV+'<span>Devis</span></button><button type="button" class="qk-nb" data-act="nbopen" title="Bloc-notes personnel, sans compte">'+I_EV.note+'<span>Bloc-notes</span><b class="num" id="qkNb" hidden></b></button>';nbBadge()}
+  el.innerHTML=QK.map(([t,l])=>'<button type="button" data-anew="'+(t==="cr"?"visite":t)+'"'+(t==="cr"?' data-cr="1"':'')+' data-qk="1" title="'+esc(t==="cr"?"Rédiger un compte rendu":"Nouveau : "+l)+'">'+(t==="cr"?I_CR:I_EV[t])+'<span>'+esc(l)+'</span></button>').join("")+'<button type="button" data-dvnew="1" title="Nouveau devis">'+I_DV+'<span>Devis</span></button><button type="button" data-rsnew="1" title="Compte rendu de réunion (Café Commerce, inter-BU, équipe, direction…), sans compte">'+I_RS+'<span>Réunion</span></button><button type="button" class="qk-nb" data-act="nbopen" title="Bloc-notes personnel, sans compte">'+I_EV.note+'<span>Bloc-notes</span><b class="num" id="qkNb" hidden></b></button>';nbBadge()}
 
 /* ---------- Recherche de compte (nom, ville, contact, e-mail, typologie…) ---------- */
 let KSX=null,KSXV=-1,KC_I=0;
