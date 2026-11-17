@@ -509,13 +509,13 @@ async function dvImport(files){files=[...(files||[])];if(!files.length)return;
     if(DV&&MODAL==="devis"&&dvNew){dvRead();const keep={id:DV.id,creeLe:DV.creeLe},typed=DV._k;const nd=dvFromImport(r,files[0].name);DV=Object.assign(nd,keep);if(!nd.compteId&&typed&&!r.client)DV._k=typed;DVCAT=false;dvDraw(true)}
     else{if(MODAL)closeModal();DV=dvFromImport(r,files[0].name);dvNew=true;dvDelA=false;DVCAT=false;dvDraw(true)}
     toast("Devis lu : vérifiez puis Enregistrer.");return}
-  let n=0,dup=0,err=0,nk=0;const seen=new Set();
+  let n=0,dup=0,err=0,nk=0;const seen=new Set(),k0=grpIds();
   for(const f of files){let r;try{r=await dvReadFile(f)}catch(e){err++;continue}
     const key=nh(r.numero);if(key&&(seen.has(key)||S.devis.some(d=>nh(d.numero)===key))){dup++;continue}if(key)seen.add(key);
     if(!r.lignes.length){err++;continue}
     const d=dvFromImport(r,f.name);const k=dvImpCompte(d);if(d._imp.match==="nouveau")nk++;d.compteId=k.id;dvImpContact(d,k);
     const o=Object.assign({},d);delete o._k;delete o._imp;put("devis",o);n++}
-  commit();toast(pl(n,"devis importé","devis importés")+(dup?" · "+dup+" déjà suivi"+(dup>1?"s":"")+" (ignoré"+(dup>1?"s":"")+")":"")+(nk?" · "+pl(nk,"compte créé","comptes créés"):"")+(err?" · "+err+" illisible"+(err>1?"s":""):""))}
+  grpAfterImport(k0);commit();toast(pl(n,"devis importé","devis importés")+(dup?" · "+dup+" déjà suivi"+(dup>1?"s":"")+" (ignoré"+(dup>1?"s":"")+")":"")+(nk?" · "+pl(nk,"compte créé","comptes créés"):"")+(err?" · "+err+" illisible"+(err>1?"s":""):""))}
 function dvImpCompte(d){let k=findCompte(d._k)||kOf(d.compteId);if(!k){const i=d._imp&&d._imp.init||{origine:"devis"};k=ensureCompte(d._k,i)}return k}
 function dvImpContact(d,k){const c=d._imp&&d._imp.ct;if(!c||!(c.nom||c.mail))return;if(d.contactId&&ctById(d.contactId))return;const ct=ensureContact(k.id,c);d.contactId=ct.id}
 /* Mise à jour d'un devis déjà suivi depuis le fichier : statut, réalisations et nombres définitifs conservés */
@@ -641,7 +641,7 @@ function dvxSumHTML(){const X=DVX;if(!X.sel.size)return '<div class="empty" styl
    (P.link.length?'<li><b>'+pl(P.link.length,"devis en attente","devis en attente")+'</b> passé'+(P.link.length>1?'s':'')+' en accepté : la commande du même client et du même montant y est rattachée</li>':'')+
    (P.av?'<li><b>'+pl(P.av,"affaire avec avoir","affaires avec avoir")+'</b> : gardée'+(P.av>1?'s':'')+' en gagné au montant du devis, et signalée'+(P.av>1?'s':'')+' « Avoir »</li>':'')+'</ul>'+
    '<p class="hint" style="margin:0">Sans doublon : un n° de devis, de commande ou de facture déjà suivi met à jour le devis existant. Le détail des prestations n\'est pas dans l\'export : chaque devis porte son montant global, et vous pouvez ensuite importer le devis Word pour le détailler.</p>'}
-function dvxGo(){const X=DVX,P=dvxPlan(X.groups,[...X.sel]);S.settings.dvApporteurs=[...X.sel];
+function dvxGo(){const X=DVX,P=dvxPlan(X.groups,[...X.sel]),k0=grpIds();S.settings.dvApporteurs=[...X.sel];
   let nk=0;const KI=dvxIndex(),QI=[],QK=[];
   P.add.forEach(({g})=>{let k=KI.get(dvxKey(g.tiers));if(!k){k=ensureCompte(g.tiers||"Client sans nom",{type:g.st==="accepte"?"Client existant":"Prospect",ville:g.ville,cp:/^\d{5}$/.test(g.cp)?g.cp:"",dept:cpDept(g.cp),origine:"devis excel"});QK.push(k.nom);KI.set(dvxKey(k.nom),k);nk++}
     else if(g.st==="accepte"&&(TYPE_RANK[k.type]||0)<TYPE_RANK["Client existant"])k.type="Client existant";
@@ -649,7 +649,7 @@ function dvxGo(){const X=DVX,P=dvxPlan(X.groups,[...X.sel]);S.settings.dvApporte
   P.upd.forEach(({d,g})=>{const o=dvxMerge(clone(d),g),e=qnDiff(dvnorm(clone(d)),o,false);put("devis",o);if(e.length)QI.push({id:o.id,e})});
   P.link.forEach(({d,g})=>{const c=dvxMerge(clone(d),g);c.notes=[c.notes,"Commande "+g.key+" rattachée (même client, même montant)"].filter(Boolean).join(" · ");const e=qnDiff(dvnorm(clone(d)),c,false);put("devis",c);if(e.length)QI.push({id:c.id,e})});
   qnRecord(X.file,QI,QK);
-  closeModal();DVX=null;commit();if(S.tab!=="devis")showTab("devis");setTimeout(qnOpen,50);
+  closeModal();DVX=null;grpAfterImport(k0);commit();if(S.tab!=="devis")showTab("devis");setTimeout(qnOpen,50);
   toast("Intégré : "+[pl(P.add.length,"devis créé","devis créés"),pl(P.upd.length,"mis à jour","mis à jour"),P.link.length?pl(P.link.length,"rattaché","rattachés")+" à sa commande":"",nk?pl(nk,"compte créé","comptes créés"):""].filter(Boolean).join(" · "))}
 document.addEventListener("change",e=>{const t=e.target;if(!DVX||MODAL!=="dvx"||!t.dataset||t.dataset.dvxa==null)return;const a=t.dataset.dvxa;t.checked?DVX.sel.add(a):DVX.sel.delete(a);
   const lb=t.closest(".dvx-a");if(lb)lb.classList.toggle("on",t.checked);const s=$("#dvxSum");if(s)s.innerHTML=dvxSumHTML();const b=document.querySelector('#modal [data-act="dvxgo"]');if(b)b.disabled=!DVX.sel.size});

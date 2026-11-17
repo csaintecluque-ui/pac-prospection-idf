@@ -251,7 +251,7 @@ function mCollect(){const I=MIMP,sel=[...document.querySelectorAll("#mPrev input
 function mCount(){const c=mCollect();
   $("#mSum").innerHTML='<div><b>'+c.add.length+'</b><span class="sub">nouveau'+(c.add.length>1?'x':'')+' contact'+(c.add.length>1?'s':'')+'</span></div><div><b>'+c.upd.length+'</b><span class="sub">déjà présent'+(c.upd.length>1?'s':'')+'</span></div><div><b>'+c.dup+'</b><span class="sub">en double dans le fichier</span></div>';
   const n=c.add.length+c.upd.length;$("#mGo").disabled=!n;$("#mGo").textContent=n?"Importer "+pl(n,"contact"):"Rien à importer"}
-async function mImportGo(){const c=mCollect(),now=new Date().toISOString(),list=[];
+async function mImportGo(){const c=mCollect(),now=new Date().toISOString(),list=[],k0=grpIds();
   const DESC=["client","typologie","famille","contact","mail","appel","accroche","mission","agence","apporteur","nbFact","ca","attention","envoyer"];
   c.add.forEach(r=>list.push(Object.assign(r,{id:uid(),creeLe:now})));
   c.upd.forEach(([ex,r])=>{const m=clone(ex);DESC.forEach(k=>{if(r[k])m[k]=r[k]});if(!m.liste)m.liste=r.liste;
@@ -259,6 +259,6 @@ async function mImportGo(){const c=mCollect(),now=new Date().toISOString(),list=
   const b=$("#mGo");b.disabled=true;b.textContent="Import en cours…";
   if(MIMP.types){S.settings.mailTypes=MIMP.types;await saveSettings()}
   if(!(await mBulk(list))){b.disabled=false;b.textContent="Réessayer";return}
-  MIMP=null;closeDrawer();MUI.view="aenv";MUI.lim=200;renderMailing();
+  grpAfterImport(k0);MIMP=null;closeDrawer();MUI.view="aenv";MUI.lim=200;renderMailing();
   toast([c.add.length?pl(c.add.length,"contact ajouté","contacts ajoutés"):"",c.upd.length?pl(c.upd.length,"contact mis à jour","contacts mis à jour"):""].filter(Boolean).join(" · ")||"Rien de nouveau");
 }

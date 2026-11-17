@@ -559,6 +559,7 @@ function drawImportPreview(fname){
 }
 function impTarget(it,i){if(it.ex)return it.ex;if(!it.near.length)return null;const sel=document.querySelector('#imPrev select[data-near="'+i+'"]');const id=sel?sel.value:it.near[0].id;return id?S.cibles.find(x=>x.id===id)||null:null}
 async function runImport(){
+  const k0=grpIds();
   const mode=(document.querySelector('input[name="imDup"]:checked')||{}).value||"complete";
   const out=new Map(),now=new Date().toISOString();let nNew=0;const touched=new Set();
   IMP.items.forEach((it,i)=>{const c=it.c,ex=impTarget(it,i);
@@ -575,6 +576,7 @@ async function runImport(){
   const btn=$("#imGo");btn.disabled=true;btn.textContent="Import en cours…";
   const ok=out.size?await bulkApply([...out.values()],[]):true;
   if(!ok){btn.disabled=false;btn.textContent="Réessayer";return}
+  grpAfterImport(k0);
   toast([nNew?pl(nNew,"nouvelle fiche","nouvelles fiches"):"",touched.size?pl(touched.size,"fiche complétée","fiches complétées"):""].filter(Boolean).join(" · ")||"Rien de nouveau : tout était déjà dans l'application");
   closeDrawer();S.view="toutes";render();
 }

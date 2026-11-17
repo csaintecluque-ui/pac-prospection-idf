@@ -174,10 +174,25 @@ function grpSuggest(){if(GSUG&&GSUGV===S.ver)return GSUG;const ign=new Set(S.set
     if(head?members.length<1:members.length<2)return;
     out.push({key:pk,name,head:head?head.id:"",members:members.sort(byNom).map(k=>k.id)})});
   GSUG=out.sort((a,b)=>b.members.length-a.members.length||a.name.localeCompare(b.name,"fr"));GSUGV=S.ver;return GSUG}
-/* Bandeau de la liste des comptes */
-function grpSugBar(view){const L=grpSuggest(),n=L.length;if(!n)return "";const hid=(S.settings.grpSugHide||0)>=n;
+/* Bandeau de la liste des comptes.
+   « Masquer » enregistre les suggestions du moment : le bandeau ne revient qu'après un import (cibles Excel, historique clients,
+   mailing, devis) qui crée des comptes formant un nouveau groupe possible ou complétant une suggestion. Un compte créé à la main ne le fait pas revenir. */
+const grpSugN=s=>s.members.length+(s.head?1:0);
+const grpSnap=L=>{const k={};L.forEach(s=>{k[s.key]=grpSugN(s)});return {le:now(),k,again:false}};
+const grpIds=()=>new Set(S.comptes.map(k=>k.id));
+function grpSugHid(L){let h=S.settings.grpSugHide;if(!h)return false;
+  /* Ancien réglage (un simple nombre de suggestions) : le bandeau reste masqué, les suggestions actuelles servent de référence */
+  if(typeof h!=="object"){h=S.settings.grpSugHide=grpSnap(L);lsSave()}
+  return !h.again}
+/* À appeler en fin d'import avec les comptes présents avant (grpIds()) */
+function grpAfterImport(k0){const h=S.settings.grpSugHide;if(!h||typeof h!=="object"||h.again||!k0)return;
+  const nw=new Set(S.comptes.filter(k=>!k0.has(k.id)).map(k=>k.id));if(!nw.size)return;
+  GSUG=null;const L=grpSuggest();
+  if(L.some(s=>(nw.has(s.head)||s.members.some(id=>nw.has(id)))&&grpSugN(s)>(h.k[s.key]||0))){h.again=true;lsSave()}}
+function grpSugBar(view){const L=grpSuggest(),n=L.length;if(!n)return "";const hid=grpSugHid(L);
   if(hid&&view!=="groupes")return "";
-  return '<div class="notice grp-sug">'+I_PLUS+'<span class="grow"><b>'+pl(n,"groupe possible","groupes possibles")+'</b> : des comptes ont le même début de nom ('+esc(L.slice(0,4).map(x=>x.name).join(", "))+(n>4?"…":"")+').</span><button type="button" class="btn" data-gact="gsug">Voir les suggestions</button>'+(hid?'':'<button type="button" class="more" data-gact="gsughide" title="Le bandeau revient si de nouvelles suggestions apparaissent ; toujours accessible depuis la vue « Groupes et sites »">Masquer</button>')+'</div>'}
+  const h=S.settings.grpSugHide,nn=h&&typeof h==="object"&&h.again?L.filter(s=>grpSugN(s)>(h.k[s.key]||0)).length:0;
+  return '<div class="notice grp-sug">'+I_PLUS+'<span class="grow"><b>'+pl(n,"groupe possible","groupes possibles")+'</b>'+(nn?', dont '+pl(nn,"nouveau ou complété","nouveaux ou complétés")+' depuis que vous l\'aviez masqué':'')+' : des comptes ont le même début de nom ('+esc(L.slice(0,4).map(x=>x.name).join(", "))+(n>4?"…":"")+').</span><button type="button" class="btn" data-gact="gsug">Voir les suggestions</button>'+(hid?'':'<button type="button" class="more" data-gact="gsughide" title="Le bandeau ne reviendra qu\'après un import qui ajoute des comptes formant de nouveaux groupes. Les suggestions restent dans la vue « Groupes et sites ».">Masquer</button>')+'</div>'}
 let GSM=null;
 function gsugOpen(){const L=grpSuggest();if(!L.length){toast("Aucune suggestion de groupe : pas d'autres comptes au même début de nom.");return}
   if(MODAL)closeModal();
@@ -216,7 +231,7 @@ document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest
   if(a==="gsug"){gsugOpen();return}
   if(a==="gsugok"){gsugOk();return}
   if(a==="gsign"){gsugIgnore(+t.dataset.i);return}
-  if(a==="gsughide"){S.settings.grpSugHide=grpSuggest().length;lsSave();render();toast("Bandeau masqué : les suggestions restent dans la vue « Groupes et sites »");return}});
+  if(a==="gsughide"){S.settings.grpSugHide=grpSnap(grpSuggest());lsSave();render();toast("Bandeau masqué jusqu'au prochain import de nouveaux comptes · suggestions dans « Groupes et sites »");return}});
 document.addEventListener("change",e=>{const t=e.target;if(!GSM||!t.matches)return;
   if(t.matches("input[data-gson]")){const s=GSM.L[+t.dataset.gson];s.on=t.checked;t.closest(".gsm").classList.toggle("off",!s.on);gsmCount();return}
   if(t.matches("input[data-gsm]")){const s=GSM.L[+t.dataset.gsm];t.checked?s.sel.add(t.dataset.id):s.sel.delete(t.dataset.id);gsmCount();return}});

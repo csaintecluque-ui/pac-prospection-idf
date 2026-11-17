@@ -176,7 +176,7 @@ async function histoApply(){const H=HIMP;if(!H)return;const btn=$("#hiGo");btn.d
   await new Promise(r=>setTimeout(r,30));
   const keep=new Set([...document.querySelectorAll("#hiTy input:checked")].map(i=>i.value));
   const byK=new Map();H.pieces.forEach(p=>{const k=nh(p.t);let l=byK.get(k);if(!l)byK.set(k,l=[]);l.push(p)});
-  const store=new Map(),done=new Map();let nNew=0,nUpd=0,nSkip=0;const c0=S.contacts.length;
+  const store=new Map(),done=new Map(),k0=grpIds();let nNew=0,nUpd=0,nSkip=0;const c0=S.contacts.length;
   H.clients.forEach((c,k)=>{let acc=findCompte(c.nom);
     if(!acc&&!keep.has(c.typologie||"Sans typologie")){nSkip++;return}
     const isNew=!acc;if(!acc)acc=ensureCompte(c.nom,{origine:"historique"});
@@ -199,7 +199,7 @@ async function histoApply(){const H=HIMP;if(!H)return;const btn=$("#hiGo");btn.d
   if(H.types&&H.types.length)S.settings.mailTypes=H.types;
   const np=ensureFamilyPlans();
   S.settings.histoImport={le:now(),fichier:H.fname,clients:done.size,pieces:H.pieces.length};
-  bump();lsSave();HIMP=null;closeDrawer();UI.kv.v="tous";uiSave();showTab("comptes");
+  grpAfterImport(k0);bump();lsSave();HIMP=null;closeDrawer();UI.kv.v="tous";uiSave();showTab("comptes");
   toast(pl(nNew,"compte créé","comptes créés")+" · "+pl(nUpd,"compte complété","comptes complétés")+" · "+pl(S.contacts.length-c0,"contact ajouté","contacts ajoutés")+(nSkip?" · "+nSkip+" ignorés (typologies décochées)":"")+(np?" · "+pl(np,"PAC")+" par famille":""))}
 
 /* Antécédents dans la fiche compte */
