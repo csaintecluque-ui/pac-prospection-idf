@@ -240,7 +240,7 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 const persistReq=()=>{try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}};
 function applyState(r){
   S.cibles=(r.cibles||[]).map(norm);S.comptes=(r.comptes||[]).map(knorm);S.contacts=(r.contacts||[]).map(ctnorm);S.actions=(r.actions||[]).map(anorm);
-  S.plans=Array.isArray(r.plans)?r.plans:[];S.pac=(r.pac||[]).map(pnorm);S.mailing=(r.mailing||[]).map(mnorm);S.devis=(r.devis||[]).map(dvnorm);S.reunions=(r.reunions||[]).map(rsnorm);S.settings=Object.assign({objectif:8},r.settings||{});bump()}
+  S.plans=Array.isArray(r.plans)?r.plans:[];S.pac=(r.pac||[]).map(pnorm);S.mailing=(r.mailing||[]).map(mnorm);S.devis=(r.devis||[]).map(dvnorm);S.reunions=(r.reunions||[]).map(rsnorm);S.liens=(r.liens||[]).map(lnorm);S.settings=Object.assign({objectif:8},r.settings||{});bump()}
 async function loadState(){
   let idbOK=true,st;
   try{st=await appGet("state")}catch(e){idbOK=false}
@@ -383,7 +383,7 @@ function tlItem(x,cs){const ct=ctById(x.contactId),who=[ct?ct.nom:"",x.interlocu
   return '<div class="tl-i'+(x.statut==="annule"?' annule':'')+(op?' open':'')+'" '+(x.mailing?'data-mopen="'+esc(x.id)+'"':'data-aid="'+esc(x.id)+'"')+'><span class="eic eic-'+esc(x.type)+'">'+(I_EV[x.type]||I_EV.autre)+'</span>'+
    '<div style="min-width:0;display:flex;flex-direction:column;gap:3px"><div class="eh"><span class="num">'+(x.date?fdate(x.date):"—")+'</span><b>'+esc(x.mailing?"Mailing":ESHORT[x.type]||x.type)+'</b>'+
     (x.statut==="annule"?'<span class="pill tone-grey">Annulé</span>':'')+(x.cr?'<span class="pill tone-info">Compte rendu</span>':'')+(x.resultat?'<span class="pill tone-'+(/^(Joint|Réponse|Appel reçu|Mail reçu|Rencontr|Relancé)/.test(x.resultat)?"ok":"info")+'">'+esc(x.resultat)+'</span>':'')+
-    (x._site?'<span class="pill tone-grey" title="Site du groupe">'+esc(x._site)+'</span>':'')+'<span class="sub grow">'+esc(who)+(cb&&cs.length>1?' · '+esc(campShort(cb)):'')+'</span>'+
+    (x._site?'<span class="pill tone-grey" title="Site du groupe">'+esc(x._site)+'</span>':'')+(x.mailing?'':lkClip("action",x.id))+'<span class="sub grow">'+esc(who)+(cb&&cs.length>1?' · '+esc(campShort(cb)):'')+'</span>'+
     (has?'<button type="button" class="tgb'+(op?'':' has')+'" data-tlx="'+esc(id)+'" aria-expanded="'+op+'" title="'+(op?'Replier':'Déplier')+'" aria-label="'+(op?'Replier':'Déplier')+' le détail">'+CHEV+'</button>':'')+'</div>'+
     (x.objet?'<div class="eobj">'+esc(x.objet)+'</div>':'')+
     (op?(x.details?'<p class="edet">'+esc(x.details)+'</p>':'')+(x.cr?crHTML(x):'')+(x.suite?'<div class="sub">Suite : '+esc(x.suite)+'</div>':'')
@@ -410,7 +410,7 @@ function viewAction(id){const a=S.actions.find(x=>x.id===id);if(!a)return;if(!vi
        (ct&&(ct.tel||ct.mail)?'<div class="rv-kv"><span>Contact</span><b>'+(ct.tel?'<a class="dl num" href="tel:'+esc(ct.tel.replace(/[^\d+]/g,""))+'">'+esc(ct.tel)+'</a> ':'')+(ct.mail?'<a class="dl" href="mailto:'+esc(ct.mail)+'">'+esc(ct.mail)+'</a>':'')+'</b></div>':''))+
      card("Opportunité",((c.prestas||[]).length?'<div class="tags" style="margin-bottom:6px">'+c.prestas.map(p=>'<span class="tag" title="'+esc(PLABEL[p]||p)+'">'+esc(PLABEL[p]||p)+'</span>').join("")+'</div>':'')+kv("Potentiel",c.potentiel?eur(c.potentiel)+" / an":"")+kv("Concurrence",esc(c.concurrence||""))+kv("Campagne",cb?esc(campShort(cb))+' · <span class="pill st-'+cb.etape+'" style="font-size:11px">'+esc(SL[cb.etape])+'</span>':""))+
      (open.length?'<div class="rv-c"><h3>À venir sur ce compte</h3><div class="todo">'+open.map(x=>tItem(x,{noCompte:true,full:true})).join("")+'</div></div>':'')+
-    '</aside></div></div>'+
+    lkBlock("action",a.id,"card")+'</aside></div></div>'+
    '<div class="df">'+(k?'<button class="btn ghost" type="button" data-kopen="'+esc(k.id)+'">Fiche compte</button>':'')+'<button class="btn ghost" type="button" data-act="crcopy">Copier</button><button class="btn ghost" type="button" data-act="crmail">Envoyer par mail</button><button class="btn ghost" type="button" data-act="crprint">Imprimer / PDF</button><span class="grow"></span><button class="btn" type="button" data-act="mclose">Fermer</button><button class="btn primary" type="button" data-act="rvedit">Modifier</button></div>',"view");
   modalBig()}
 

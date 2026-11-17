@@ -87,7 +87,7 @@ function renderCompte(){
    '<div class="panel"><div class="ph"><h2>Contacts</h2><span class="sub num">'+cts.length+'</span><button type="button" class="more" data-ctnew="'+esc(k.id)+'">+ Ajouter</button></div>'+
     (cts.length?'<div class="cards">'+cts.map(c=>'<div class="ccard"><div class="nm">'+(c.principal?'<span class="star" title="Contact principal">★</span>':'')+esc(c.nom||"Sans nom")+'</div>'+(c.fonction?'<div class="sub">'+esc(c.fonction)+'</div>':'')+
       (c.tel?'<a class="dl num" href="tel:'+esc(c.tel.replace(/[^\d+]/g,""))+'">'+I_TEL+esc(c.tel)+'</a>':'')+(c.mail?'<a class="dl" href="mailto:'+esc(c.mail)+'" target="_blank" rel="noopener">'+I_MAIL+esc(c.mail)+'</a>':'')+(c.notes?'<div class="sub" style="white-space:pre-line">'+esc(c.notes)+'</div>':'')+
-      '<button class="btn ghost ed" type="button" data-ctedit="'+esc(c.id)+'">Modifier</button></div>').join("")+'</div>':'<p class="hint">Aucun contact. Ajoutez vos interlocuteurs : ils seront proposés dans chaque action.</p>')+'</div>';
+      '<button class="btn ghost ed" type="button" data-ctedit="'+esc(c.id)+'">Modifier</button></div>').join("")+'</div>':'<p class="hint">Aucun contact. Ajoutez vos interlocuteurs : ils seront proposés dans chaque action.</p>')+'</div>'+lkBlock("compte",k.id,"panel");
   /* Colonne 2 : à venir et historique */
   const c2='<div class="panel"><div class="ph"><h2>À venir</h2><span class="sub num">'+open.length+'</span></div>'+qBtns(k.id,cs.length===1?cs[0].id:"")+
      (open.length||rel.length?'<div class="todo">'+open.map(a=>tItem(a,{noCompte:true,full:true})).join("")+rel.map(rItem).join("")+'</div>':'<p class="hint">Aucune action prévue : planifiez un RDV, un appel ou un rappel.</p>')+'</div>'+
@@ -177,7 +177,7 @@ function renderList(){
     const nv=visitsDone(c);
     const op=S.open.has(c.id),has=!!(c.notes||p||actOf(c.compteId).length);
     const pk=PICK.has(c.id),cls=[op?"open":"",pk?"picked":""].filter(Boolean).join(" ");
-    return '<tr data-id="'+esc(c.id)+'" tabindex="0"'+(cls?' class="'+cls+'"':'')+'><td class="pick"><label class="pickl"><input type="checkbox" data-pick="'+esc(c.id)+'" aria-label="Sélectionner '+esc(c.compte||"Sans nom")+'"'+(pk?' checked':'')+'></label></td><td class="tg"><button type="button" class="tgb'+(has?' has':'')+'" data-tog="'+esc(c.id)+'" aria-expanded="'+op+'" aria-label="'+(op?'Replier':'Déplier')+' : contact et notes" title="'+(has?'Contact, notes et actions':'Rien de renseigné')+'">'+CHEV+'</button></td><td><div class="co"><button type="button" class="lk" data-kopen="'+esc(c.compteId)+'" title="Ouvrir la fiche compte">'+esc(c.compte||"Sans nom")+'</button>'+(c.exemple?'<span class="ex">Exemple</span>':'')+'</div><div class="sub">'+(k?tyTag(k.type)+' ':'')+(c.dept?'<span class="ty">'+esc(c.dept)+'</span> ':'')+esc([p&&p.nom,c.agence].filter(Boolean).join(" · "))+'</div></td>'+
+    return '<tr data-id="'+esc(c.id)+'" tabindex="0"'+(cls?' class="'+cls+'"':'')+'><td class="pick"><label class="pickl"><input type="checkbox" data-pick="'+esc(c.id)+'" aria-label="Sélectionner '+esc(c.compte||"Sans nom")+'"'+(pk?' checked':'')+'></label></td><td class="tg"><button type="button" class="tgb'+(has?' has':'')+'" data-tog="'+esc(c.id)+'" aria-expanded="'+op+'" aria-label="'+(op?'Replier':'Déplier')+' : contact et notes" title="'+(has?'Contact, notes et actions':'Rien de renseigné')+'">'+CHEV+'</button></td><td><div class="co"><button type="button" class="lk" data-kopen="'+esc(c.compteId)+'" title="Ouvrir la fiche compte">'+esc(c.compte||"Sans nom")+'</button>'+(c.exemple?'<span class="ex">Exemple</span>':'')+lkClip("cible",c.id)+'</div><div class="sub">'+(k?tyTag(k.type)+' ':'')+(c.dept?'<span class="ty">'+esc(c.dept)+'</span> ':'')+esc([p&&p.nom,c.agence].filter(Boolean).join(" · "))+'</div></td>'+
     '<td><div class="tags">'+c.bu.map(b=>'<span class="tag bu">'+esc(b)+'</span>').join("")+'</div>'+(c.apporteur?'<div class="sub">via '+esc(c.apporteur)+'</div>':'')+'</td>'+
     '<td><div class="tags">'+c.prestations.map(p=>'<span class="tag" title="'+esc(PLABEL[p]||p)+'">'+esc(p)+'</span>').join("")+'</div></td>'+
     '<td><span class="prio prio-'+esc(c.priorite)+'">'+esc(c.priorite)+'</span></td>'+
@@ -349,7 +349,7 @@ function drawDrawer(){
     (c.etape==="sans_suite"?'<div class="f"><label class="lbl" for="d-motif">Motif sans suite <span class="req">*</span></label><select id="d-motif" data-k="motif">'+opts(MOTIFS,c.motif,"Choisir un motif")+'</select></div>':'')+
     '<div class="f"><label class="lbl" for="d-acc">Accompagnant visite</label><input type="text" id="d-acc" data-k="accompagnant" value="'+esc(c.accompagnant)+'" placeholder="Chef d\'agence ou commercial de la BU"></div>'+
     '<div class="f"><label class="lbl" for="d-notes">Notes de prospection</label><textarea id="d-notes" data-k="notes" rows="5">'+esc(c.notes)+'</textarea></div>'+
-   '</fieldset>'+
+   '</fieldset>'+lkBlock("cible",c.id,"field")+
    '<section class="ech" aria-label="Actions du compte"><div class="ech-h"><span class="leg">Actions du compte</span></div>'+
     qBtns(k?k.id:"",c.id)+
     (open.length?'<div class="todo"><div class="todo-g acc">À venir<span class="n">'+open.length+'</span></div>'+open.map(a=>tItem(a,{noCompte:true,full:true})).join("")+'</div>':'<p class="hint">Aucune action prévue sur ce compte.</p>')+

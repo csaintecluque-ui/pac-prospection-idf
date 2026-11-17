@@ -44,8 +44,8 @@ function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTi
 /* ================= V3 · État, modèle Comptes / Contacts / Actions, migration ================= */
 const nh=x=>String(x==null?"":x).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
 const now=()=>new Date().toISOString();
-const S={open:new Set(),mode:"wait",cibles:[],comptes:[],contacts:[],actions:[],plans:[],pac:[],mailing:[],devis:[],reunions:[],settings:{objectif:8},writable:true,view:"actives",tab:"tdb",kid:"",db:null,downloads:null,ver:0};
-const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.39";
+const S={open:new Set(),mode:"wait",cibles:[],comptes:[],contacts:[],actions:[],plans:[],pac:[],mailing:[],devis:[],reunions:[],liens:[],settings:{objectif:8},writable:true,view:"actives",tab:"tdb",kid:"",db:null,downloads:null,ver:0};
+const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.40";
 let STORE="ls"; /* "idb" dès que les données sont dans la base du navigateur */
 const IN_FRAME=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 const TYPE_RANK={"Client existant":3,"Prescripteur":2,"Prospect":1};
@@ -75,6 +75,8 @@ const anorm=x=>{const o=Object.assign(ablank(),x||{});if(!["afaire","fait","annu
 const RTYPES=[["cafe","Café Commerce"],["interbu","Réunion inter-BU"],["equipe","Réunion d'équipe"],["direction","Réunion de direction"],["formation","Formation / atelier"],["interne","Autre réunion"]];
 const rsAff=x=>Object.assign({compte:"",compteId:"",apporteur:"",besoin:"",suite:""},x||{});
 const rsblank=()=>({id:"",creeLe:"",majLe:"",type:"cafe",date:"",heure:"",titre:"",agence:"",participants:"",points:"",affaires:[],decisions:""});
+/* Fichiers reliés : un lien vers un fichier du PC (rien n'est copié). L'accès au fichier reste dans ce navigateur (09 · base « app ») */
+const lnorm=x=>Object.assign({id:"",owner:"",ownerId:"",nom:"",type:"",taille:0,modifLe:"",ajouteLe:""},x||{});
 const isRs=x=>!!x&&Array.isArray(x.affaires)&&RTYPES.some(t=>t[0]===x.type);
 const rsnorm=x=>{const o=Object.assign(rsblank(),x||{});if(!RTYPES.some(t=>t[0]===o.type))o.type="interne";o.affaires=(Array.isArray(o.affaires)?o.affaires:[]).map(rsAff);return o};
 
@@ -207,7 +209,7 @@ function repairLinks(){
 
 /* ---------- Persistance (navigateur) ---------- */
 function setSync(mode,txt){S.mode=mode;const a=$("#sync"),b=$("#syncTxt");if(a)a.dataset.s=mode;if(b)b.textContent=txt}
-const snapshot=()=>({schema:SCHEMA,cibles:S.cibles,comptes:S.comptes,contacts:S.contacts,actions:S.actions,plans:S.plans,pac:S.pac,mailing:S.mailing,devis:S.devis,reunions:S.reunions,settings:S.settings});
+const snapshot=()=>({schema:SCHEMA,cibles:S.cibles,comptes:S.comptes,contacts:S.contacts,actions:S.actions,plans:S.plans,pac:S.pac,mailing:S.mailing,devis:S.devis,reunions:S.reunions,liens:S.liens,settings:S.settings});
 let saveWarned=false;
 function lsSave(){bump();
   if(STORE==="idb"){idbQueue();return true}
@@ -238,7 +240,7 @@ function lsLoad(){
   if(r&&r.storage==="idb"){ensurePlans();return {lost:true}}
   if(r&&r.schema===SCHEMA){
     S.cibles=(r.cibles||[]).map(norm);S.comptes=(r.comptes||[]).map(knorm);S.contacts=(r.contacts||[]).map(ctnorm);S.actions=(r.actions||[]).map(anorm);
-    S.plans=Array.isArray(r.plans)?r.plans:[];S.pac=(r.pac||[]).map(pnorm);S.mailing=(r.mailing||[]).map(mnorm);S.devis=(r.devis||[]).map(dvnorm);S.reunions=(r.reunions||[]).map(rsnorm);S.settings=Object.assign({objectif:8},r.settings||{});
+    S.plans=Array.isArray(r.plans)?r.plans:[];S.pac=(r.pac||[]).map(pnorm);S.mailing=(r.mailing||[]).map(mnorm);S.devis=(r.devis||[]).map(dvnorm);S.reunions=(r.reunions||[]).map(rsnorm);S.liens=(r.liens||[]).map(lnorm);S.settings=Object.assign({objectif:8},r.settings||{});
     bump();ensurePlans();repairLinks();if(upgrade31())lsSave();return {}}
   /* Données de la V2 : copie de sécurité conservée telle quelle, puis conversion */
   let copie=false;try{if(!localStorage.getItem(BK_KEY))localStorage.setItem(BK_KEY,raw);copie=true}catch(e){}
@@ -257,5 +259,5 @@ async function init(){
   else if(st.migrated&&!st.ok){b.hidden=false;b.className="notice warn";b.innerHTML="<b>Conversion non enregistrée</b> : l'espace du navigateur est plein. Vos données d'origine sont intactes. Faites une sauvegarde complète puis libérez de l'espace."}
   else setSync("local",IN_FRAME?"Enregistré sur ce poste · Notion":"Enregistré sur ce poste");
   routeFromHash();render();
-  maybePacSeed();
+  maybePacSeed();lkInit();
 }

@@ -28,6 +28,7 @@ Les données restent dans le navigateur (IndexedDB) : faire régulièrement une 
   - `17-recherche.js` : recherche globale (Ctrl+K)
   - `19-comptes-rendus.js` : page Comptes rendus (recherche plein texte, filtres, impression de la sélection) et bloc du tableau de bord ; chargé juste avant le démarrage
   - `20-reunions.js` : réunions (Café Commerce, inter-BU, équipe, direction, formation, autre) : compte rendu sans compte obligatoire, affaires évoquées reliées aux fiches des clients cités ; intégrées à la page Comptes rendus, à la recherche globale et à la fiche compte
+  - `21-fichiers.js` : fichiers reliés (réunions, comptes rendus et actions, fiches compte, cibles) : un lien vers le fichier du PC, rien n'est copié ; l'accès reste dans le navigateur, le nom et la taille suivent la sauvegarde. Chrome ou Edge, en pleine page
   - `18-demarrage.js` : événements et démarrage (toujours en dernier)
 
 ## Nouvelle version

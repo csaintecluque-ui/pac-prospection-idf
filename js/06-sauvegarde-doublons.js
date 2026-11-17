@@ -11,7 +11,7 @@ async function restore(text){
   const before={c:S.cibles.length,k:S.comptes.length,ct:S.contacts.length,a:S.actions.length,m:S.mailing.length,p:S.pac.length};
   if(j.schema===SCHEMA){
     const up=(coll,list,nf)=>{(list||[]).forEach(x=>{const o=nf(x);if(!o.id)o.id=uid();const i=S[coll].findIndex(y=>y.id===o.id);if(i>=0)S[coll][i]=o;else S[coll].push(o)})};
-    up("comptes",j.comptes,knorm);up("contacts",j.contacts,ctnorm);up("actions",j.actions,anorm);up("cibles",j.cibles,norm);up("mailing",j.mailing,mnorm);up("devis",j.devis,dvnorm);up("reunions",j.reunions,rsnorm);
+    up("comptes",j.comptes,knorm);up("contacts",j.contacts,ctnorm);up("actions",j.actions,anorm);up("cibles",j.cibles,norm);up("mailing",j.mailing,mnorm);up("devis",j.devis,dvnorm);up("reunions",j.reunions,rsnorm);up("liens",j.liens,lnorm);
     (j.plans||[]).forEach(p=>{if(!S.plans.some(x=>x.id===p.id))S.plans.push(p)});up("pac",j.pac,pnorm);
     if(j.settings)S.settings=Object.assign({},j.settings,{lastBackup:S.settings.lastBackup||j.settings.lastBackup,migrationV3:S.settings.migrationV3});
     bump();ensurePlans();repairLinks()}
@@ -174,7 +174,7 @@ async function dupGo(){
   if(!sel.length){toast("Cochez au moins un client.");return}
   const btn=$("#dupGo");btn.disabled=true;btn.textContent="Fusion en cours…";
   const before=[],saves=[],dels=[];
-  sel.forEach(g=>{g.forEach(c=>before.push(clone(c)));saves.push(mergeGroup(g));g.slice(1).forEach(c=>{dels.push(c.id);S.actions.forEach(a=>{if(a.cibleId===c.id)a.cibleId=g[0].id})})});
+  sel.forEach(g=>{g.forEach(c=>before.push(clone(c)));saves.push(mergeGroup(g));g.slice(1).forEach(c=>{dels.push(c.id);S.actions.forEach(a=>{if(a.cibleId===c.id)a.cibleId=g[0].id});S.liens.forEach(l=>{if(l.owner==="cible"&&l.ownerId===c.id)l.ownerId=g[0].id})})});
   const keepIgn=boxes.filter(i=>!i.checked).map(i=>dupSig(DUP[+i.dataset.dg]));
   if(!(await bulkApply(saves,dels))){btn.disabled=false;dupCount();return}
   dels.forEach(id=>S.open.delete(id));

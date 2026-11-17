@@ -158,7 +158,7 @@ function drawAction(){
     '<div class="f"><label class="lbl" for="am-sud">Le</label><input type="date" id="am-sud" value="'+esc(a._suite?a._suite.date:addD(todayISO(),7))+'"></div><div class="f"><label class="lbl" for="am-suo">Quoi</label><input type="text" id="am-suo" value="'+esc(a._suite?a._suite.objet:"")+'" placeholder="Relancer, envoyer le devis…"></div></div></div>'+
   '</div><div class="am-col">'+
    ta("am-det",a.type==="note"?"Note":(a.cr||a._crOpen)?"Points abordés":rdv||a.type==="evenement"?"Compte rendu":"Détails",a.details,a.type==="note"||rdv||a.cr||a._crOpen?12:8,EPH[a.type])+
-   (crOK(a.type)?crSection(a):'')+
+   (crOK(a.type)?crSection(a):'')+lkBlock("action",a.id,"plain")+
   '</div></form></div>'+
   '<div class="df">'+(amNew?'':'<button class="btn danger" type="button" data-act="amdel">Supprimer</button>')+(k?'<button class="btn ghost" type="button" data-kopen="'+esc(k.id)+'">Fiche compte</button>':'')+(k&&rdv?'<button class="btn ghost" type="button" data-prep="'+esc(k.id)+'" data-prepa="'+esc(a.id)+'">Fiche de préparation</button>':'')+'<span class="grow"></span><button class="btn" type="button" data-act="mclose">Annuler</button><button class="btn primary" type="button" data-act="amsave">Enregistrer</button></div>',"action");
   modalBig();
@@ -179,7 +179,7 @@ async function amSave(){
   toast((wasNew?(o.cr?"Compte rendu enregistré":"Action ajoutée"):"Action enregistrée")+" dans « "+k.nom+" »"+(suite?" · suite planifiée":"")+integ+(created?" · compte créé":""));
 }
 async function amDelete(btn){if(!amDel){amDel=true;btn.classList.add("armed");btn.textContent="Confirmer la suppression";return}
-  const kid=AM.compteId;drop("actions",AM.id);restage(kid);closeModal();commit();if(D)drawDrawer();toast("Action supprimée")}
+  const kid=AM.compteId;lkDropOwner("action",AM.id);drop("actions",AM.id);restage(kid);closeModal();commit();if(D)drawDrawer();toast("Action supprimée")}
 async function toggleDone(id){const a=S.actions.find(x=>x.id===id);if(!a)return;
   if(a.statut==="fait"){a.statut="afaire";a.faitLe=""}else{a.statut="fait";a.faitLe=todayISO();if(!a.date||a.date>todayISO())a.date=todayISO()}
   a.majLe=now();bump();restage(a.compteId);commit();if(D)drawDrawer();
@@ -265,6 +265,7 @@ function mergeComptes(srcId,dstId){const a=kOf(srcId),b=kOf(dstId);if(!a||!b||a.
   S.mailing.forEach(m=>{if(m.compteId===a.id){m.compteId=b.id;if(map[m.contactId])m.contactId=map[m.contactId]}});
   S.cibles.forEach(c=>{if(c.compteId===a.id){c.compteId=b.id;c.compte=b.nom}});
   S.devis.forEach(d=>{if(d.compteId===a.id){d.compteId=b.id;if(map[d.contactId])d.contactId=map[d.contactId]}});
+  S.liens.forEach(l=>{if(l.owner==="compte"&&l.ownerId===a.id)l.ownerId=b.id});
   S.comptes.forEach(x=>{if(x.groupeId===a.id)x.groupeId=b.id});if(b.groupeId===b.id||b.groupeId===a.id)b.groupeId="";
   S.comptes=S.comptes.filter(x=>x.id!==a.id);b.majLe=now();bump();grpRepair();restage(b.id);return true}
 function kMergeGo(toId){const dst=toId?kOf(toId):findCompte(vOf("km-to"));const src=KM;

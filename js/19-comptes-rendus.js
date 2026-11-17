@@ -39,7 +39,7 @@ function crCard(a,q){const k=kOf(a.compteId),g=grpOf(k);
   return '<div class="crc" data-aid="'+esc(a.id)+'" tabindex="0" role="button" aria-label="Lire le compte rendu : '+esc(a.objet||ALBL[a.type])+'">'+
     '<div class="crc-h"><span class="eic eic-'+esc(a.type)+'">'+(I_EV[a.type]||I_EV.autre)+'</span><span class="num crc-d">'+(a.date?fdate(a.date):"Sans date")+'</span>'+
      (k?'<button type="button" class="lk strong" data-kopen="'+esc(k.id)+'">'+esc(k.nom)+'</button>':'')+(g?'<span class="ty grp">'+esc(g.nom)+'</span>':isGrp(k)?'<span class="ty grp">Groupe</span>':'')+
-     '<span class="grow"></span>'+(a.cr?'<span class="pill tone-info">Compte rendu</span>':'<span class="pill tone-grey">'+esc(ESHORT[a.type]||ALBL[a.type]||a.type)+'</span>')+'</div>'+
+     '<span class="grow"></span>'+lkClip("action",a.id)+(a.cr?'<span class="pill tone-info">Compte rendu</span>':'<span class="pill tone-grey">'+esc(ESHORT[a.type]||ALBL[a.type]||a.type)+'</span>')+'</div>'+
     '<div class="crc-o">'+esc(a.objet||ALBL[a.type]||"Échange")+'</div>'+
     (crBody(a)?'<div class="crc-x">'+crExtract(a,q)+'</div>':'')+
     ((crWho(a)||a.lieu)?'<div class="sub">'+esc([crWho(a),a.lieu].filter(Boolean).join(" · "))+'</div>':'')+'</div>'}

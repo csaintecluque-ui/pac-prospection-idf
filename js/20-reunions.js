@@ -57,7 +57,7 @@ function rsDraw(){const r=RS,ph=rsTitle(Object.assign({},r,{titre:""}));
     ta("rs-part","Participants",r.participants,3,"Personnes, BU ou filiales présentes…")+
     ta("rs-dec","Décisions et prochaines étapes",r.decisions,5,"Qui fait quoi, pour quand…")+
   '</div><div class="am-col">'+ta("rs-pts","Points abordés",r.points,13,RPH[r.type])+'</div>'+
-  '<div class="rs-affw" id="rsAffW">'+rsAffHTML()+'</div></form></div>'+
+  '<div class="rs-affw" id="rsAffW">'+rsAffHTML()+'</div><div class="rs-lkw">'+lkBlock("reunion",r.id,"plain")+'</div></form></div>'+
   '<div class="df">'+(rsNew?'':'<button class="btn danger" type="button" data-rsact="del">Supprimer</button>')+'<span class="grow"></span><button class="btn" type="button" data-act="mclose">Annuler</button><button class="btn primary" type="button" data-rsact="save">Enregistrer</button></div>'+
   '<datalist id="rsAgL">'+rsAgences().map(a=>'<option value="'+esc(a)+'">').join("")+'</datalist>'+
   '<datalist id="rsKL">'+S.comptes.map(k=>'<option value="'+esc(k.nom)+'">').join("")+'</datalist>',"rs");
@@ -78,7 +78,7 @@ async function rsSave(){rsRead();const r=RS;if(!r)return;
   closeModal();commit();
   toast((wasNew?"Compte rendu de réunion enregistré":"Réunion enregistrée")+(nk?" · visible sur la fiche de "+pl(nk,"compte"):""))}
 function rsDelete(btn){if(!RS)return;if(!rsDel){rsDel=true;btn.classList.add("armed");btn.textContent="Confirmer la suppression";return}
-  drop("reunions",RS.id);closeModal();commit();toast("Réunion supprimée")}
+  const n=lkN("reunion",RS.id);lkDropOwner("reunion",RS.id);drop("reunions",RS.id);closeModal();commit();toast("Réunion supprimée"+(n?" · "+pl(n,"lien retiré","liens retirés")+", les fichiers restent sur votre PC":""))}
 
 /* ---------- Lecture ---------- */
 function rsView(id){const r=S.reunions.find(x=>x.id===id);if(!r)return;RSV=r;
@@ -93,7 +93,7 @@ function rsView(id){const r=S.reunions.find(x=>x.id===id);if(!r)return;RSV=r;
     '<p class="rv-meta"><span>'+esc(dl?blCap(dl):"Sans date")+(r.heure?' à '+esc(r.heure.replace(":","h")):'')+'</span>'+(r.agence?'<span>'+esc(r.agence)+'</span>':'')+'</p></div><button class="btn ghost" type="button" data-act="mclose">Fermer</button></div>'+
    '<div class="db"><div class="rv-grid"><div class="rv-main">'+sec("Points abordés",r.points,true)+aff+sec("Décisions et prochaines étapes",r.decisions)+(rsBody(r)?'':'<p class="hint">Aucun contenu.</p>')+'</div>'+
     '<aside class="rv-side">'+(r.participants?'<div class="rv-c"><h3>Participants</h3><div class="rv-t rs-pt">'+esc(r.participants)+'</div></div>':'')+
-     '<div class="rv-c"><h3>Réunion</h3>'+kv("Type",esc(RTL[r.type]))+kv("Agence ou lieu",esc(r.agence))+kv("Affaires",A.length?String(A.length):"")+kv("Clients reliés",ks.length?ks.map(k=>'<button type="button" class="lk" data-kopen="'+esc(k.id)+'">'+esc(k.nom)+'</button>').join(", "):"")+'</div></aside></div></div>'+
+     '<div class="rv-c"><h3>Réunion</h3>'+kv("Type",esc(RTL[r.type]))+kv("Agence ou lieu",esc(r.agence))+kv("Affaires",A.length?String(A.length):"")+kv("Clients reliés",ks.length?ks.map(k=>'<button type="button" class="lk" data-kopen="'+esc(k.id)+'">'+esc(k.nom)+'</button>').join(", "):"")+'</div>'+lkBlock("reunion",r.id,"card")+'</aside></div></div>'+
    '<div class="df"><button class="btn ghost" type="button" data-rsact="copy">Copier</button><button class="btn ghost" type="button" data-rsact="mail">Envoyer par mail</button><button class="btn ghost" type="button" data-rsact="print">Imprimer / PDF</button><span class="grow"></span><button class="btn" type="button" data-act="mclose">Fermer</button><button class="btn primary" type="button" data-rsact="edit">Modifier</button></div>',"rsv");
   modalBig()}
 
@@ -120,7 +120,7 @@ function rsPrintBlock(r,R,sec){
 function rsCard(r,q){const A=r.affaires,ks=[...new Set(A.map(rsK).filter(Boolean))];
   return '<div class="crc rs-c" data-rid="'+esc(r.id)+'" tabindex="0" role="button" aria-label="Lire le compte rendu de réunion : '+esc(rsTitle(r))+'">'+
     '<div class="crc-h"><span class="eic eic-rs">'+I_RS+'</span><span class="num crc-d">'+(r.date?fdate(r.date):"Sans date")+'</span>'+(r.agence?'<span class="ty">'+esc(r.agence)+'</span>':'')+
-     '<span class="grow"></span><span class="pill tone-rs">'+esc(RTL[r.type])+'</span></div>'+
+     '<span class="grow"></span>'+lkClip("reunion",r.id)+'<span class="pill tone-rs">'+esc(RTL[r.type])+'</span></div>'+
     '<div class="crc-o">'+esc(rsTitle(r))+'</div>'+
     (rsBody(r)?'<div class="crc-x">'+crExtract(r,q)+'</div>':'')+
     ((A.length||ks.length)?'<div class="sub rs-cs">'+(A.length?'<span>'+pl(A.length,"affaire évoquée","affaires évoquées")+'</span>':'')+ks.slice(0,4).map(k=>'<button type="button" class="lk" data-kopen="'+esc(k.id)+'">'+esc(k.nom)+'</button>').join("")+(ks.length>4?'<span>+'+(ks.length-4)+'</span>':'')+'</div>':'')+
