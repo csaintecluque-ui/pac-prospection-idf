@@ -53,7 +53,8 @@ const hCA=(k,y)=>{const h=k&&k.histo;if(!h)return 0;const a=h.ans[y||h.y1];retur
 function syncMailAction(m){
   const ex=S.actions.find(a=>a.mailingId===m.id);
   if(!m.envoye){if(ex&&ex.origine==="mailing"){S.actions=S.actions.filter(a=>a!==ex);bump()}return}
-  absorbMailing(m);const k=kOf(m.compteId);if(k&&k.type!=="Client existant"){k.type="Client existant";k.majLe=now()}
+  /* Une liste importée ne contient que des clients facturés ; une liste créée depuis Registre (origine « selection ») garde le type du compte */
+  absorbMailing(m);const k=kOf(m.compteId);if(k&&k.type!=="Client existant"&&m.origine!=="selection"){k.type="Client existant";k.majLe=now()}
   const t=mTpl(m),ob="Mailing « "+(m.liste||"clients")+" »"+(t&&t.objet?" : "+t.objet:"");
   if(ex){ex.date=m.dateEnvoi||ex.date;ex.contactId=m.contactId||ex.contactId;ex.compteId=m.compteId;ex.details=m.commentaire||"";ex.majLe=now()}
   else S.actions.push(anorm({id:uid(),compteId:m.compteId,contactId:m.contactId||"",type:"mail",date:m.dateEnvoi||todayISO(),statut:"fait",resultat:"Envoyé",objet:ob,details:m.commentaire||"",faitLe:m.dateEnvoi||todayISO(),mailingId:m.id,origine:"mailing",creeLe:now(),majLe:now()}));
@@ -181,7 +182,7 @@ async function histoApply(){const H=HIMP;if(!H)return;const btn=$("#hiGo");btn.d
     if(!acc&&!keep.has(c.typologie||"Sans typologie")){nSkip++;return}
     const isNew=!acc;if(!acc)acc=ensureCompte(c.nom,{origine:"historique"});
     const P=(byK.get(k)||[]).map(p=>{const o=Object.assign({},p);delete o.t;return o}).sort((a,b)=>String(b.d).localeCompare(String(a.d)));
-    if(P.some(p=>isFact(p.e))||mlOf(acc.id).length)acc.type="Client existant";else if(isNew)acc.type="Prospect";
+    if(P.some(p=>isFact(p.e))||mlOf(acc.id).some(m=>m.origine!=="selection"))acc.type="Client existant";else if(isNew)acc.type="Prospect";
     if(c.typologie&&(!acc.typologie||/^à qualifier$/i.test(acc.typologie)))acc.typologie=c.typologie;
     if(c.sousTypo)acc.sousTypo=c.sousTypo;if(c.fiab)acc.fiab=c.fiab;
     if(c.agence&&!acc.agence)acc.agence=c.agence;if(c.apporteur&&!acc.apporteur)acc.apporteur=c.apporteur;

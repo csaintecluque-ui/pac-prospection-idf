@@ -14,7 +14,7 @@ const MVIEWS=[
 function mblank(){return {liste:"",client:"",typologie:"",famille:"",contact:"",mail:"",appel:"",accroche:"",mission:"",agence:"",apporteur:"",nbFact:"",ca:"",attention:"",envoyer:"",envoye:false,dateEnvoi:"",relance:"",relanceFaite:"",commentaire:""}}
 function mnorm(x){const o=Object.assign(mblank(),x||{});o.envoye=!!o.envoye;o.mail=String(o.mail||"").trim();return o}
 const mkey=m=>nh(m.client)+"|"+String(m.mail||"").trim().toLowerCase();
-const MUI={view:"aenv",q:"",liste:"",famille:"",agence:"",lim:200,copied:null,showCopy:""};
+const MUI={view:"aenv",q:"",liste:"",famille:"",agence:"",typologie:"",lim:200,copied:null,showCopy:""};
 const addDaysTo=(iso,n)=>{const d=new Date(iso+"T12:00:00");d.setDate(d.getDate()+n);return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())};
 const relJ=()=>{const n=parseInt(S.settings.mailRelanceJ,10);return isNaN(n)?15:Math.max(0,n)};
 /* Enregistrement : différé pendant la saisie, groupé pour les actions en masse */
@@ -31,7 +31,7 @@ const mMailto=(m,t)=>"mailto:"+m.mail+(t?"?subject="+encodeURIComponent(t.objet)
 const mFold=x=>String(x||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
 /* Recherche et filtres communs à toutes les vues : les mots peuvent être dans n'importe quel ordre, sans accents */
 function mBase(){const words=mFold(MUI.q).split(/\s+/).filter(Boolean);
-  return S.mailing.filter(m=>(!MUI.liste||m.liste===MUI.liste)&&(!MUI.famille||m.famille===MUI.famille)&&(!MUI.agence||m.agence===MUI.agence)&&
+  return S.mailing.filter(m=>(!MUI.liste||m.liste===MUI.liste)&&(!MUI.typologie||m.typologie===MUI.typologie)&&(!MUI.famille||m.famille===MUI.famille)&&(!MUI.agence||m.agence===MUI.agence)&&
     (!words.length||(h=>words.every(w=>h.includes(w)))(mFold([m.client,m.contact,m.mail,m.commentaire,m.typologie,m.famille,m.liste,m.appel].join(" ")))))}
 function mFiltered(){const v=MVIEWS.find(x=>x.k===MUI.view)||MVIEWS[0];
   return mBase().filter(v.f)
@@ -74,17 +74,17 @@ function renderMNote(){const n=$("#mNote");if(!n)return;const c=MUI.copied;
   const ta=$("#mCopyTxt");if(ta){ta.focus({preventScroll:true});ta.select()}}
 function renderMailing(){
   const el=$("#view-mailing");if(!el)return;const M=S.mailing,ro=!S.writable;
-  if(!M.length){el.innerHTML=pageH("Actions commerciales","Mailing","","")+'<div class="empty"><h3>Aucune liste de mailing</h3><p>Importez votre fichier de contacts (Excel ou CSV) : une ligne par contact, avec au minimum le client et l\'adresse e-mail. Vous pouvez aussi ajouter les contacts un par un. Vous suivez ensuite chaque envoi, sa date, la relance et vos commentaires.</p>'+(ro?'':'<div class="bar" style="justify-content:center"><button class="btn primary" type="button" data-act="mimport">Importer une liste</button><button class="btn" type="button" data-act="mnew">Ajouter un contact à la main</button></div>')+'</div>';return}
+  if(!M.length){el.innerHTML=pageH("Actions commerciales","Mailing","","")+'<div class="empty"><h3>Aucune liste de mailing</h3><p>Importez votre fichier de contacts (Excel ou CSV) : une ligne par contact, avec au minimum le client et l\'adresse e-mail. Vous pouvez aussi ajouter les contacts un par un. Vous suivez ensuite chaque envoi, sa date, la relance et vos commentaires. Vous pouvez aussi partir de vos contacts dans Registre, par typologie.</p>'+(ro?'':'<div class="bar" style="justify-content:center"><button class="btn primary" type="button" data-msopen="all">Sélectionner des contacts</button><button class="btn" type="button" data-act="mimport">Importer une liste</button><button class="btn" type="button" data-act="mnew">Ajouter un contact à la main</button></div>')+'</div>';return}
   const uniq=k=>[...new Set(M.map(m=>m[k]).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
   const sel=(id,k,lab)=>'<div class="field-s"><label for="'+id+'">'+lab+'</label><select id="'+id+'" data-mflt="'+k+'"><option value="">Toutes</option>'+uniq(k).map(o=>'<option'+(MUI[k]===o?' selected':'')+'>'+esc(o)+'</option>').join("")+'</select></div>';
   el.innerHTML=pageH("Actions commerciales","Mailing","Chaque mail envoyé apparaît dans l\'historique du compte ; les relances dues remontent dans le tableau de bord et l\'agenda.","")+'<div class="kpis" id="mKpis"></div>'+
    '<div class="bar"><div class="chips grow" id="mViews" aria-label="Vues du mailing"></div>'+
-    (ro?'':'<button class="btn ghost" type="button" data-act="mimport">Importer une liste</button>')+
+    (ro?'':'<button class="btn ghost" type="button" data-msopen="all" title="Choisir des contacts de Registre par typologie, famille, département… pour créer une liste">Sélectionner des contacts</button><button class="btn ghost" type="button" data-act="mimport">Importer une liste</button>')+
     '<button class="btn ghost" type="button" data-act="mcopy" title="Copier les adresses des contacts affichés qui n\'ont pas encore reçu le mail">Copier les adresses</button>'+
     '<button class="btn ghost" type="button" data-act="mexport">Exporter / Excel</button>'+
     (ro?'':'<button class="btn primary" type="button" data-act="mnew"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3v10M3 8h10"/></svg>Nouveau contact</button>')+'</div>'+
    '<div class="filters"><div class="field-s"><label for="mQ">Rechercher</label><input type="search" id="mQ" value="'+esc(MUI.q)+'" placeholder="Client, contact, e-mail, commentaire…"></div>'+
-    sel("mFl","liste","Liste")+sel("mFf","famille","Famille")+sel("mFa","agence","Agence")+
+    sel("mFl","liste","Liste")+sel("mFt","typologie","Typologie")+sel("mFf","famille","Famille")+sel("mFa","agence","Agence")+
     '<div class="field-s"><label for="mRj">Relance après (jours)</label><input type="number" id="mRj" min="0" step="1" class="num" value="'+relJ()+'"'+(ro?' disabled':'')+'></div></div>'+
    '<div id="mNote" class="notice" hidden></div>'+
    '<div class="list-wrap" id="mList"></div><div class="bar" id="mMore"></div>'+
