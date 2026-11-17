@@ -4,6 +4,8 @@
 
 /* ================= V3 · Événements ================= */
 document.addEventListener("click",async e=>{
+  /* Cases à cocher de la liste des cibles : ne pas ouvrir la fiche */
+  if(e.target.closest&&e.target.closest("#listWrap .pickl")){pickClick(e);return}
   const t=e.target.closest("button,a[data-kopen],[data-aid],[data-mopen],[data-cday],[data-cib],[data-pid],tr[data-id],tr[data-kid],[data-act]");if(!t)return;
   const d=t.dataset;
   /* Fenêtre modale ouverte : ses propres boutons d'abord */
@@ -75,6 +77,7 @@ document.addEventListener("click",async e=>{
   /* Cibles */
   if(d.camp!=null&&t.matches(".camp")){const s=$("#fCa");s.value=s.value===d.camp?"":d.camp;renderCibles();return}
   if(d.view){S.view=d.view;renderCibles();return}
+  if(d.pk){await pickAct(d.pk);return}
   if(d.tog){toggleRow(d.tog);return}
   if(d.togall){const ids=[...document.querySelectorAll("#listWrap tr[data-id]")].map(r=>r.dataset.id);const ao=ids.every(id=>S.open.has(id));
     ids.forEach(id=>ao?S.open.delete(id):S.open.add(id));renderList();const b=$("#listWrap [data-togall]");if(b)b.focus({preventScroll:true});return}

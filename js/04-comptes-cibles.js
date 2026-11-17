@@ -165,17 +165,19 @@ function renderCibles(){
 function renderList(){
   const w=$("#listWrap");
   if(!S.cibles.length){
-    w.innerHTML='<div class="empty"><h3>Aucune cible pour l\'instant</h3><p>Une cible, c\'est un compte que vous travaillez dans une campagne de prospection : étape, priorité, diagnostics visés, potentiel, opportunité.</p><button class="btn primary" type="button" data-act="new">Créer une cible</button></div>';return}
+    w.innerHTML='<div class="empty"><h3>Aucune cible pour l\'instant</h3><p>Une cible, c\'est un compte que vous travaillez dans une campagne de prospection : étape, priorité, diagnostics visés, potentiel, opportunité.</p><button class="btn primary" type="button" data-act="new">Créer une cible</button></div>';PICK.clear();pickSync();return}
   const rows=filtered();
-  if(!rows.length){w.innerHTML='<div class="empty"><h3>Aucune cible dans cette vue</h3><p>Changez de vue ou retirez un filtre.</p></div>';return}
+  if(!rows.length){w.innerHTML='<div class="empty"><h3>Aucune cible dans cette vue</h3><p>Changez de vue ou retirez un filtre.</p></div>';PICK.clear();pickSync();return}
   const t=todayISO();
   const allOpen=rows.every(c=>S.open.has(c.id));
-  w.innerHTML='<table><thead><tr><th class="tg"><button type="button" class="tgb" data-togall="1" aria-expanded="'+allOpen+'" title="'+(allOpen?'Tout replier':'Tout déplier')+'" aria-label="'+(allOpen?'Tout replier':'Tout déplier')+'">'+CHEV+'</button></th><th>Client</th><th>BU d\'origine</th><th>Diagnostics visés</th><th>Prio.</th><th>Étape</th><th>Prochaine action</th><th>Dernier contact</th><th class="r">Potentiel / an</th><th class="r">Visites</th></tr></thead><tbody>'+
+  {const vis=new Set(rows.map(c=>c.id));[...PICK].forEach(id=>{if(!vis.has(id))PICK.delete(id)})}
+  w.innerHTML='<table><thead><tr><th class="pick"><label class="pickl"><input type="checkbox" data-pickall="1" aria-label="Tout sélectionner"></label></th><th class="tg"><button type="button" class="tgb" data-togall="1" aria-expanded="'+allOpen+'" title="'+(allOpen?'Tout replier':'Tout déplier')+'" aria-label="'+(allOpen?'Tout replier':'Tout déplier')+'">'+CHEV+'</button></th><th>Client</th><th>BU d\'origine</th><th>Diagnostics visés</th><th>Prio.</th><th>Étape</th><th>Prochaine action</th><th>Dernier contact</th><th class="r">Potentiel / an</th><th class="r">Visites</th></tr></thead><tbody>'+
   rows.map(c=>{
     const n=nextFor(c),late=n&&n.date&&n.date<t&&isActive(c),k=kOf(c.compteId),p=principal(c.compteId),la=lastOf(c.compteId);
     const nv=visitsDone(c);
     const op=S.open.has(c.id),has=!!(c.notes||p||actOf(c.compteId).length);
-    return '<tr data-id="'+esc(c.id)+'" tabindex="0"'+(op?' class="open"':'')+'><td class="tg"><button type="button" class="tgb'+(has?' has':'')+'" data-tog="'+esc(c.id)+'" aria-expanded="'+op+'" aria-label="'+(op?'Replier':'Déplier')+' : contact et notes" title="'+(has?'Contact, notes et actions':'Rien de renseigné')+'">'+CHEV+'</button></td><td><div class="co"><button type="button" class="lk" data-kopen="'+esc(c.compteId)+'" title="Ouvrir la fiche compte">'+esc(c.compte||"Sans nom")+'</button>'+(c.exemple?'<span class="ex">Exemple</span>':'')+'</div><div class="sub">'+(k?tyTag(k.type)+' ':'')+(c.dept?'<span class="ty">'+esc(c.dept)+'</span> ':'')+esc([p&&p.nom,c.agence].filter(Boolean).join(" · "))+'</div></td>'+
+    const pk=PICK.has(c.id),cls=[op?"open":"",pk?"picked":""].filter(Boolean).join(" ");
+    return '<tr data-id="'+esc(c.id)+'" tabindex="0"'+(cls?' class="'+cls+'"':'')+'><td class="pick"><label class="pickl"><input type="checkbox" data-pick="'+esc(c.id)+'" aria-label="Sélectionner '+esc(c.compte||"Sans nom")+'"'+(pk?' checked':'')+'></label></td><td class="tg"><button type="button" class="tgb'+(has?' has':'')+'" data-tog="'+esc(c.id)+'" aria-expanded="'+op+'" aria-label="'+(op?'Replier':'Déplier')+' : contact et notes" title="'+(has?'Contact, notes et actions':'Rien de renseigné')+'">'+CHEV+'</button></td><td><div class="co"><button type="button" class="lk" data-kopen="'+esc(c.compteId)+'" title="Ouvrir la fiche compte">'+esc(c.compte||"Sans nom")+'</button>'+(c.exemple?'<span class="ex">Exemple</span>':'')+'</div><div class="sub">'+(k?tyTag(k.type)+' ':'')+(c.dept?'<span class="ty">'+esc(c.dept)+'</span> ':'')+esc([p&&p.nom,c.agence].filter(Boolean).join(" · "))+'</div></td>'+
     '<td><div class="tags">'+c.bu.map(b=>'<span class="tag bu">'+esc(b)+'</span>').join("")+'</div>'+(c.apporteur?'<div class="sub">via '+esc(c.apporteur)+'</div>':'')+'</td>'+
     '<td><div class="tags">'+c.prestations.map(p=>'<span class="tag" title="'+esc(PLABEL[p]||p)+'">'+esc(p)+'</span>').join("")+'</div></td>'+
     '<td><span class="prio prio-'+esc(c.priorite)+'">'+esc(c.priorite)+'</span></td>'+
@@ -184,6 +186,7 @@ function renderList(){
     '<td>'+(la?'<div class="nx"><span class="d">'+fdate(la.date)+'</span><span class="l">'+esc(la.label)+'</span></div>':'<span class="sub">—</span>')+'</td>'+
     '<td class="r num">'+(c.potentiel?eur(c.potentiel):'<span class="sub">—</span>')+'</td>'+
     '<td class="r num">'+nv+'</td></tr>'+(op?detRow(c):'')}).join("")+'</tbody></table>';
+  pickSync();
 }
 function detRow(c){
   const kv=(l,v)=>v?'<div class="kv">'+l+' : <b>'+esc(v)+'</b></div>':'';
@@ -200,7 +203,7 @@ function detRow(c){
     (A.length?A.slice(0,3).map(x=>'<div class="dv"><span class="num">'+(x.date?fdate(x.date):"Sans date")+'</span> · <b>'+esc(ESHORT[x.type]||x.type)+'</b> · '+esc(stLbl(x))+(x.resultat?' · '+esc(x.resultat):'')+(x.objet?'<p><b>'+esc(x.objet)+'</b></p>':'')+(x.details?'<p>'+esc(cut(x.details))+'</p>':'')+'</div>').join("")+(A.length>3?'<div class="sub">+ '+pl(A.length-3,"autre action","autres actions")+' dans la fiche compte</div>':''):'<p class="sub" style="margin:0">Aucune action.</p>')+
     (c.opp.creee?'<div class="kv" style="margin-top:4px">Opportunité Athena : <b>'+esc(c.opp.statut)+(c.opp.montant?' · '+eur(c.opp.montant):'')+(c.opp.devis?' · '+esc(c.opp.devis):'')+'</b></div>':'')+
     '<div class="dact"><button class="btn" type="button" data-open="'+esc(c.id)+'">Modifier la cible</button><button class="btn" type="button" data-kopen="'+esc(c.compteId)+'">Fiche compte</button><button class="btn ghost" type="button" data-anew="appel" data-k="'+esc(c.compteId)+'" data-c="'+esc(c.id)+'">'+I_EV.appel+'Appel</button><button class="btn ghost" type="button" data-anew="visite" data-k="'+esc(c.compteId)+'" data-c="'+esc(c.id)+'">'+I_EV.visite+'RDV</button><button class="btn ghost" type="button" data-copy="'+esc(c.id)+'">Copier vers une autre campagne</button></div></div>';
-  return '<tr class="det" data-det="'+esc(c.id)+'"><td colspan="10"><div class="det-in">'+contact+notes+suivi+'</div></td></tr>';
+  return '<tr class="det" data-det="'+esc(c.id)+'"><td colspan="11"><div class="det-in">'+contact+notes+suivi+'</div></td></tr>';
 }
 function toggleRow(id,force){
   const tr=document.querySelector('#listWrap tr[data-id="'+CSS.escape(id)+'"]');if(!tr)return;
@@ -213,6 +216,81 @@ function toggleRow(id,force){
   const all=document.querySelector("#listWrap [data-togall]");if(all){const ao=[...document.querySelectorAll("#listWrap tr[data-id]")].every(r=>S.open.has(r.dataset.id));all.setAttribute("aria-expanded",String(ao));const l=ao?"Tout replier":"Tout déplier";all.title=l;all.setAttribute("aria-label",l)}
 }
 function siblings(c){return S.cibles.filter(x=>x.id!==c.id&&x.compteId===c.compteId).sort((a,b)=>(a.campagne||"").localeCompare(b.campagne||"","fr"))}
+
+/* ---------- Sélection multiple (cases à cocher) : classer sans suite, retirer de la campagne, supprimer ---------- */
+/* La sélection ne porte que sur les lignes affichées : changer de vue ou de filtre retire les cibles masquées */
+const PICK=new Set();let PICKLAST="",PICKARM="",PICKUNDO=null;
+const I_X='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8"/></svg>';
+const pickVis=()=>[...document.querySelectorAll("#listWrap input[data-pick]")].map(x=>x.dataset.pick);
+const pickRows=()=>{const v=new Set(pickVis());return S.cibles.filter(c=>PICK.has(c.id)&&v.has(c.id))};
+function pickClick(e){const i=e.target;if(!i.matches||!i.matches("input[data-pick],input[data-pickall]"))return;
+  const vis=pickVis();
+  if(i.dataset.pickall){vis.forEach(id=>i.checked?PICK.add(id):PICK.delete(id));PICKLAST=""}
+  else{const id=i.dataset.pick,on=i.checked;
+    /* Maj+clic : toute la plage depuis la dernière case cochée */
+    if(e.shiftKey&&PICKLAST&&PICKLAST!==id&&vis.includes(PICKLAST)){const a=vis.indexOf(PICKLAST),b=vis.indexOf(id);vis.slice(Math.min(a,b),Math.max(a,b)+1).forEach(x=>on?PICK.add(x):PICK.delete(x))}
+    else on?PICK.add(id):PICK.delete(id);
+    PICKLAST=id}
+  PICKARM="";PICKUNDO=null;pickSync()}
+function pickSync(){
+  document.querySelectorAll("#listWrap input[data-pick]").forEach(x=>{const on=PICK.has(x.dataset.pick);x.checked=on;const tr=x.closest("tr");if(tr)tr.classList.toggle("picked",on)});
+  const all=document.querySelector("#listWrap input[data-pickall]");
+  if(all){const vis=pickVis(),n=vis.filter(id=>PICK.has(id)).length,full=!!n&&n===vis.length,l=full?"Tout désélectionner":"Tout sélectionner ("+vis.length+")";
+    all.checked=full;all.indeterminate=n>0&&!full;all.setAttribute("aria-label",l);all.parentNode.title=l+" · Maj+clic sur une case : sélectionne toute la plage"}
+  pickBar()}
+function pickBar(){const b=$("#pickBar");if(!b)return;
+  const C=pickRows();
+  if(!C.length&&PICKARM)PICKARM="";
+  if(!C.length&&!PICKUNDO){b.hidden=true;b.innerHTML="";return}
+  b.hidden=false;
+  if(!C.length){b.innerHTML='<span class="pb-n grow">'+esc(PICKUNDO.txt)+'</span><button class="btn" type="button" data-pk="undo">Annuler</button><button class="btn ghost pb-x" type="button" data-pk="close" title="Fermer" aria-label="Fermer">'+I_X+'</button>';return}
+  const n=C.length,na=C.filter(isActive).length,nc=C.filter(c=>c.campagne).length,o=C.filter(c=>c.opp.creee).length,v=C.filter(c=>visitsDone(c)>0).length;
+  const risk=[o?pl(o,"avec opportunité","avec opportunité"):"",v?pl(v,"visitée","visitées"):""].filter(Boolean).join(" et ");
+  const head='<span class="pb-n grow"><b>'+pl(n,"cible sélectionnée","cibles sélectionnées")+'</b>'+(risk?'<span class="pb-s">dont '+risk+'</span>':'')+'</span>';
+  if(PICKARM==="ss"){b.innerHTML=head+'<label class="pb-m"><span>Motif sans suite</span><select id="pkMotif">'+opts(MOTIFS.slice(),"","Choisir un motif")+'</select></label>'+
+    '<button class="btn" type="button" data-pk="back">Retour</button><button class="btn primary" type="button" data-pk="ssgo">Classer '+pl(na,"cible","cibles")+' sans suite</button>';return}
+  b.innerHTML=head+
+    '<button class="btn" type="button" data-pk="ss"'+(na?'':' disabled')+' title="'+(na?'Étape « Sans suite » avec un motif : la cible quitte les cibles actives, son historique reste':'Aucune cible active dans la sélection')+'">Classer sans suite</button>'+
+    '<button class="btn" type="button" data-pk="camp"'+(nc?'':' disabled')+' title="'+(nc?'Les cibles restent, en « Sans campagne »':'Aucune campagne sur ces cibles')+'">Retirer de la campagne</button>'+
+    '<button class="btn danger'+(PICKARM==="del"?' armed':'')+'" type="button" data-pk="del" title="Supprime les cibles ; les comptes, contacts et actions sont conservés">'+(PICKARM==="del"?'Confirmer la suppression':'Supprimer')+'</button>'+
+    '<button class="btn ghost pb-x" type="button" data-pk="none" title="Tout désélectionner (Échap)" aria-label="Tout désélectionner">'+I_X+'</button>'}
+async function pickAct(k){
+  if(k==="undo"){await pickUndo();return}
+  if(k==="close"){PICKUNDO=null;pickBar();return}
+  if(k==="none"){PICK.clear();PICKARM="";PICKLAST="";pickSync();return}
+  if(k==="back"){PICKARM="";pickBar();return}
+  if(!S.writable){toast("Modification impossible ici : ouvrez Registre en pleine page.");return}
+  const C=pickRows();if(!C.length)return;
+  if(k==="del"&&PICKARM!=="del"){PICKARM="del";pickBar();const b=document.querySelector('#pickBar [data-pk="del"]');if(b)b.focus({preventScroll:true});return}
+  if(k==="ss"){PICKARM="ss";pickBar();const s=$("#pkMotif");if(s)s.focus({preventScroll:true});return}
+  const u={kind:k,cibles:[],acts:[],after:{}};let T,txt;
+  if(k==="del"){T=C;const ids=new Set(T.map(c=>c.id));u.cibles=T.map(clone);
+    S.actions.forEach(a=>{if(ids.has(a.cibleId)){u.acts.push([a.id,a.cibleId]);a.cibleId=""}});
+    if(!(await bulkApply([],[...ids])))return;ids.forEach(id=>S.open.delete(id));
+    txt=pl(T.length,"cible supprimée","cibles supprimées")+" · comptes, contacts et actions conservés."}
+  else{let patch;
+    if(k==="ssgo"){const m=($("#pkMotif")||{}).value;if(!m){toast("Choisissez un motif sans suite.");const s=$("#pkMotif");if(s)s.focus({preventScroll:true});return}
+      T=C.filter(isActive);patch={etape:"sans_suite",motif:m};txt=pl(T.length,"cible classée","cibles classées")+" sans suite ("+m+")."}
+    else if(k==="camp"){T=C.filter(c=>c.campagne);patch={campagne:""};txt=pl(T.length,"cible retirée","cibles retirées")+" de la campagne : "+(T.length>1?"elles restent":"elle reste")+" en « Sans campagne »."}
+    else return;
+    if(!T.length)return;
+    u.cibles=T.map(clone);const saves=T.map(c=>Object.assign(clone(c),patch));
+    if(!(await bulkApply(saves,[])))return;saves.forEach(c=>{u.after[c.id]=c.majLe})}
+  u.txt=txt;PICK.clear();PICKARM="";PICKLAST="";PICKUNDO=u;renderCibles()}
+/* Annuler : ne remet que les cibles qui n'ont pas été modifiées (ou recréées) depuis */
+async function pickUndo(){const u=PICKUNDO;if(!u)return;PICKUNDO=null;
+  const saves=[];let skip=0;
+  u.cibles.forEach(c=>{const cur=S.cibles.find(x=>x.id===c.id);
+    if(u.kind==="del"?!!cur:(!cur||cur.majLe!==u.after[c.id])){skip++;return}
+    saves.push(clone(c))});
+  if(u.kind==="del"){const back=new Set(saves.map(c=>c.id));u.acts.forEach(([aid,cid])=>{if(!back.has(cid))return;const a=S.actions.find(x=>x.id===aid);if(a&&!a.cibleId)a.cibleId=cid})}
+  if(saves.length&&!(await bulkApply(saves,[]))){toast("Annulation impossible pour le moment.");return}
+  renderCibles();toast(saves.length?"Opération annulée"+(skip?" ("+pl(skip,"cible modifiée","cibles modifiées")+" depuis, laissée"+(skip>1?"s":"")+" telle"+(skip>1?"s":"")+")":""):"Rien à annuler : les cibles ont été modifiées depuis.")}
+document.addEventListener("keydown",e=>{if(e.key!=="Escape"||S.tab!=="cibles"||!$("#drawer").hidden||!$("#modal").hidden)return;
+  if(PICKARM&&pickRows().length){PICKARM="";pickBar();return}
+  if(PICK.size){PICK.clear();PICKLAST="";pickSync()}});
+/* Maj+clic sur une case : pas de sélection de texte entre les deux clics */
+document.addEventListener("mousedown",e=>{if(e.shiftKey&&e.target.closest&&e.target.closest("#listWrap .pickl"))e.preventDefault()});
 
 /* ---------- Fiche cible (panneau latéral) ---------- */
 let D=null,isNew=false,delArmed=false;
