@@ -10,9 +10,9 @@ const uiSave=()=>{try{localStorage.setItem(UIK,JSON.stringify({cal:UI.cal,ag:{vu
 
 /* Événements d'une journée : actions datées (sauf annulées) + relances de mailing regroupées */
 function mailsOn(iso){return S.actions.filter(a=>a.date===iso&&a.origine==="mailing").length}
-function dayItems(iso){return S.actions.filter(a=>a.date===iso&&a.statut!=="annule"&&a.origine!=="mailing").sort((a,b)=>(a.heure||"00").localeCompare(b.heure||"00")||(a.statut==="fait")-(b.statut==="fait"))}
+function dayItems(iso){return S.actions.filter(a=>a.date===iso&&a.statut!=="annule"&&a.origine!=="mailing").concat(S.reunions.filter(r=>r.date===iso&&r.statut!=="annule")).sort((a,b)=>(a.heure||"00").localeCompare(b.heure||"00")||(a.statut==="fait")-(b.statut==="fait"))}
 function relOn(iso){return S.mailing.filter(m=>m.envoye&&m.relance===iso&&!m.relanceFaite).length}
-function evBtn(a,withK){const k=kOf(a.compteId),late=isOpen(a)&&a.date<todayISO();
+function evBtn(a,withK){if(isRs(a))return rsEvBtn(a,withK);const k=kOf(a.compteId),late=isOpen(a)&&a.date<todayISO();
   return '<button type="button" class="ev k-'+esc(a.type)+(a.statut==="fait"?' done':'')+(late?' late':'')+'" data-aid="'+esc(a.id)+'" title="'+esc((ALBL[a.type]||"")+" · "+(a.objet||"")+(k?" · "+k.nom:""))+'">'+(a.heure?'<span class="t">'+esc(a.heure.replace(":","h"))+'</span>':'')+'<span class="o">'+esc(a.objet||ALBL[a.type])+'</span>'+(withK&&k?'<span class="k">'+esc(k.nom)+'</span>':'')+'</button>'}
 function calHTML(key){const st=UI.cal[key],t=todayISO();if(!st.ref)st.ref=t;
   const month=st.mode==="mois",ref=st.ref;
@@ -28,7 +28,7 @@ function calHTML(key){const st=UI.cal[key],t=todayISO();if(!st.ref)st.ref=t;
     h+='<div class="cal-d'+(we?' we':'')+(d===t?' today':'')+(month&&dd.getMonth()!==mm?' out':'')+'" data-cday="'+d+'" title="Ajouter une action le '+fdate(d)+'"><div class="dn"><b>'+dd.getDate()+'</b>'+(!month?'<span>'+esc(dd.toLocaleDateString("fr-FR",{month:"short"}).replace(".",""))+'</span>':'')+'</div><span class="add" aria-hidden="true">+</span>'+
       items.slice(0,max).map(a=>evBtn(a,!month)).join("")+(items.length>max?'<span class="nmore">+ '+(items.length-max)+' autre'+(items.length-max>1?'s':'')+'</span>':'')+
       (mailsOn(d)?'<button type="button" class="ev k-rel" data-mailday="'+d+'">'+pl(mailsOn(d),"mail envoyé","mails envoyés")+' (mailing)</button>':'')+(nr?'<button type="button" class="ev k-rel" data-relday="'+d+'">'+I_MAIL.replace('aria-hidden="true"','aria-hidden="true" style="width:11px;height:11px;vertical-align:-1px;margin-right:3px"')+pl(nr,"relance")+' mailing</button>':'')+'</div>'}
-  h+='</div><div class="cal-leg"><span><i style="background:var(--ok)"></i>RDV, visio</span><span><i style="background:var(--info)"></i>Appel</span><span><i style="background:var(--accent)"></i>Mail</span><span><i style="background:var(--warn)"></i>Rappel / tâche</span><span><i style="background:var(--bad)"></i>En retard</span><span>Cliquez sur un jour pour ajouter une action · glissez une action pour la déplacer.</span></div>';
+  h+='</div><div class="cal-leg"><span><i style="background:var(--ok)"></i>RDV, visio</span><span><i style="background:var(--info)"></i>Appel</span><span><i style="background:var(--accent)"></i>Mail</span><span><i style="background:var(--warn)"></i>Rappel / tâche</span><span><i style="background:var(--accent)"></i>Réunion</span><span><i style="background:var(--bad)"></i>En retard</span><span>Cliquez sur un jour pour ajouter une action · glissez une action pour la déplacer.</span></div>';
   return h}
 function calNav(key,dir){const st=UI.cal[key];if(dir===0)st.ref=todayISO();else if(st.mode==="mois"){const d=dObj(st.ref);st.ref=isoOf(new Date(d.getFullYear(),d.getMonth()+dir,1))}else st.ref=addD(st.ref,7*dir);uiSave();render()}
 
@@ -46,14 +46,14 @@ function chartVisits(){const done=S.actions.filter(a=>a.type==="visite"&&a.statu
     svg+='<text x="'+(x+w/2)+'" y="'+(H-9)+'" text-anchor="middle" font-size="11.5" fill="var(--muted)" font-family="IBM Plex Sans Condensed,sans-serif">'+esc(months[i].l)+'</text>'});
   if(obj){svg+='<line x1="'+pl_+'" x2="'+(W-pr)+'" y1="'+y(obj)+'" y2="'+y(obj)+'" stroke="var(--fg)" stroke-dasharray="5 4" stroke-width="1.3"/><text x="'+(W-pr)+'" y="'+(y(obj)-5)+'" text-anchor="end" font-size="11" fill="var(--fg)" font-family="IBM Plex Sans Condensed,sans-serif">Objectif '+obj+'</text>'}
   return svg+'</svg>'}
-function todoHTML(limit){const t=todayISO(),tom=addD(t,1),wk=addD(t,7),O=S.actions.filter(isOpen).sort(aSort);
+function todoHTML(limit){const t=todayISO(),tom=addD(t,1),wk=addD(t,7),O=S.actions.filter(isOpen).concat(S.reunions.filter(isOpen)).sort(aSort);
   const G=[["En retard","bad",O.filter(a=>a.date&&a.date<t)],["Aujourd'hui","acc",O.filter(a=>a.date===t)],["Demain","",O.filter(a=>a.date===tom)],["7 prochains jours","",O.filter(a=>a.date>tom&&a.date<=wk)]];
   const R=relancesDues();
   let h='<div class="todo">',any=false;
-  G.forEach(([l,cls,L])=>{if(!L.length)return;any=true;h+='<div class="todo-g '+cls+'">'+esc(l)+'<span class="n">'+L.length+'</span></div>'+L.slice(0,limit).map(a=>tItem(a)).join("")+(L.length>limit?'<button type="button" class="more" data-nav="agenda" style="padding:6px 2px;text-align:left">Voir les '+L.length+' dans l\'agenda</button>':'')});
+  G.forEach(([l,cls,L])=>{if(!L.length)return;any=true;h+='<div class="todo-g '+cls+'">'+esc(l)+'<span class="n">'+L.length+'</span></div>'+L.slice(0,limit).map(a=>isRs(a)?rsTItem(a):tItem(a)).join("")+(L.length>limit?'<button type="button" class="more" data-nav="agenda" style="padding:6px 2px;text-align:left">Voir les '+L.length+' dans l\'agenda</button>':'')});
   if(R.length){any=true;h+='<div class="todo-g bad">Relances mailing<span class="n">'+R.length+'</span></div>'+R.slice(0,5).map(rItem).join("")+(R.length>5?'<button type="button" class="more" data-act="mrelview" style="padding:6px 2px;text-align:left">Voir les '+R.length+' relances</button>':'')}
   const DR=dvRelList();if(DR.length){any=true;h+='<div class="todo-g bad">Devis à relancer<span class="n">'+DR.length+'</span></div>'+DR.slice(0,5).map(dvRelItem).join("")+(DR.length>5?'<button type="button" class="more" data-dvv="relance" style="padding:6px 2px;text-align:left">Voir les '+DR.length+' devis à relancer</button>':'')}
-  const nd=O.filter(a=>!a.date).length;
+  const nd=O.filter(a=>!a.date&&!isRs(a)).length;
   if(!any)h+='<div class="empty-s">Rien en retard ni de prévu cette semaine.</div>';
   if(nd)h+='<div class="todo-g">Sans date<span class="n">'+nd+'</span></div><div class="ti" data-act="agnodate" style="grid-template-columns:minmax(0,1fr)"><span class="m">'+pl(nd,"action")+' à planifier (prochaines étapes reprises de vos cibles). <b style="color:var(--accent)">Les voir</b></span></div>';
   return h+'</div>'}
@@ -114,19 +114,22 @@ function renderTdb(){
 /* ---------- Agenda & actions ---------- */
 const AGF=[["afaire","À faire"],["retard","En retard"],["nodate","Sans date"],["faites","Faites"],["cr","Comptes rendus"],["toutes","Toutes"]];
 function agBase(){const q=nh(UI.ag.q),ty=UI.ag.type;
-  return S.actions.filter(a=>{if(ty&&a.type!==ty)return false;if(q){const k=kOf(a.compteId),ct=ctById(a.contactId);if(!nh([a.objet,a.details,a.resultat,k&&k.nom,ct&&ct.nom,a.accompagnant].join(" ")).includes(q))return false}return true})}
-const agFilt=(f,a)=>{const t=todayISO();return f==="afaire"?isOpen(a):f==="retard"?isOpen(a)&&a.date&&a.date<t:f==="nodate"?isOpen(a)&&!a.date:f==="faites"?a.statut!=="afaire":f==="cr"?!!a.cr:true};
+  /* Réunions (sans compte) : planifiées, tenues ou annulées, à côté des actions */
+  const R=!ty||ty==="reunion"?S.reunions.filter(r=>!q||rsHay(r).includes(q)):[];
+  if(ty==="reunion")return R;
+  return R.concat(S.actions.filter(a=>{if(ty&&a.type!==ty)return false;if(q){const k=kOf(a.compteId),ct=ctById(a.contactId);if(!nh([a.objet,a.details,a.resultat,k&&k.nom,ct&&ct.nom,a.accompagnant].join(" ")).includes(q))return false}return true}))}
+const agFilt=(f,a)=>{const t=todayISO();return f==="afaire"?isOpen(a):f==="retard"?isOpen(a)&&a.date&&a.date<t:f==="nodate"?isOpen(a)&&!a.date:f==="faites"?a.statut!=="afaire":f==="cr"?(isRs(a)?a.statut==="fait":!!a.cr):true};
 function renderAgenda(){
   const el=$("#view-agenda"),B=agBase(),f=UI.ag.f,L=B.filter(a=>agFilt(f,a));
-  let h=pageH("Actions commerciales","Agenda &amp; actions",pl(S.actions.filter(isOpen).length,"action")+" à faire · "+pl(S.actions.filter(a=>a.statut==="fait").length,"action réalisée","actions réalisées"),
-    '<button class="btn" type="button" data-anew="appel">'+I_EV.appel+'Appel</button><button class="btn" type="button" data-anew="tache">'+I_EV.tache+'Rappel</button><button class="btn primary" type="button" data-anew="visite">'+I_PLUS+'RDV</button>');
+  let h=pageH("Actions commerciales","Agenda &amp; actions",pl(S.actions.filter(isOpen).length,"action")+" à faire · "+pl(S.actions.filter(a=>a.statut==="fait").length,"action réalisée","actions réalisées")+(S.reunions.some(isOpen)?" · "+pl(S.reunions.filter(isOpen).length,"réunion planifiée","réunions planifiées"):""),
+    '<button class="btn" type="button" data-anew="appel">'+I_EV.appel+'Appel</button><button class="btn" type="button" data-anew="tache">'+I_EV.tache+'Rappel</button><button class="btn" type="button" data-rsnew="plan" title="Café Commerce, réunion inter-BU, d\'équipe… : sans compte">'+I_RS+'Réunion</button><button class="btn primary" type="button" data-anew="visite">'+I_PLUS+'RDV</button>');
   h+='<div class="bar"><div class="seg" role="group" aria-label="Affichage"><button type="button" data-agv="liste" aria-pressed="'+(UI.ag.vue==="liste")+'">Liste</button><button type="button" data-agv="semaine" aria-pressed="'+(UI.ag.vue==="semaine")+'">Semaine</button><button type="button" data-agv="mois" aria-pressed="'+(UI.ag.vue==="mois")+'">Mois</button></div>'+
     (UI.ag.vue==="liste"?'<div class="chips grow">'+AGF.map(([k,l])=>'<button type="button" class="chip" data-agf="'+k+'" aria-pressed="'+(f===k)+'">'+l+'<span class="n num">'+B.filter(a=>agFilt(k,a)).length+'</span></button>').join("")+'</div>':'<span class="grow"></span>')+
-    '<select id="agTy" aria-label="Type d\'action" style="width:auto"><option value="">Tous les types</option>'+ATYPES.map(([k,l])=>'<option value="'+k+'"'+(UI.ag.type===k?' selected':'')+'>'+esc(l)+'</option>').join("")+'</select>'+
+    '<select id="agTy" aria-label="Type d\'action" style="width:auto"><option value="">Tous les types</option>'+ATYPES.map(([k,l])=>'<option value="'+k+'"'+(UI.ag.type===k?' selected':'')+'>'+esc(l)+'</option>').join("")+'<option value="reunion"'+(UI.ag.type==="reunion"?' selected':'')+'>Réunion</option></select>'+
     '<input type="search" id="agQ" value="'+esc(UI.ag.q)+'" placeholder="Rechercher (compte, objet, contact…)" style="width:260px"></div>';
   if(UI.ag.vue!=="liste"){UI.cal.agenda.mode=UI.ag.vue;h+='<div class="panel">'+calHTML("agenda")+'</div>';
-    const late=S.actions.filter(a=>isOpen(a)&&a.date&&a.date<todayISO()).sort(aSort);
-    if(late.length)h+='<div class="panel"><div class="ph"><h2>En retard</h2><span class="sub num">'+late.length+'</span></div><div class="todo">'+late.slice(0,12).map(a=>tItem(a,{full:true})).join("")+'</div></div>';
+    const late=S.actions.concat(S.reunions).filter(a=>isOpen(a)&&a.date&&a.date<todayISO()).sort(aSort);
+    if(late.length)h+='<div class="panel"><div class="ph"><h2>En retard</h2><span class="sub num">'+late.length+'</span></div><div class="todo">'+late.slice(0,12).map(a=>isRs(a)?rsTItem(a,{full:true}):tItem(a,{full:true})).join("")+'</div></div>';
     el.innerHTML=h;return}
   if(!L.length){h+='<div class="list-wrap"><div class="empty"><h3>Aucune action dans cette vue</h3><p>Ajoutez un RDV, un appel ou un rappel avec les boutons en haut, ou depuis la fiche d\'un compte.</p></div></div>';el.innerHTML=h;return}
   const t=todayISO(),tom=addD(t,1),wkEnd=addD(mondayOf(t),6);
@@ -139,7 +142,7 @@ function renderAgenda(){
   let n=0;const lim=UI.ag.lim;
   h+='<div class="list-wrap"><table class="tbl"><thead><tr><th style="width:34px"></th><th>Date</th><th>Type</th><th>Objet</th><th>Compte</th><th>Contact</th><th>Campagne</th><th>Statut</th></tr></thead><tbody>';
   for(const [l,v] of groups){if(n>=lim)break;h+='<tr class="det" style="cursor:default"><td colspan="8" style="padding:10px 12px 6px;box-shadow:none;background:var(--surface-2)"><span class="lbl"'+(l==="En retard"?' style="color:var(--bad)"':'')+'>'+esc(l)+' · '+v.length+'</span></td></tr>';
-    for(const a of v){if(n++>=lim)break;const k=kOf(a.compteId),ct=ctById(a.contactId),cb=cibById(a.cibleId),late=isOpen(a)&&a.date&&a.date<t;
+    for(const a of v){if(n++>=lim)break;if(isRs(a)){h+=rsAgRow(a);continue}const k=kOf(a.compteId),ct=ctById(a.contactId),cb=cibById(a.cibleId),late=isOpen(a)&&a.date&&a.date<t;
       h+='<tr data-aid="'+esc(a.id)+'"><td><button type="button" class="ck'+(a.statut==="fait"?' on':'')+'" data-done="'+esc(a.id)+'" aria-label="Marquer comme fait">'+(a.statut==="fait"?I_CHECK:'')+'</button></td>'+
         '<td class="num'+(late?' late':'')+'" style="white-space:nowrap">'+(a.date?esc(fday(a.date))+(a.date.slice(0,4)!==t.slice(0,4)?' '+a.date.slice(0,4):''):'<span class="sub">—</span>')+(a.heure?'<div class="sub">'+esc(a.heure.replace(":","h"))+'</div>':'')+'</td>'+
         '<td><span class="eic eic-'+esc(a.type)+'" style="vertical-align:middle">'+(I_EV[a.type]||I_EV.autre)+'</span> <span class="sub">'+esc(ESHORT[a.type]||a.type)+'</span></td>'+

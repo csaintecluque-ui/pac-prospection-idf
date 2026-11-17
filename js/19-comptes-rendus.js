@@ -23,7 +23,7 @@ const crHay=a=>{if(isRs(a))return rsHay(a);const k=kOf(a.compteId),ct=ctById(a.c
 function crPeriod(a){const p=CRU.p;if(!p)return true;const d=a.date||"";if(!d)return false;
   if(p==="an")return d>=todayISO().slice(0,4)+"-01-01";return d>=addD(todayISO(),-Number(p))}
 /* Comptes rendus d'actions et réunions (sans compte obligatoire), dans une même liste */
-const crBase=()=>S.actions.filter(a=>isCR(a)&&crPeriod(a)).concat(S.reunions.filter(crPeriod));
+const crBase=()=>S.actions.filter(a=>isCR(a)&&crPeriod(a)).concat(S.reunions.filter(r=>r.statut==="fait"&&crPeriod(r)));
 const crKind=(a,f)=>!f||(f==="rs"?isRs(a):!isRs(a)&&(f==="cr"?!!a.cr:!a.cr));
 function crList(){const w=nh(CRU.q).split(" ").filter(Boolean);
   return crBase().filter(a=>crKind(a,CRU.f)&&(!w.length||(h=>w.every(t=>h.includes(t)))(crHay(a)))).sort(aSortDesc)}
@@ -45,7 +45,7 @@ function crCard(a,q){const k=kOf(a.compteId),g=grpOf(k);
     ((crWho(a)||a.lieu)?'<div class="sub">'+esc([crWho(a),a.lieu].filter(Boolean).join(" · "))+'</div>':'')+'</div>'}
 
 function renderCR(){const el=$("#view-cr");if(!el)return;
-  const B=crBase(),L=crList(),nr=S.reunions.length,all=S.actions.filter(isCR).length+nr;
+  const B=crBase(),L=crList(),nr=S.reunions.filter(r=>r.statut==="fait").length,all=S.actions.filter(isCR).length+nr;
   let h=pageH("Actions commerciales","Comptes rendus",pl(all,"compte rendu","comptes rendus")+" enregistré"+(all>1?"s":"")+" · "+pl(S.actions.filter(a=>a.cr&&a.statut!=="annule").length,"détaillé")+(nr?" · "+pl(nr,"réunion","réunions"):"")+" · notes de RDV comprises",
     '<button class="btn ghost" type="button" data-cract="print"'+(L.length?'':' disabled')+' title="Imprimer ou enregistrer en PDF les comptes rendus affichés">Imprimer la sélection</button><button class="btn" type="button" data-rsnew="1" title="Café Commerce, réunion inter-BU, d\'équipe, de direction, formation… : pas besoin de compte">'+I_RS+'Réunion</button><button class="btn primary" type="button" data-anew="visite" data-cr="1">'+I_PLUS+'Compte rendu</button>');
   h+='<div class="cr-bar"><div class="field-s cr-q"><label for="crQ">Rechercher dans les comptes rendus</label><input type="search" id="crQ" value="'+esc(CRU.q)+'" placeholder="Compte, groupe, contact, agence, mot du compte rendu (ex. DTA, Safran, Café Commerce)…" autocomplete="off"></div>'+
@@ -77,7 +77,7 @@ function crPrintItems(L,titre,sous){const R=s=>esc(s==null?"":s);
   const w=window.open("","_blank");if(!w){toast("Fenêtre bloquée : autorisez les fenêtres pour imprimer.");return}w.document.write(html);w.document.close()}
 
 /* Bloc du tableau de bord */
-function crWidget(){const L=S.actions.filter(isCR).concat(S.reunions).sort(aSortDesc).slice(0,6);
+function crWidget(){const L=S.actions.filter(isCR).concat(S.reunions.filter(r=>r.statut==="fait")).sort(aSortDesc).slice(0,6);
   return '<div class="panel"><div class="ph"><h2>Derniers comptes rendus</h2><button type="button" class="more" data-nav="cr">Tous</button></div>'+
     (L.length?'<div class="crw">'+L.map(a=>{if(isRs(a))return '<div class="crw-i" data-rid="'+esc(a.id)+'" tabindex="0" role="button"><span class="num sub">'+(a.date?fdate(a.date):"—")+'</span><span class="grow"><b>'+esc(rsTitle(a))+'</b><span class="sub">'+esc([rsTitle(a).indexOf(RTL[a.type])<0?RTL[a.type]:"",a.affaires.length?pl(a.affaires.length,"affaire évoquée","affaires évoquées"):""].filter(Boolean).join(" · ")||"Compte rendu de réunion")+'</span></span></div>';const k=kOf(a.compteId);return '<div class="crw-i" data-aid="'+esc(a.id)+'" tabindex="0" role="button"><span class="num sub">'+(a.date?fdate(a.date):"—")+'</span><span class="grow"><b>'+esc(k?k.nom:"")+'</b><span class="sub">'+esc(a.objet||ALBL[a.type])+'</span></span></div>'}).join("")+'</div>'
       :'<p class="hint">Aucun compte rendu pour l\'instant.</p>')+'<div class="bar" style="justify-content:flex-start"><button class="btn" type="button" data-anew="visite" data-cr="1">'+I_CR+'Rédiger un compte rendu</button><button class="btn" type="button" data-rsnew="1" title="Café Commerce, réunion inter-BU, d\'équipe…">'+I_RS+'Réunion</button></div></div>'}

@@ -45,7 +45,7 @@ function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTi
 const nh=x=>String(x==null?"":x).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
 const now=()=>new Date().toISOString();
 const S={open:new Set(),mode:"wait",cibles:[],comptes:[],contacts:[],actions:[],plans:[],pac:[],mailing:[],devis:[],reunions:[],liens:[],settings:{objectif:8},writable:true,view:"actives",tab:"tdb",kid:"",db:null,downloads:null,ver:0};
-const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.41";
+const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.42";
 let STORE="ls"; /* "idb" dès que les données sont dans la base du navigateur */
 const IN_FRAME=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 const TYPE_RANK={"Client existant":3,"Prescripteur":2,"Prospect":1};
@@ -74,11 +74,12 @@ const anorm=x=>{const o=Object.assign(ablank(),x||{});if(!["afaire","fait","annu
 /* Réunions (synergie, équipe, direction, formation…) : comptes rendus sans compte obligatoire ; les affaires évoquées peuvent citer un compte */
 const RTYPES=[["cafe","Café Commerce"],["interbu","Réunion inter-BU"],["equipe","Réunion d'équipe"],["direction","Réunion de direction"],["formation","Formation / atelier"],["interne","Autre réunion"]];
 const rsAff=x=>Object.assign({compte:"",compteId:"",apporteur:"",besoin:"",suite:""},x||{});
-const rsblank=()=>({id:"",creeLe:"",majLe:"",type:"cafe",date:"",heure:"",titre:"",agence:"",participants:"",points:"",affaires:[],decisions:""});
+/* statut : afaire = planifiée (dans l'agenda), fait = tenue (compte rendu), annule ; actionId : point d'agenda relié (action) */
+const rsblank=()=>({id:"",creeLe:"",majLe:"",type:"cafe",statut:"fait",date:"",heure:"",titre:"",agence:"",participants:"",points:"",affaires:[],decisions:"",actionId:""});
 /* Fichiers reliés : un lien vers un fichier du PC (rien n'est copié). L'accès au fichier reste dans ce navigateur (09 · base « app ») */
 const lnorm=x=>Object.assign({id:"",owner:"",ownerId:"",nom:"",type:"",taille:0,modifLe:"",ajouteLe:""},x||{});
 const isRs=x=>!!x&&Array.isArray(x.affaires)&&RTYPES.some(t=>t[0]===x.type);
-const rsnorm=x=>{const o=Object.assign(rsblank(),x||{});if(!RTYPES.some(t=>t[0]===o.type))o.type="interne";o.affaires=(Array.isArray(o.affaires)?o.affaires:[]).map(rsAff);return o};
+const rsnorm=x=>{const o=Object.assign(rsblank(),x||{});if(!RTYPES.some(t=>t[0]===o.type))o.type="interne";if(!["afaire","fait","annule"].includes(o.statut))o.statut="fait";o.affaires=(Array.isArray(o.affaires)?o.affaires:[]).map(rsAff);return o};
 
 /* Index recalculés à chaque modification */
 let IXC=null,IXV=-1;

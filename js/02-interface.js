@@ -143,7 +143,7 @@ function drawAction(){
   const ST=[["afaire",rdv?"Planifié":"À faire"],["fait",rdv?"Réalisé":"Fait"],["annule","Annulé"]];
   showModal(mHead(amNew?"Nouvelle action":"Action",esc(ALBL[a.type]||"Action")+(a._k?' · '+esc(a._k):''))+
   '<div class="db"><form id="amForm" class="am-grid" onsubmit="return false"><div class="am-col">'+
-   '<div class="tpick" role="group" aria-label="Type d\'action">'+ATYPES.map(([t,l])=>'<button type="button" data-atype="'+t+'" aria-pressed="'+(a.type===t)+'">'+(I_EV[t]||"")+esc(l)+'</button>').join("")+'</div>'+
+   '<div class="tpick" role="group" aria-label="Type d\'action">'+ATYPES.map(([t,l])=>'<button type="button" data-atype="'+t+'" aria-pressed="'+(a.type===t)+'">'+(I_EV[t]||"")+esc(l)+'</button>').join("")+(amNew?'<button type="button" data-rsfromam="1" title="Réunion interne sans compte (Café Commerce, équipe…), à la même date">'+I_RS+'Réunion interne</button>':'')+'</div>'+
    kcHTML(a,k)+
    '<div class="row4"><div class="f"><label class="lbl" for="am-date">Date</label><input type="date" id="am-date" value="'+esc(a.date)+'"></div><div class="f"><label class="lbl" for="am-heure">Heure</label><input type="time" id="am-heure" value="'+esc(a.heure)+'"></div>'+
     '<div class="f" style="grid-column:span 2"><span class="lbl">Statut</span><div class="seg" role="group" aria-label="Statut">'+ST.map(([s,l])=>'<button type="button" data-ast="'+s+'" aria-pressed="'+(a.statut===s)+'">'+l+'</button>').join("")+'</div></div></div>'+
@@ -160,7 +160,7 @@ function drawAction(){
    ta("am-det",a.type==="note"?"Note":(a.cr||a._crOpen)?"Points abordés":rdv||a.type==="evenement"?"Compte rendu":"Détails",a.details,a.type==="note"||rdv||a.cr||a._crOpen?12:8,EPH[a.type])+
    (crOK(a.type)?crSection(a):'')+lkBlock("action",a.id,"plain")+
   '</div></form></div>'+
-  '<div class="df">'+(amNew?'':'<button class="btn danger" type="button" data-act="amdel">Supprimer</button>')+(k?'<button class="btn ghost" type="button" data-kopen="'+esc(k.id)+'">Fiche compte</button>':'')+(k&&rdv?'<button class="btn ghost" type="button" data-prep="'+esc(k.id)+'" data-prepa="'+esc(a.id)+'">Fiche de préparation</button>':'')+'<span class="grow"></span><button class="btn" type="button" data-act="mclose">Annuler</button><button class="btn primary" type="button" data-act="amsave">Enregistrer</button></div>',"action");
+  '<div class="df">'+(amNew?'':'<button class="btn danger" type="button" data-act="amdel">Supprimer</button>')+(k?'<button class="btn ghost" type="button" data-kopen="'+esc(k.id)+'">Fiche compte</button>':'')+(k&&rdv?'<button class="btn ghost" type="button" data-prep="'+esc(k.id)+'" data-prepa="'+esc(a.id)+'">Fiche de préparation</button>':'')+(amNew?'':rsActBtn(a))+'<span class="grow"></span><button class="btn" type="button" data-act="mclose">Annuler</button><button class="btn primary" type="button" data-act="amsave">Enregistrer</button></div>',"action");
   modalBig();
 }
 async function amSave(){
