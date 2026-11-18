@@ -515,7 +515,6 @@ main#app>section{display:flex;flex-direction:column;gap:16px;min-width:0}
 .ev.k-rel{background:none;box-shadow:inset 0 0 0 1px var(--line);color:var(--muted)}
 .ev.done{opacity:.6}.ev.done .o{text-decoration:line-through}
 .ev.late{box-shadow:inset 3px 0 0 var(--bad)}
-.cal .nmore{font:500 11.5px var(--f-ui);color:var(--muted);padding:0 4px}
 .cal-leg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted)}
 .cal-leg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
 @media (max-width:760px){.cal-w{grid-template-columns:minmax(0,1fr)}.cal-w .hd{display:none}.cal-w .cal-d{min-height:0}.cal-m .cal-d{min-height:64px}.cal-m .ev{font-size:0;padding:0;height:6px}.cal-m .ev *{display:none}}
