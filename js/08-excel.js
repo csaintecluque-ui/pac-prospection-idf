@@ -493,7 +493,7 @@ function importMenu(){
   $("#scrim").hidden=false;d.hidden=false;
   const mb=$("#imModel");if(mb)mb.onclick=async()=>{try{saveBlob(await buildTemplate(),"Registre_modele_import.xlsx");toast("Modèle téléchargé")}catch(e){toast("Modèle indisponible : vérifiez la connexion internet.")}};
   $("#imFile").onchange=async e=>{const f=e.target.files[0];if(!f)return;const pv=$("#imPrev");pv.hidden=false;pv.innerHTML='<p class="hint">Lecture du fichier…</p>';
-    try{IMP=await parseImportFile(f);drawImportPreview(f.name)}catch(err){pv.innerHTML='<div class="notice warn"><b>Fichier illisible.</b> Enregistrez-le au format .xlsx ou .csv et réessayez. Si le fichier est un .xlsx, vérifiez la connexion internet.</div>'}};
+    try{IMP=await parseImportFile(f);IMP.file=f;drawImportPreview(f.name)}catch(err){pv.innerHTML='<div class="notice warn"><b>Fichier illisible.</b> Enregistrez-le au format .xlsx ou .csv et réessayez. Si le fichier est un .xlsx, vérifiez la connexion internet.</div>'}};
 }
 /* Noms proches : tous les mots significatifs du nom le plus court se retrouvent dans l'autre (« Cougnaud » ≈ « COUGNAUD – Saint-Michel-sur-Orge ») */
 const NSTOP=new Set(["sa","sas","sasu","sarl","eurl","sci","snc","scop","sem","spl","gie","et","de","du","des","la","le","les","the","and","cie","ste","societe","groupe","group","holding","france","fr"]);
@@ -511,7 +511,7 @@ function mergeRow(a,b){ /* deux lignes du fichier pour le même client */
     else if(a[k]==null||a[k]==="")a[k]=v})}
 function drawImportPreview(fname){
   const pv=$("#imPrev"),I=IMP;
-  if(!["compte","compteAthena","societe"].some(k=>I.cols.includes(k))){pv.innerHTML='<div class="notice warn"><b>Colonne « Client » introuvable.</b> La première ligne du fichier doit contenir les titres de colonnes, dont « Client » (ou « Compte », « Entreprise », « Raison sociale », ou pour un export de leads Athena « Compte existant » ou « Société du lead »).</div>';return}
+  if(!["compte","compteAthena","societe"].some(k=>I.cols.includes(k))){pv.innerHTML='<div class="notice warn"><b>Colonne « Client » introuvable.</b> La première ligne du fichier doit contenir les titres de colonnes, dont « Client » (ou « Compte », « Entreprise », « Raison sociale », ou pour un export de leads Athena « Compte existant » ou « Société du lead »).</div>';ciSuggest(I.file);return}
   /* Rapprochement : n° de lead Athena, puis même client et même département ; une seule fiche existante et une seule ligne dans le fichier = même client */
   const byName={};S.cibles.forEach(c=>{const k=nh(c.compte);if(k)(byName[k]=byName[k]||[]).push(c)});
   const byLead={};S.cibles.forEach(x=>x.leadIds.forEach(id=>{byLead[id]=x}));

@@ -46,7 +46,7 @@ function ciContact(o){const nom=String(o.nomc||[o.prenom,o.nom].filter(Boolean).
 async function ciLoad(f){
   const book=await openBook(f),vis=book.sheets.filter(s=>s.state==="visible"||book.sheets.length===1);
   const named=n=>vis.find(s=>nh(s.name)===n);
-  let shK=named("comptes"),shC=named("contacts");const res={fname:f.name,comptes:[],contacts:[],sheets:[]};
+  let shK=named("comptes"),shC=named("contacts");const res={fname:f.name,comptes:[],contacts:[],sheets:[],named:!!(shK||shC)};
   const needK=s=>s.has("nom"),needC=s=>s.has("compte")&&(s.has("nomc")||s.has("nom")||s.has("prenom")||s.has("mail"));
   if(!shK&&!shC){ /* pas d'onglet nommé : le premier onglet reconnu, contacts d'abord */
     for(const s of vis){const rows=await book.load(s),hc=ciHead(rows,CI_C,needC);if(hc){res.contacts=ciRead(rows,hc).map(ciContact);res.sheets.push(s.name);return res}
@@ -121,6 +121,15 @@ function ciUndo(){const U=CI&&CI.done;if(!U)return;
   U.cb.forEach(b=>{const i=S.contacts.findIndex(x=>x.id===b.id);if(i>=0)S.contacts[i]=b});
   bump();commit();CI.done=null;ciDraw();toast("Import annulé")}
 
+/* Un fichier « Comptes / Contacts » choisi dans l'import des cibles : on propose le bon import, fichier déjà chargé */
+let CI_NEXT=null;
+async function ciSuggest(f){CI_NEXT=null;if(!f)return;
+  try{const r=await ciLoad(f);if(!r.named||!(r.comptes.length||r.contacts.length))return;CI_NEXT=r;const pv=$("#imPrev");if(!pv)return;
+    pv.innerHTML='<div class="notice warn ci-done"><span class="grow"><b>Ce fichier est une base de comptes et contacts</b>, pas une liste de cibles ('+pl(r.comptes.length,"compte")+', '+pl(r.contacts.length,"contact")+'). Il s\'importe par Comptes › Importer › « Comptes et contacts (sans campagne) », sans créer de cible.</span>'+
+      '<button class="btn primary" type="button" data-act="ciopen">Ouvrir cet import</button></div>'}catch(e){}}
+function ciOpenNext(){const r=CI_NEXT;CI_NEXT=null;if(!r)return;histoMenu();CI=r;ciDraw();const pv=$("#ciPrev");if(pv)pv.scrollIntoView({block:"center"})}
+
 document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("button");if(!t)return;const a=t.dataset.act;
+  if(a==="ciopen"){ciOpenNext();return}
   if(a==="cigo"){t.disabled=true;t.textContent="Import en cours…";setTimeout(ciApply,30);return}
   if(a==="ciundo"){ciUndo();return}});
