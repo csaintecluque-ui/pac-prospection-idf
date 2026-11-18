@@ -156,9 +156,12 @@ function histoMenu(){
    '<p class="hint">Le classeur d\'analyse des clients facturés : onglets de pièces (factures, devis, commandes), clients typés, contacts clients, contrats cadres et mails types. Pour chaque client : le compte est créé ou complété (type « Client existant », typologie, famille, agence, apporteur, contrat cadre), ses contacts sont ajoutés et ses antécédents calculés : CA facturé par année, devis en attente, commandes en cours, statut (actif, nouveau, perdu).</p>'+
    '<p class="hint">Rien n\'est supprimé : vos comptes, contacts, actions et cibles sont conservés. Un nouvel import remplace seulement les antécédents par ceux du fichier.'+(last?' Dernier import : '+new Date(last.le).toLocaleDateString("fr-FR")+' · '+esc(last.fichier||"")+'.':'')+'</p>'+
    '<input type="file" id="hiFile" accept=".xlsx"><div id="hiPrev"></div></div>'+
+  '<div class="addv"><span class="lbl">Comptes et contacts (sans campagne)</span><p class="hint">Une base de contacts : un onglet « Comptes » (une ligne par entreprise) et/ou un onglet « Contacts » (une ligne par contact, avec la colonne « Compte »). Les comptes sont créés ou complétés (champs vides seulement) et tous leurs contacts ajoutés, sans doublon. Aucune cible n\'est créée : les contacts se retrouvent dans Comptes et dans « Contacts pour un mailing ».</p>'+
+   '<input type="file" id="ciFile" accept=".xlsx,.csv,.txt,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"><div id="ciPrev"></div></div>'+
   '<div class="addv"><span class="lbl">Cibles de prospection</span><p class="hint">Une liste de clients ou de prospects à travailler en campagne (Excel ou CSV, une ligne par entreprise).</p><div class="bar"><button class="btn" type="button" id="btnImpCib">Importer des cibles</button></div></div></div>';
   $("#scrim").hidden=false;d.hidden=false;
   $("#btnImpCib").onclick=()=>importMenu();
+  CI=null;$("#ciFile").onchange=ciFile;
   $("#hiFile").onchange=async e=>{const f=e.target.files[0];if(!f)return;const pv=$("#hiPrev");pv.innerHTML='<p class="hint">Lecture du fichier… (quelques secondes pour un gros classeur)</p>';
     try{HIMP=await parseHisto(f);drawHistoPrev()}catch(err){console.error(err);pv.innerHTML='<div class="notice warn"><b>Aucune donnée reconnue.</b> Il faut des onglets avec une colonne « Client (Tiers) » ou des pièces (« Tiers », « Etape WF », « Total HT »).</div>'}};
 }

@@ -1281,3 +1281,7 @@ fieldset.lkb{gap:8px}
 .ev.k-reunion{background:color-mix(in srgb,var(--accent) 12%,var(--surface));box-shadow:inset 3px 0 0 var(--accent)}
 .rs-plan{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0}
 .btn svg{flex:none}
+
+/* Import comptes et contacts */
+.ci-done{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.ci-done .grow{min-width:220px;flex:1}

@@ -30,6 +30,7 @@ Les données restent dans le navigateur (IndexedDB) : faire régulièrement une 
   - `20-reunions.js` : réunions (Café Commerce, inter-BU, équipe, direction, formation, autre) : compte rendu sans compte obligatoire, affaires évoquées reliées aux fiches des clients cités ; réunions planifiées dans l'agenda (calendrier, À faire, glisser-déposer), compte rendu une fois tenues, lien vers un point d'agenda (action) ; intégrées à la page Comptes rendus, à la recherche globale et à la fiche compte
   - `21-fichiers.js` : fichiers reliés (réunions, comptes rendus et actions, fiches compte, cibles) : un lien vers le fichier du PC, rien n'est copié ; l'accès reste dans le navigateur, le nom et la taille suivent la sauvegarde. Chrome ou Edge, en pleine page
   - `22-selection-contacts.js` : sélection de contacts pour un mailing (typologie, sous-typologie, famille, type, département, agence, fonction) ; copie des adresses ou création d'une liste dans le Mailing
+  - `23-comptes-contacts.js` : import « Comptes et contacts » (Comptes › Importer) : une base de contacts sans cible ni campagne ; comptes créés ou complétés (champs vides seulement), tous les contacts ajoutés sans doublon, annulation tant que le panneau reste ouvert
   - `18-demarrage.js` : événements et démarrage (toujours en dernier)
 
 ## Nouvelle version

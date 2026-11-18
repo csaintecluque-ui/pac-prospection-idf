@@ -303,7 +303,7 @@ function openDrawer(id,preset){
   const db=document.querySelector("#drawer .db");if(db)db.scrollTop=0;
   setTimeout(()=>{const f=$("#d-compte");if(f&&isNew&&!D.compteId)f.focus({preventScroll:true})},30);
 }
-function closeDrawer(){$("#scrim").hidden=true;$("#drawer").hidden=true;$("#drawer").classList.remove("wide");D=null;P=null;ME=null;CP=null;PIMP=null;DUP=null;MIMP=null;IMP=null;CG=null}
+function closeDrawer(){$("#scrim").hidden=true;$("#drawer").hidden=true;$("#drawer").classList.remove("wide");D=null;P=null;ME=null;CP=null;PIMP=null;DUP=null;MIMP=null;IMP=null;CG=null;CI=null}
 function opts(list,cur,empty){if(cur&&!list.includes(cur))list=list.concat([cur]);return (empty!=null?'<option value="">'+esc(empty)+'</option>':'')+list.map(o=>'<option'+(o===cur?' selected':'')+'>'+esc(o)+'</option>').join("")}
 function checks(name,list,sel,lab){return '<div class="checks">'+list.map(it=>{const v=Array.isArray(it)?it[0]:it,l=Array.isArray(it)?it[0]+" · "+it[1]:it;return '<label><input type="checkbox" data-arr="'+name+'" value="'+esc(v)+'"'+(sel.includes(v)?' checked':'')+'>'+esc(lab?lab(it):l)+'</label>'}).join("")+'</div>'}
 function drawDrawer(){
