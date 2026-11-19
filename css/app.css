@@ -1284,3 +1284,6 @@ fieldset.lkb{gap:8px}
 /* Import comptes et contacts */
 .ci-done{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
 .ci-done .grow{min-width:220px;flex:1}
+/* V3.46 · Devis en double, avertissements de l'analyse */
+.dv-dup{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px}
+.an-n1{margin:-6px 0 14px}
