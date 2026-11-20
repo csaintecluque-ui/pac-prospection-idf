@@ -1289,7 +1289,7 @@ fieldset.lkb{gap:8px}
 .an-n1{margin:-6px 0 14px}
 
 /* V3.47 · Analyse SWOT (24-swot.js) */
-:where(.sw-q,.sw-dot,.sw-rq button,.sw-pq,.sw-tag i){--qc:var(--ok);--qs:var(--ok-soft)}
+:where(.sw-q,.sw-dot,.sw-tag i){--qc:var(--ok);--qs:var(--ok-soft)}
 .q-w{--qc:var(--bad);--qs:var(--bad-soft)}.q-o{--qc:var(--info);--qs:var(--info-soft)}.q-t{--qc:var(--warn);--qs:var(--warn-soft)}
 .sw-camps .camp .sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sw-dot{display:inline-block;width:7px;height:7px;border-radius:2px;background:var(--qc);margin-right:4px;vertical-align:0}
@@ -1340,18 +1340,6 @@ textarea.sw-ta:focus{border-color:var(--line);background:var(--surface)}
 input.sw-add{border-style:dashed;background:none;margin-top:auto}
 input.sw-add:focus{border-style:solid;background:var(--surface)}
 .sw-undo{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.sw-rps{display:flex;flex-direction:column;border-top:1px solid var(--line)}
-.sw-rp{display:flex;align-items:center;gap:8px 14px;padding:7px 2px;border-bottom:1px solid var(--line);flex-wrap:wrap}
-.sw-rp:last-child{border-bottom:0}
-.sw-rt{flex:1 1 320px;min-width:0;font-size:13.5px}
-.sw-rp.on .sw-rt{color:var(--muted)}
-.sw-rd{display:inline-flex;align-items:center;gap:10px}
-.sw-rq{display:inline-flex;gap:4px}
-.sw-rq button{width:28px;height:26px;border-radius:5px;border:1px solid var(--line);background:var(--surface);color:var(--muted);font:700 12.5px var(--f-label);cursor:pointer}
-.sw-rq button:hover{border-color:var(--qc);color:var(--qc)}
-.sw-rq button.sug{background:var(--qs);border-color:var(--qc);color:var(--qc)}
-.pill.sw-pq{background:var(--qs);color:var(--qc)}
-.sw-none{font-size:13px;color:var(--muted);margin:0}
 .sw-st{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .sw-sc{border:1px solid var(--line);border-radius:var(--r);padding:11px 13px 13px;display:flex;flex-direction:column;gap:8px;min-width:0;background:var(--bg)}
 .sw-sch{display:flex;align-items:center;gap:8px}

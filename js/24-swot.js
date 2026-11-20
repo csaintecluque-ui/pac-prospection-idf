@@ -1,6 +1,6 @@
 /* Registre · CSC — Analyse SWOT : forces, faiblesses, opportunités, menaces, sur l'entreprise (nom saisi), un compte, un secteur ou une campagne.
-   Repères chiffrés tirés du registre (devis, facturation, comptes, cibles) à ajouter en un clic ; stratégies croisées
-   (S×O, W×O, S×T, W×T) envoyées dans le plan d'action (PAC) ; impression ; recherche globale ; bouton SWOT de la fiche compte.
+   Stratégies croisées (S×O, W×O, S×T, W×T) envoyées dans le plan d'action (PAC) ; analyse jointe au PAC ; impression ;
+   recherche globale ; bouton SWOT de la fiche compte.
    Chargé avant 18-demarrage.js (toujours en dernier) : partage les déclarations des fichiers précédents. */
 "use strict";
 
@@ -19,14 +19,14 @@ const SWQ1={s:"une force",w:"une faiblesse",o:"une opportunité",t:"une menace"}
 const SWXD={so:["so","Miser sur vos forces pour saisir les opportunités"],wo:["wo","Corriger vos faiblesses pour ne pas laisser passer les opportunités"],
   st:["st","Vous appuyer sur vos forces pour contrer les menaces"],wt:["wt","Réduire les faiblesses qui vous exposent aux menaces"]};
 const SWIMP={1:"faible",2:"moyenne",3:"forte"};
-const SWPH={activite:"L'entreprise, la filiale, la région ou l'agence que vous analysez : les repères chiffrés portent sur tous les comptes du registre.",
+const SWPH={activite:"L'entreprise, la filiale, la région ou l'agence que vous analysez.",
   compte:"Un client ou un prospect (un groupe compte avec ses sites) : les atouts et les fragilités de l'entreprise face à lui.",
   secteur:"Un secteur d'activité (segment ou typologie des comptes) : bailleurs sociaux, foncières, industriels…",
   campagne:"Une campagne de prospection : ses cibles, ses opportunités, ses motifs de classement sans suite.",
-  libre:"Une offre, un marché, un appel d'offres… : pas de repères chiffrés, l'analyse est libre."};
+  libre:"Une offre, un marché, un appel d'offres…"};
 const SWK="pac-idf-swot-ui";
-const SWU=(()=>{const d={cur:"",rep:true};try{return Object.assign(d,JSON.parse(localStorage.getItem(SWK)||"{}"))}catch(e){return d}})();
-const swuSave=()=>{try{localStorage.setItem(SWK,JSON.stringify({cur:SWU.cur,rep:SWU.rep}))}catch(e){}};
+const SWU=(()=>{const d={cur:""};try{return Object.assign(d,JSON.parse(localStorage.getItem(SWK)||"{}"))}catch(e){return d}})();
+const swuSave=()=>{try{localStorage.setItem(SWK,JSON.stringify({cur:SWU.cur}))}catch(e){}};
 let SWUNDO=null,SWN=null,SWDRAG=null;
 
 /* ---------- Libellés ---------- */
@@ -53,77 +53,6 @@ const swCamps=()=>[...new Set(S.cibles.map(c=>c.campagne).filter(Boolean))].sort
 const swPacOf=x=>x.pacId?S.pac.find(p=>p.id===x.pacId)||null:null;
 const swNextPer=p=>/^\d{4}$/.test(String(p||"").trim())?String(+p+1):"";
 function swTouch(a){a.majLe=now();lsSave()}
-
-/* ---------- Périmètre : les comptes concernés (null = tous) ---------- */
-function swKids(a){
-  if(a.portee==="activite")return null;
-  if(a.portee==="compte"){const k=kOf(a.compteId);return new Set(k?[k.id].concat(sitesOf(k.id).map(x=>x.id)):[])}
-  if(a.portee==="secteur")return new Set(a.secteur?S.comptes.filter(k=>secteurOf(k)===a.secteur).map(k=>k.id):[]);
-  if(a.portee==="campagne")return new Set(a.campagne?S.cibles.filter(c=>c.campagne===a.campagne).map(c=>c.compteId):[]);
-  return new Set()}
-
-/* ---------- Repères chiffrés : constats du registre, chacun avec un quadrant suggéré (ou aucun) ---------- */
-function swReperes(a){
-  if(a.portee==="libre")return [];
-  const one=a.portee==="compte",k0=one?kOf(a.compteId):null;
-  if(one&&!k0||a.portee==="secteur"&&!a.secteur||a.portee==="campagne"&&!a.campagne)return [];
-  const K=swKids(a),t=todayISO(),Y1=String(new Date().getFullYear()),Y0=String(+Y1-1),R=[],add=(key,q,txt)=>R.push({key,q,txt});
-  const KK=K?S.comptes.filter(k=>K.has(k.id)):S.comptes;
-  /* Devis décidés (acceptés, refusés, sans suite) sur 12 mois glissants ; comparaison aux 12 mois d'avant si le suivi remonte assez loin */
-  const all=S.devis.filter(d=>d.statut!=="brouillon"),D=K?all.filter(d=>K.has(d.compteId)):all;
-  const f1=addD(t,-365),f2=addD(t,-730),deb=anDebut(),hasPrev=!!deb&&deb<=f2;
-  const dec=(L,a0,a1)=>{const r={n:0,m:0,ln:0,lm:0};L.forEach(d=>{const x=d.dateRep||d.date||"";if(!x||x<a0||x>=a1)return;const s=dvSum(d).tot;
-    if(d.statut==="accepte"){r.n++;r.m+=s}else if(!dvLive(d)){r.ln++;r.lm+=s}});return r};
-  const cur=dec(D,f1,"9999"),prev=hasPrev?dec(D,f2,f1):null;
-  if(cur.n){let txt=pl(cur.n,"devis accepté","devis acceptés")+" sur 12 mois · "+eur(cur.m)+" HT",q="";
-    if(prev&&prev.m){const ev=Math.round((cur.m-prev.m)/prev.m*100);txt+=" ("+(ev>=0?"+":"")+ev+" % par rapport aux 12 mois précédents)";q=ev>=10?"s":ev<=-10?"w":""}
-    add("acc",q,txt)}
-  else if(prev&&prev.n)add("acc","w","Aucun devis accepté sur 12 mois, contre "+eur(prev.m)+" HT les 12 mois précédents");
-  if(cur.n+cur.ln>=3&&cur.m+cur.lm>0){const tm=pct(cur.m,cur.m+cur.lm),tn=pct(cur.n,cur.n+cur.ln);let txt="Transformation des devis sur 12 mois : "+tm+" % en montant, "+tn+" % en nombre",q="";
-    if(K){const g=dec(all,f1,"9999"),gm=g.m+g.lm>0?pct(g.m,g.m+g.lm):null;if(gm!=null&&g.n+g.ln>cur.n+cur.ln){txt+=" (ensemble du registre : "+gm+" %)";q=tm-gm>=5?"s":gm-tm>=5?"w":""}}
-    else if(prev&&prev.n+prev.ln>=3&&prev.m+prev.lm>0){const pm=pct(prev.m,prev.m+prev.lm);txt+=" ("+pm+" % les 12 mois précédents)";q=tm-pm>=5?"s":pm-tm>=5?"w":""}
-    add("tx",q,txt)}
-  const lim=addD(t,-AN_DORM),att=D.filter(d=>d.statut==="attente"),vif=att.filter(d=>!d.date||d.date>=lim),dorm=att.filter(d=>d.date&&d.date<lim),mt=L=>L.reduce((s,d)=>s+dvSum(d).tot,0);
-  if(vif.length)add("att","o",pl(vif.length,"devis","devis")+" en attente de réponse depuis moins de "+AN_DORM+" jours · "+eur(mt(vif))+" HT à transformer");
-  if(dorm.length)add("dorm","w",pl(dorm.length,"devis","devis")+" sans réponse depuis plus de "+AN_DORM+" jours · "+eur(mt(dorm))+" HT");
-  /* Prestations acceptées sur 12 mois (lignes détaillées seulement : un montant global importé d'Excel n'a pas de prestation) */
-  const P=new Map();let pt=0;
-  D.forEach(d=>{const x=d.dateRep||d.date||"";if(d.statut!=="accepte"||!x||x<f1)return;
-    d.lignes.forEach(l=>{if(l.gx||/montant global/i.test(l.presta||""))return;const v=lTot(l);if(v<=0)return;const n=dvShort(l.presta);P.set(n,(P.get(n)||0)+v);pt+=v})});
-  const top=[...P.entries()].sort((x,y)=>y[1]-x[1]).slice(0,3);
-  if(top.length)add("presta","s",(one?"Prestations commandées":"Prestations les plus vendues")+" sur 12 mois : "+top.map(([n,v])=>n+" ("+Math.round(v/pt*100)+" %)").join(", "));
-  /* Facturation (antécédents importés cette année) */
-  if(one){const h=k0.histo;if(h&&h.y1===Y1){const st=HST[h.st];
-    add("ca",h.st==="actif"||h.st==="nouveau"?"s":h.st==="perdu"||h.st==="relance"?"w":"",(st?st[0]+" · ":"")+"CA facturé "+Y0+" : "+eur(hCA(k0,Y0))+", "+Y1+" à date : "+eur(hCA(k0,Y1)))}}
-  else{const H=KK.filter(k=>k.histo&&k.histo.y1===Y1);
-    if(H.length){const c0=H.reduce((s,k)=>s+hCA(k,Y0),0),c1=H.reduce((s,k)=>s+hCA(k,Y1),0);
-      add("ca","","CA facturé "+Y0+" : "+eur(c0)+", "+Y1+" à date : "+eur(c1)+" ("+pl(H.length,"compte")+" avec historique de facturation)");
-      const nv=H.filter(k=>k.histo.st==="nouveau"),pd=H.filter(k=>k.histo.st==="perdu");
-      if(nv.length)add("nouv","s",pl(nv.length,"nouveau client","nouveaux clients")+" facturé"+(nv.length>1?"s":"")+" en "+Y1+" · "+eur(nv.reduce((s,k)=>s+hCA(k,Y1),0)));
-      if(pd.length)add("perdus","w",pl(pd.length,"client facturé","clients facturés")+" en "+Y0+" sans facture en "+Y1+" · "+eur(pd.reduce((s,k)=>s+hCA(k,Y0),0))+" de CA "+Y0)}}
-  if(one){if(k0.contrat)add("contrat","s","Contrat cadre en place avec ce compte")}
-  else{const n=KK.filter(k=>k.contrat).length;if(n)add("contrat","s",pl(n,"compte","comptes")+" sous contrat cadre")}
-  /* Relation */
-  if(one){const l=lastOf(k0.id);
-    if(!l)add("rel","w","Aucun échange enregistré avec ce compte");
-    else if(l.date>=addD(t,-90))add("rel","s","Relation suivie : dernier échange le "+fdate(l.date)+(l.label?" · "+l.label:""));
-    else if(l.date<addD(t,-180))add("rel","w","Aucun échange depuis le "+fdate(l.date)+", soit plus de 6 mois");
-    const nc=ctOf(k0.id).length;if(nc<=1)add("ct","w",nc?"Un seul interlocuteur identifié":"Aucun interlocuteur identifié");else if(nc>=3)add("ct","s",nc+" interlocuteurs identifiés");
-    if(isGrp(k0))add("sites","o","Groupe : "+pl(sitesOf(k0.id).length,"site rattaché","sites rattachés"))}
-  else{const cl=KK.filter(k=>k.type==="Client existant");
-    if(cl.length){const l6=addD(t,-180),fr=cl.filter(k=>{const l=lastOf(k.id);return !l||l.date<l6}).length;
-      if(fr)add("froid","w",fr+" client"+(fr>1?"s":"")+" sur "+cl.length+" sans échange depuis plus de 6 mois")}}
-  /* Prospection : opportunités, cibles actives, motifs de classement sans suite */
-  const C=S.cibles.filter(c=>a.portee==="campagne"?c.campagne===a.campagne:!K||K.has(c.compteId)),act=C.filter(isActive);
-  const op=act.filter(c=>c.opp.creee&&c.opp.statut==="Ouvert");
-  if(op.length){const m=op.reduce((s,c)=>s+nb0(c.opp.montant),0);add("opp","o",pl(op.length,"opportunité ouverte","opportunités ouvertes")+(m?" · "+eur(m):""))}
-  const pr=act.filter(c=>!c.opp.creee);
-  if(pr.length&&!one){const pot=pr.reduce((s,c)=>s+nb0(c.potentiel),0),rv=pr.filter(c=>SIDX[c.etape]>=SIDX.rdv).length;
-    add("prosp","o",pl(pr.length,"cible","cibles")+" en prospection"+(rv?" dont "+rv+" avec un RDV pris ou une visite faite":"")+(pot?" · potentiel annuel "+eur(pot):""))}
-  const ss=C.filter(c=>c.etape==="sans_suite"),nCo=ss.filter(c=>c.motif==="Accord-cadre concurrent").length,nPx=ss.filter(c=>c.motif==="Prix").length;
-  if(nCo)add("concu","t",one?"Prospection classée sans suite : accord-cadre d'un concurrent":pl(nCo,"cible classée","cibles classées")+" sans suite à cause d'un accord-cadre concurrent");
-  if(nPx)add("prix","t",one?"Prospection classée sans suite pour une question de prix":pl(nPx,"cible classée","cibles classées")+" sans suite pour une question de prix");
-  return R}
 
 /* ---------- Page ---------- */
 const swItHTML=x=>'<div class="sw-it'+(x.imp===3?' imp3':x.imp===1?' imp1':'')+'" data-swi="'+esc(x.id)+'"><span class="sw-grip" draggable="true" title="Glisser vers un autre quadrant ou une autre place">⠿</span>'+
@@ -153,15 +82,6 @@ function swHead(a){const k=a.portee==="compte"?kOf(a.compteId):null;let tg="";
     '<button class="btn ghost" type="button" data-swdup="1" title="Nouvelle analyse reprenant ce contenu, par exemple pour la période suivante">Dupliquer</button><button class="btn ghost danger" type="button" data-swdel="1">Supprimer</button></div></div>'+
    '<div class="sw-meta"><div class="f"><span class="lbl">Portée</span><div class="seg" role="group" aria-label="Portée de l\'analyse">'+SWPORT.map(([p,l])=>'<button type="button" data-swp="'+p+'" aria-pressed="'+(a.portee===p)+'">'+esc(SWPS[p])+'</button>').join("")+'</div></div>'+tg+
    '<div class="f sw-pf"><label class="lbl" for="swPer">Période</label><input type="text" id="swPer" value="'+esc(a.periode)+'" placeholder="2026, T1 2027…" autocomplete="off"></div></div></div>'}
-function swRepPanel(a){if(a.portee==="libre")return "";
-  const R=SWU.rep?swReperes(a):[];
-  let h='<div class="panel sw-rep"><div class="ph"><h2>Repères chiffrés du registre</h2>'+(SWU.rep&&R.length?'<span class="sub num">'+R.length+'</span>':'')+'<button type="button" class="more" data-swrep="1">'+(SWU.rep?"Masquer":"Afficher")+'</button></div>';
-  if(!SWU.rep)return h+'</div>';
-  h+='<p class="hint">Calculés aujourd\'hui à partir de ce que contient le registre (devis, antécédents de facturation, comptes, cibles) : ce ne sont pas tous les chiffres de l\'entreprise. Cliquez S, W, O ou T pour en faire une ligne de l\'analyse : la lettre surlignée est une suggestion, le texte reste modifiable.</p>';
-  if(!R.length)return h+'<p class="sw-none">'+(a.portee==="compte"&&!kOf(a.compteId)?"Choisissez un compte pour voir ses repères.":a.portee==="secteur"&&!a.secteur?"Choisissez un secteur pour voir ses repères.":a.portee==="campagne"&&!a.campagne?"Choisissez une campagne pour voir ses repères.":"Pas encore de devis, de facturation ni de prospection sur ce périmètre.")+'</p></div>';
-  return h+'<div class="sw-rps">'+R.map(r=>{const it=a.items.find(x=>x.src===r.key);
-    return '<div class="sw-rp'+(it?' on':'')+'"><span class="sw-rt">'+esc(r.txt)+'</span>'+(it?'<span class="sw-rd"><span class="pill sw-pq q-'+it.q+'">'+esc(swQL(it.q))+'</span>'+(it.txt!==r.txt?'<button type="button" class="more" data-swupd="'+esc(r.key)+'" title="Remplacer le texte de la ligne par les chiffres du jour">Actualiser</button>':'')+'</span>'
-      :'<span class="sw-rq" role="group" aria-label="Ajouter à">'+SWQ.map(([q,l])=>'<button type="button" class="q-'+q+(r.q===q?' sug':'')+'" data-swadd="'+esc(r.key)+'" data-swaq="'+q+'" title="Ajouter aux '+l.toLowerCase()+(r.q===q?' (suggéré)':'')+'" aria-label="Ajouter aux '+l.toLowerCase()+'">'+q.toUpperCase()+'</button>').join("")+'</span>')+'</div>'}).join("")+'</div></div>'}
 function swStrat(a){const nP=a.axes.filter(swPacOf).length;
   const cell=st=>{const L=a.axes.filter(x=>x.st===st),nm=swXL(st);
     return '<div class="sw-sc"><div class="sw-sch">'+swTag(st)+'<b>'+esc(nm)+'</b><span class="sub num">'+(L.length||"")+'</span></div><p class="hint">'+esc(SWXD[st][1])+'</p>'+
@@ -175,7 +95,7 @@ function renderSwot(){const el=$("#view-swot");if(!el)return;
   const L=swList(),a=swCur();if(a&&SWU.cur!==a.id){SWU.cur=a.id;swuSave()}
   const tools='<button class="btn ghost" type="button" data-swprint="1"'+(a?'':' disabled')+' title="Imprimer ou enregistrer en PDF">Imprimer</button><button class="btn primary" type="button" data-swnew="activite">'+I_PLUS+'Nouvelle analyse</button>';
   let h=pageH("Pilotage","Analyse SWOT","Forces, faiblesses, opportunités et menaces · de l'entreprise, d'un compte, d'un secteur ou d'une campagne",tools);
-  if(!a){el.innerHTML=h+'<div class="list-wrap"><div class="empty"><h3>Aucune analyse SWOT</h3><p>Posez vos forces, faiblesses, opportunités et menaces. Les chiffres du registre vous aident à les remplir, et les stratégies qui en découlent partent dans votre plan d\'action.</p>'+
+  if(!a){el.innerHTML=h+'<div class="list-wrap"><div class="empty"><h3>Aucune analyse SWOT</h3><p>Posez les forces, faiblesses, opportunités et menaces de l\'entreprise, d\'un compte, d\'un secteur ou d\'une campagne. Les stratégies qui en découlent partent dans votre plan d\'action.</p>'+
     '<div class="bar" style="justify-content:center"><button class="btn primary" type="button" data-swnew="activite">Analyser l\'entreprise</button><button class="btn" type="button" data-swnew="compte">Un compte</button><button class="btn" type="button" data-swnew="secteur">Un secteur</button><button class="btn" type="button" data-swnew="campagne">Une campagne</button></div></div></div>';return}
   if(L.length>1)h+='<div class="camps sw-camps" aria-label="Analyses SWOT">'+L.map(x=>{const n=q=>x.items.filter(y=>y.q===q).length;
     return '<button type="button" class="camp" data-swsel="'+esc(x.id)+'" aria-pressed="'+(x.id===a.id)+'"><b>'+esc(swTitle(x))+'</b><span class="sub">'+esc(swScope(x))+(x.periode&&!swTitle(x).includes(x.periode)?' · '+esc(x.periode):'')+'</span>'+
@@ -183,7 +103,7 @@ function renderSwot(){const el=$("#view-swot");if(!el)return;
   h+=swHead(a);
   if(SWUNDO&&SWUNDO.aid===a.id)h+='<div class="notice sw-undo" role="status"><span class="grow">'+esc(SWUNDO.lbl)+'</span><button class="btn" type="button" data-swundo="1">Annuler</button></div>';
   h+='<div class="sw-mx"><span></span><span class="sw-ax">Positif</span><span class="sw-ax">Négatif</span><span class="sw-ax v">Interne</span>'+swQuad(a,"s")+swQuad(a,"w")+'<span class="sw-ax v">Externe</span>'+swQuad(a,"o")+swQuad(a,"t")+'</div>';
-  h+=swRepPanel(a)+swStrat(a);
+  h+=swStrat(a);
   h+='<div class="panel"><div class="ph"><h2>Notes</h2></div><textarea id="swNotes" rows="3" placeholder="Sources, hypothèses, personnes consultées, dates de mise à jour…">'+esc(a.notes)+'</textarea></div>';
   el.innerHTML=h;
   Object.entries(dr).forEach(([k,v])=>{const i=el.querySelector(k[0]==="x"&&k.length===3?'input[data-swaddx="'+k.slice(1)+'"]':'input[data-swaddq="'+k+'"]');if(i)i.value=v});
@@ -343,12 +263,9 @@ document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest
     S.swot=S.swot.filter(x=>x.id!==a.id);S.plans.forEach(p=>{if(p.swotId===a.id)delete p.swotId});bump();SWU.cur="";SWUNDO=null;swuSave();lsSave();renderSwot();toast("Analyse « "+swTitle(a)+" » supprimée");return}
   if(d.swp){if(a.portee!==d.swp){a.portee=d.swp;swTouch(a);renderSwot();if(d.swp==="compte"&&!kOf(a.compteId))swFocus("#swK")}return}
   if(d.swundo){swUndo();return}
-  if(d.swrep){SWU.rep=!SWU.rep;swuSave();renderSwot();return}
   if(d.swimp){const x=a.items.find(y=>y.id===d.swimp);if(x){x.imp=x.imp%3+1;SWUNDO=null;swTouch(a);renderSwot()}return}
   if(d.swx){swDel(a,"items",d.swx);return}
   if(d.swxa){swDel(a,"axes",d.swxa);return}
-  if(d.swadd){const r=swReperes(a).find(x=>x.key===d.swadd);if(r&&!a.items.some(x=>x.src===r.key)){swAdd(a,d.swaq,r.txt,r.key);renderSwot();toast("Ajouté aux "+swQL(d.swaq).toLowerCase())}return}
-  if(d.swupd){const r=swReperes(a).find(x=>x.key===d.swupd),x=a.items.find(y=>y.src===d.swupd);if(r&&x){x.txt=r.txt;swTouch(a);renderSwot();toast("Chiffres actualisés")}return}
   if(d.swpac){const x=a.axes.find(y=>y.id===d.swpac);if(x&&x.txt.trim())swToPac(a,x);return}
   if(d.swpgo){swPacGo(d.swpgo);return}
 });
