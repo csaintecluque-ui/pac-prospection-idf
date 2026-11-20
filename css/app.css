@@ -1368,3 +1368,19 @@ body.bare .pac-swot{display:block;background:#fff;border:1px solid var(--line);b
 }
 .pac-swbar .more{background:none;border:0;padding:0;color:var(--accent);font:500 12.5px var(--f-ui);cursor:pointer}
 .pac-swbar .more:hover{text-decoration:underline}
+/* V3.50 · Import d'une analyse SWOT (25-swot-import.js) */
+.swi-sum{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--muted)}
+.swi-sum b{color:var(--fg);margin-left:2px}
+.swi-list{display:flex;flex-direction:column;gap:14px}
+.swi-g{display:flex;flex-direction:column;gap:4px}
+.swi-gh{display:flex;align-items:center;gap:8px;font:600 12px var(--f-label);letter-spacing:.06em;text-transform:uppercase;color:var(--qc,var(--muted));padding:0 0 3px;border-bottom:2px solid var(--qc,var(--line))}
+.swi-gh .sub{margin-left:auto;text-transform:none;letter-spacing:0}
+.swi-r{display:grid;grid-template-columns:20px minmax(0,1fr) 230px;gap:8px;align-items:center;padding:2px 0 2px 8px;border-left:3px solid var(--qc,var(--line))}
+.swi-r input[type=checkbox]{accent-color:var(--accent);margin:0}
+.swi-r select{padding:5px 7px}
+:where(.cat-s,.cat-so,.cat-st){--qc:var(--ok)}:where(.cat-w,.cat-wo,.cat-wt){--qc:var(--bad)}:where(.cat-o){--qc:var(--info)}:where(.cat-t){--qc:var(--warn)}:where(.cat-notes,.cat-x){--qc:var(--muted)}
+@media (max-width:700px){.swi-r{grid-template-columns:20px minmax(0,1fr)}.swi-r select{grid-column:2}}
+details.swi-g>summary{cursor:pointer;list-style:none}
+details.swi-g>summary::-webkit-details-marker{display:none}
+details.swi-g>summary::before{content:"▸";margin-right:4px}
+details.swi-g[open]>summary::before{content:"▾"}
