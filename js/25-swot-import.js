@@ -1,32 +1,49 @@
-/* Registre · CSC — Import d'une analyse SWOT : Excel (.xlsx), Word (.docx), PowerPoint (.pptx), PDF, texte (.txt, .csv) ou texte collé.
-   Les titres (Forces, Faiblesses, Opportunités, Menaces, Strengths…, stratégies S×O…) classent les lignes ; la position sur la page
-   (colonne, ligne de tableau, cadre de diapositive) rattache chaque ligne au titre le plus proche au-dessus d'elle. Aperçu corrigible
-   avant l'import, dans une nouvelle analyse ou dans l'analyse affichée. Lecteurs zip, Word et PDF repris de 10-devis.js.
+/* Registre · CSC — Import d'une analyse SWOT, ou de ses seules stratégies : Excel (.xlsx), Word (.docx), PowerPoint (.pptx), PDF,
+   texte (.txt, .csv) ou texte collé. Les titres (Forces, Faiblesses, Opportunités, Menaces, Strengths…, stratégies S×O, Offensive…)
+   classent les lignes ; la position sur la page (colonne, ligne de tableau, cadre de diapositive) rattache chaque ligne au titre le plus
+   proche au-dessus d'elle ; une matrice TOWS (forces et faiblesses en colonnes, opportunités et menaces en lignes, ou l'inverse) classe
+   chaque case dans sa stratégie. Aperçu corrigible avant l'import : SWOT complet (bouton « Importer » de la page) dans une nouvelle
+   analyse ou dans l'analyse affichée ; stratégies seules (bouton « Importer » du panneau Stratégies) dans l'analyse affichée.
+   Lecteurs zip, Word et PDF repris de 10-devis.js.
    Chargé avant 18-demarrage.js (toujours en dernier) : partage les déclarations des fichiers précédents. */
 "use strict";
 
 const SWI_CATS=[["s","Forces"],["w","Faiblesses"],["o","Opportunités"],["t","Menaces"],["so","Stratégie offensive (S × O)"],["wo","Stratégie de réorientation (W × O)"],["st","Stratégie défensive (S × T)"],["wt","Stratégie de repli (W × T)"],["notes","Notes"]];
 const SWI_CL=Object.fromEntries(SWI_CATS);
+const SWI_SX=["so","wo","st","wt"];
 const SWI_BUL=/^\s*(?:[•●○◦▪▫■□◆◇►▸▹➢➤✓✔·]\s*|[\-–—*+]\s+|\d{1,2}[.)]\s+)/;
-let SWI=null;
+let SWI=null,SWI_M="swot";
 
 /* ---------- Classement d'une ligne : titre de quadrant, de stratégie, notes, ligne à ignorer, ou contenu ---------- */
 const swiClean=s=>String(s==null?"":s).replace(/ /g," ").replace(/\s+/g," ").trim();
 function swiHead(t,noLetter){const s=swiClean(t).replace(/\s*[:：]\s*$/,"");if(!s||s.length>70||/[,;]$/.test(s))return "";const n=nh(s);
   const one={s:"s",w:"w",o:"o",t:"t"}[n];if(one)return noLetter?"":one;
-  const Q=[["s",/^(?:s )?(?:les |nos )?(?:forces?|points? forts?|atouts?|strengths?)(?: internes?)?$/],
-    ["w",/^(?:w )?(?:les |nos )?(?:faiblesses?|points? faibles?|weakness(?:es)?)(?: internes?)?$/],
-    ["o",/^(?:o )?(?:les )?(?:opportunites?|opportunities|opportunity)(?: externes?)?$/],
-    ["t",/^(?:t )?(?:les )?(?:menaces?|risques?|threats?)(?: externes?)?$/]];
+  /* « Forces (S) », « Faiblesses (W) »… : la lettre du quadrant peut suivre le titre */
+  const Q=[["s",/^(?:s )?(?:les |nos )?(?:forces?|points? forts?|atouts?|strengths?)(?: internes?)?(?: [sf])?$/],
+    ["w",/^(?:w )?(?:les |nos )?(?:faiblesses?|points? faibles?|weakness(?:es)?)(?: internes?)?(?: [wf])?$/],
+    ["o",/^(?:o )?(?:les )?(?:opportunites?|opportunities|opportunity)(?: externes?)?(?: o)?$/],
+    ["t",/^(?:t )?(?:les )?(?:menaces?|risques?|threats?)(?: externes?)?(?: [tm])?$/]];
   for(const [k,re] of Q)if(re.test(n))return k;
-  const m=n.replace(/\b(?:strategies?|strategy|strategique|axes?|de|d|la|du)\b/g," ").replace(/\s+/g," ").trim();
-  const X={so:["offensive","s o","s x o","so","maxi maxi"],wo:["reorientation","w o","w x o","wo","mini maxi","amelioration"],st:["defensive","s t","s x t","st","maxi mini","diversification"],wt:["repli","survie","w t","w x t","wt","mini mini"]};
-  for(const [k,L] of Object.entries(X)){if(L.includes(m))return k;if(L.some(a=>m===L[0]+" "+a||m===a+" "+L[0]))return k}
+  const x=swiStratHead(n);if(x)return x;
   if(/^notes?$/.test(n))return "notes";
   return ""}
+/* Titre de stratégie : « Stratégies offensives », « Offensive (S × O) », « S×O », « SO », « Maxi-Maxi », « Forces / Opportunités »… */
+const swiSg=s=>s.split(" ").filter(Boolean).map(w=>w.length>3?w.replace(/s$/,""):w).join(" ");
+const SWI_XH=Object.fromEntries(Object.entries({so:["offensive","s o","so","maxi maxi","forces opportunites","strengths opportunities"],
+  wo:["reorientation","w o","wo","mini maxi","amelioration","faiblesses opportunites","weaknesses opportunities"],
+  st:["defensive","s t","st","maxi mini","diversification","forces menaces","strengths threats"],
+  wt:["repli","survie","w t","wt","mini mini","faiblesses menaces","weaknesses threats"]}).map(([k,L])=>[k,L.map(swiSg)]));
+function swiStratHead(n){const m=swiSg(n.replace(/\b(?:strategies?|strategy|strategique|strategiques|axes?|de|d|la|du|des|et|and|vs|x)\b/g," ").replace(/\s+/g," ").trim());if(!m)return "";
+  for(const [k,L] of Object.entries(SWI_XH)){if(L.includes(m))return k;if(L.some(a=>L.some(b=>a!==b&&m===a+" "+b)))return k}
+  return ""}
+let SWI_HINTS=null;
+const swiHints=()=>SWI_HINTS||(SWI_HINTS=new Set(Object.values(SWQD).concat(Object.values(SWXD).map(x=>x[1])).map(nh)));
 function swiIgnore(t){const n=nh(t);if(!n)return true;
-  return /^(?:positif|negatif|positive|negative|interne|externe|internes|externes|origine (?:interne|externe)|swot|afom|ffom|matrice swot|analyse swot|strategies?|strategies swot|croisement swot|strategies croisement swot|tows|pac)$/.test(n)
-    ||/^en gras importance forte/.test(n)||/^analyse editee le/.test(n)||/^page \d+( \d+)?$/.test(n)||/^registre csc/.test(n)}
+  return /^(?:positif|negatif|positive|negative|interne|externe|internes|externes|origine (?:interne|externe)|facteurs? (?:internes?|externes?)(?: facteurs? (?:internes?|externes?))?|swot|afom|ffom|matrice swot|analyse swot|strategies?|strategies swot|croisement swot|strategies croisement swot|tows|matrice tows|pac|dans le pac)$/.test(n)
+    ||/^en gras importance forte/.test(n)||/^analyse editee le/.test(n)||/^page \d+( \d+)?$/.test(n)||/^registre csc/.test(n)
+    /* Texte copié depuis la page Analyse SWOT de Registre : aides des quadrants et des stratégies, compteurs, champs d'ajout */
+    ||swiHints().has(n)||/^croisez vos constats/.test(n)||/^\d{1,3}$/.test(n)||/^\d+ axes?(?: \d+ dans le pac)?$/.test(n)
+    ||/^ajouter (?:un axe|une force|une faiblesse|une opportunite|une menace)(?: entree)?$/.test(n)}
 const swiItem=t=>swiClean(String(t||"").replace(SWI_BUL,"").replace(/\s*\(dans le PAC\)\s*$/i,""));
 
 /* ---------- Blocs → lignes classées ----------
@@ -47,11 +64,12 @@ function swiParse(blocks,opt){opt=opt||{};const H=[],I=[];let titre="",entite=""
   /* Titre le plus proche au-dessus, dans la même colonne de préférence */
   /* PDF, diapositives : une page ne compte que si elle porte au moins deux titres de quadrant, ou si elle prolonge la page SWOT
      précédente avec un titre nouveau (un « Opportunités » isolé dans le tableau du PAC imprimé à la suite ne compte pas) */
+  /* Une page de stratégies seules (Offensive, Repli…) compte dès son premier titre de stratégie */
   if(opt.pages){const pgs=[...new Set(H.map(h=>h.pg))].sort((a,b)=>a-b),ok=new Set(),seen=new Set();let prev=-2;
-    pgs.forEach(p=>{const k=new Set(H.filter(h=>h.pg===p).map(h=>h.h)),nq=[...k].filter(x=>"swot".includes(x)&&x.length===1).length;
-      if(nq>=2||(prev===p-1&&[...k].some(x=>!seen.has(x)))){ok.add(p);k.forEach(x=>seen.add(x));prev=p}});
+    pgs.forEach(p=>{const k=new Set(H.filter(h=>h.pg===p).map(h=>h.h)),nq=[...k].filter(x=>x.length===1).length,nx=[...k].filter(x=>x.length===2).length;
+      if(nq>=2||nx>=1||(prev===p-1&&[...k].some(x=>!seen.has(x)))){ok.add(p);k.forEach(x=>seen.add(x));prev=p}});
     for(let j=H.length-1;j>=0;j--)if(!ok.has(H[j].pg))H.splice(j,1)}
-  const dxOf=(h,b)=>h.x1!=null&&b.x>=h.x&&b.x<=h.x1?0:Math.abs(h.x-b.x);
+  const dxOf=swiDx;
   const above=(L,b)=>{let best=null,sc=Infinity;L.forEach(h=>{if(h.y>b.y||(h.y===b.y&&h.x>b.x))return;const s=(b.y-h.y)+3*dxOf(h,b);if(s<sc){sc=s;best=h}});return best};
   I.forEach(b=>{const own=H.filter(h=>h.pg===b.pg);if(!own.length){b.cat="";return}
     let best=above(own,b);
@@ -59,6 +77,7 @@ function swiParse(blocks,opt){opt=opt||{};const H=[],I=[];let titre="",entite=""
     if(!best){const prev=H.filter(h=>h.pg<b.pg);if(prev.length){const lp=Math.max(...prev.map(h=>h.pg)),L=prev.filter(h=>h.pg===lp),dmin=Math.min(...L.map(h=>Math.abs(h.x-b.x)));
       best=L.filter(h=>Math.abs(h.x-b.x)<=dmin+60).sort((x,y)=>y.y-x.y)[0]||null}}
     b.cat=best?best.h:""});
+  const nT=swiTows(H,I,opt);
   /* PDF : une ligne sans puce sous une ligne à puce, dans la même colonne et la même rubrique, en est la suite */
   let R=I.slice().sort((a,b)=>a.y-b.y||a.x-b.x);
   if(opt.merge){const out=[];R.forEach(b=>{const p=[...out].reverse().find(x=>x.cat===b.cat&&Math.abs(x.x-b.x)<40);
@@ -67,7 +86,25 @@ function swiParse(blocks,opt){opt=opt||{};const H=[],I=[];let titre="",entite=""
   /* Un titre de l'export Registre « Entreprise 2026 » : nom et période séparés */
   let periode="";const y=titre.match(/\b(20\d\d)\b/);if(y)periode=y[1];
   if(entite&&titre&&nh(titre)===nh(entite+" "+periode))titre="";
-  return {rows,titre,entite,periode,nH:H.length}}
+  return {rows,titre,entite,periode,nH:H.length,nX:H.filter(h=>h.h.length===2).length,tows:nT>0}}
+const swiDx=(h,b)=>h.x1!=null&&b.x>=h.x&&b.x<=h.x1?0:Math.abs(h.x-b.x);
+/* Matrice TOWS : forces et faiblesses en tête de colonne, opportunités et menaces en tête de ligne (ou l'inverse). Une ligne placée
+   au croisement (à droite des titres de ligne, sous les titres de colonne) devient un axe de la stratégie correspondante, sauf si un
+   titre de stratégie la classe déjà. Une grille SWOT 2 × 2 (S et O dans la même colonne) n'est pas une matrice TOWS.
+   Ligne de la matrice : le dernier titre de ligne au-dessus (tableaux) ou le plus proche en hauteur (PDF, diapositives : titres centrés). */
+function swiTows(H,I,opt){let n=0;
+  new Set(H.map(h=>h.pg)).forEach(pg=>{
+    const one=k=>H.filter(h=>h.pg===pg&&h.h===k).pop()||null,s=one("s"),w=one("w"),o=one("o"),t=one("t");if(!s||!w||!o||!t)return;
+    const side=(a,b)=>Math.abs(a.y-b.y)*2<Math.abs(a.x-b.x),stack=(a,b)=>Math.abs(a.x-b.x)*2<Math.abs(a.y-b.y);
+    const G=side(s,w)&&stack(o,t)?{C:[s,w],R:[o,t]}:side(o,t)&&stack(s,w)?{C:[o,t],R:[s,w]}:null;if(!G)return;
+    const top=Math.max(G.C[0].y,G.C[1].y),left=Math.max(G.R[0].x,G.R[1].x),cx=Math.min(G.C[0].x,G.C[1].x),ry=Math.min(G.R[0].y,G.R[1].y),gap=Math.abs(G.R[0].y-G.R[1].y);
+    if(cx<=left||ry<=top)return;
+    I.forEach(b=>{if(b.pg!==pg||b.cat.length===2||b.cat==="notes"||b.y<=top||b.x<=left+(cx-left)/2)return;
+      if(opt.free&&b.y<ry-gap/2)return;
+      const c=G.C.slice().sort((x,y)=>swiDx(x,b)-swiDx(y,b))[0];
+      const r=opt.free?G.R.slice().sort((x,y)=>Math.abs(x.y-b.y)-Math.abs(y.y-b.y))[0]:G.R.filter(h=>h.y<=b.y).sort((x,y)=>y.y-x.y)[0];
+      if(!r)return;const hs=[c.h,r.h];b.cat=hs.find(x=>"sw".includes(x))+hs.find(x=>"ot".includes(x));n++})});
+  return n}
 
 /* ---------- Lecteurs ---------- */
 function swiTextBlocks(txt){const L=String(txt||"").replace(/\r/g,"").split("\n");
@@ -126,19 +163,26 @@ async function swiPdf(buf){await loadPdf();const doc=await window.pdfjsLib.getDo
 async function swiRead(f){const n=f.name||"",buf=await f.arrayBuffer();
   if(/\.xlsx$/i.test(n))return swiParse(await swiXlsx(buf));
   if(/\.docx$/i.test(n))return swiParse(await swiDocx(buf));
-  if(/\.pptx$/i.test(n))return swiParse(await swiPptx(buf),{pages:true});
-  if(/\.pdf$/i.test(n))return swiParse(await swiPdf(buf),{merge:true,lh:30,pages:true,noLetter:true});
+  if(/\.pptx$/i.test(n))return swiParse(await swiPptx(buf),{pages:true,free:true});
+  if(/\.pdf$/i.test(n))return swiParse(await swiPdf(buf),{merge:true,lh:30,pages:true,noLetter:true,free:true});
   const txt=new TextDecoder().decode(buf);
   if(/\.csv$/i.test(n))return swiParse(swiCsv(txt));
   if(/\.(txt|md|text)$/i.test(n))return swiParse(swiTextBlocks(txt));
   throw new Error("format")}
 
-/* ---------- Fenêtres : source, puis aperçu ---------- */
-function swiOpen(){SWI=null;
-  showModal(mHead("Analyse SWOT","Importer un SWOT")+'<div class="db">'+
-    '<p class="hint">Un fichier Excel (.xlsx), Word (.docx), PowerPoint (.pptx), PDF ou texte (.txt, .csv), ou le texte collé ci-dessous. Les titres Forces, Faiblesses, Opportunités, Menaces (ou Strengths, Weaknesses, Opportunities, Threats) classent les lignes ; un aperçu vous permet de corriger avant l\'import.</p>'+
+/* ---------- Fenêtres : source, puis aperçu ----------
+   SWI_M : "swot" (bouton Importer de la page : tout le SWOT) ou "strat" (bouton Importer du panneau Stratégies : les axes seuls) */
+const swiSt=()=>SWI_M==="strat";
+const swiWhat=()=>swiSt()?"des stratégies":"du SWOT";
+function swiOpen(m){if(m)SWI_M=m;SWI=null;const st=swiSt(),cur=swCur();
+  if(st&&!cur){toast("Ouvrez d'abord une analyse SWOT.");return}
+  showModal(mHead("Analyse SWOT",st?"Importer des stratégies":"Importer un SWOT")+'<div class="db">'+
+    (st?'<p class="hint">Un fichier Excel (.xlsx), Word (.docx), PowerPoint (.pptx), PDF ou texte (.txt, .csv), ou le texte collé ci-dessous. Les titres Offensive (S × O), Réorientation (W × O), Défensive (S × T) et Repli (W × T) — ou SO, WO, ST, WT, Maxi-Maxi… — classent les axes ; une matrice TOWS (forces et faiblesses en colonnes, opportunités et menaces en lignes) est aussi reconnue. Les axes s\'ajoutent à l\'analyse « '+esc(swCut(swTitle(cur),50))+' », après un aperçu corrigible.</p>'
+      :'<p class="hint">Un fichier Excel (.xlsx), Word (.docx), PowerPoint (.pptx), PDF ou texte (.txt, .csv), ou le texte collé ci-dessous. Les titres Forces, Faiblesses, Opportunités, Menaces (ou Strengths, Weaknesses, Opportunities, Threats) classent les lignes ; un aperçu vous permet de corriger avant l\'import.</p>')+
     '<div class="bar"><button class="btn primary" type="button" data-swifile="1">Choisir un fichier…</button><span class="sub" id="swiSt"></span></div>'+
-    '<div class="f"><label class="lbl" for="swiTxt">Ou collez le texte du SWOT</label><textarea id="swiTxt" rows="11" placeholder="Forces&#10;- Maillage des agences&#10;- …&#10;Faiblesses&#10;- …&#10;Opportunités&#10;- …&#10;Menaces&#10;- …"></textarea>'+
+    '<div class="f"><label class="lbl" for="swiTxt">Ou collez le texte '+swiWhat()+'</label><textarea id="swiTxt" rows="11" placeholder="'+
+      (st?'Offensive (S × O)&#10;- Proposer le diagnostic avant travaux aux bailleurs&#10;- …&#10;Réorientation (W × O)&#10;- …&#10;Défensive (S × T)&#10;- …&#10;Repli (W × T)&#10;- …'
+        :'Forces&#10;- Maillage des agences&#10;- …&#10;Faiblesses&#10;- …&#10;Opportunités&#10;- …&#10;Menaces&#10;- …')+'"></textarea>'+
     '<p class="hint">Un tableau copié depuis Excel ou Word se colle aussi : chaque colonne garde son titre.</p></div></div>'+
     '<div class="df"><span class="grow"></span><button class="btn" type="button" data-act="mclose">Annuler</button><button class="btn primary" type="button" data-switxt="1">Analyser le texte collé</button></div>',"swi");
   setTimeout(()=>{const t=$("#swiTxt");if(t)t.focus({preventScroll:true})},30)}
@@ -152,35 +196,54 @@ async function swiFromFile(f){const n=f.name||"";
   try{swiShow(await swiRead(f),n)}
   catch(e){console.error(e);if(st)st.textContent="";
     toast(e.message==="format"?"Format non pris en charge : Excel (.xlsx), Word (.docx), PowerPoint (.pptx), PDF, .txt ou .csv.":e.message==="inflate"?"Ce navigateur ne sait pas ouvrir ce fichier : utilisez Chrome ou Edge à jour.":
-      /\.(pdf|xlsx)$/i.test(n)?"Lecture impossible de « "+n+" » : vérifiez la connexion internet (lecteur PDF / Excel), ou collez le texte.":"Lecture impossible de « "+n+" ». Collez le texte du SWOT à la place.")}}
-function swiShow(r,src){const cur=swCur(),y=String(new Date().getFullYear());
-  SWI={src,rows:r.rows,nH:r.nH,dest:"new",entite:r.entite||S.settings.swEntite||"",titre:r.titre||"",periode:r.periode||y,curId:cur?cur.id:""};
-  if(!SWI.rows.length){toast("Aucune ligne trouvée"+(src?" dans « "+src+" »":"")+". Collez le texte du SWOT à la place.");if(MODAL!=="swi")swiOpen();return}
+      /\.(pdf|xlsx)$/i.test(n)?"Lecture impossible de « "+n+" » : vérifiez la connexion internet (lecteur PDF / Excel), ou collez le texte.":"Lecture impossible de « "+n+" ». Collez le texte "+swiWhat()+" à la place.")}}
+function swiShow(r,src){const cur=swCur(),y=String(new Date().getFullYear()),st=swiSt();
+  /* Stratégies seules : les forces, faiblesses, opportunités, menaces et notes du document sont laissées de côté (comptées) */
+  let rows=r.rows,skip=0;if(st){rows=r.rows.filter(x=>!x.cat||SWI_SX.includes(x.cat));skip=r.rows.length-rows.length}
+  if(st&&!cur){toast("Ouvrez d'abord une analyse SWOT.");return}
+  SWI={mode:SWI_M,src,rows,skip,nH:r.nH,nX:r.nX||0,tows:!!r.tows,dest:st?"cur":"new",entite:r.entite||S.settings.swEntite||"",titre:r.titre||"",periode:r.periode||y,curId:cur?cur.id:""};
+  if(!rows.length){
+    toast(st&&skip?"Aucun axe stratégique"+(src?" dans « "+src+" »":"")+" : "+pl(skip,"ligne")+" de forces, faiblesses, opportunités ou menaces. Pour les reprendre, utilisez « Importer » en haut de la page."
+      :"Aucune ligne trouvée"+(src?" dans « "+src+" »":"")+". Collez le texte "+swiWhat()+" à la place.");
+    if(MODAL!=="swi")swiOpen();return}
   swiDraw()}
-function swiDraw(){const w=SWI,cur=w.curId&&S.swot.find(x=>x.id===w.curId),n=k=>w.rows.filter(r=>r.on&&r.cat===k).length;
-  const opts=sel=>'<option value="">Non classée</option>'+SWI_CATS.map(([k,l])=>'<option value="'+k+'"'+(k===sel?' selected':'')+'>'+esc(l)+'</option>').join("");
+function swiDraw(){const w=SWI,st=w.mode==="strat",C=st?SWI_CATS.filter(c=>SWI_SX.includes(c[0])):SWI_CATS,cur=w.curId&&S.swot.find(x=>x.id===w.curId),n=k=>w.rows.filter(r=>r.on&&r.cat===k).length;
+  const opts=sel=>'<option value="">Non classée</option>'+C.map(([k,l])=>'<option value="'+k+'"'+(k===sel?' selected':'')+'>'+esc(l)+'</option>').join("");
   const grp=k=>{const L=w.rows.map((r,i)=>[r,i]).filter(([r])=>r.cat===k);if(!L.length)return "";const big=!k&&L.length>12;
-    return (big?'<details class="swi-g">':'<div class="swi-g">')+(big?'<summary class="swi-gh cat-x">':'<div class="swi-gh cat-'+(k||"x")+'">')+esc(k?SWI_CL[k]:"Non classées : choisissez une rubrique, ou laissez décoché")+'<span class="sub num">'+L.length+'</span>'+(big?'</summary>':'</div>')+
-      L.map(([r,i])=>'<div class="swi-r cat-'+(k||"x")+'"><input type="checkbox" data-swion="'+i+'"'+(r.on?' checked':'')+' aria-label="Importer cette ligne"><input type="text" data-switx="'+i+'" value="'+esc(r.t)+'" aria-label="Texte"><select data-swic="'+i+'" aria-label="Rubrique">'+opts(k)+'</select></div>').join("")+(big?'</details>':'</div>')};
+    return (big?'<details class="swi-g">':'<div class="swi-g">')+(big?'<summary class="swi-gh cat-x">':'<div class="swi-gh cat-'+(k||"x")+'">')+esc(k?SWI_CL[k]:"Non classées : choisissez "+(st?"une stratégie":"une rubrique")+", ou laissez décoché")+'<span class="sub num">'+L.length+'</span>'+(big?'</summary>':'</div>')+
+      L.map(([r,i])=>'<div class="swi-r cat-'+(k||"x")+'"><input type="checkbox" data-swion="'+i+'"'+(r.on?' checked':'')+' aria-label="Importer cette ligne"><input type="text" data-switx="'+i+'" value="'+esc(r.t)+'" aria-label="Texte"><select data-swic="'+i+'" aria-label="'+(st?"Stratégie":"Rubrique")+'">'+opts(k)+'</select></div>').join("")+(big?'</details>':'</div>')};
+  /* Lignes non classées : un seul choix pour toutes */
+  const nx=w.rows.filter(r=>!r.cat).length;
+  const bulk=nx>1?'<div class="swi-bulk"><label class="sub" for="swiAll">'+pl(nx,"ligne non classée","lignes non classées")+'</label><select id="swiAll" data-swiall="1"><option value="">Toutes les classer dans…</option>'+C.map(([k,l])=>'<option value="'+k+'">'+esc(l)+'</option>').join("")+'</select></div>':'';
   const tot=w.rows.filter(r=>r.on&&r.cat).length;
-  showModal(mHead("Importer un SWOT",esc(w.src||"Texte collé"))+'<div class="db">'+
-    (w.nH?'':'<div class="notice warn">Aucun titre Forces, Faiblesses, Opportunités ou Menaces trouvé : choisissez la rubrique de chaque ligne.</div>')+
-    '<div class="swi-sum">'+SWQ.map(([q,l])=>'<span><i class="sw-dot q-'+q+'"></i>'+esc(l)+' <b class="num">'+n(q)+'</b></span>').join("")+'<span>Axes <b class="num">'+["so","wo","st","wt"].reduce((s,k)=>s+n(k),0)+'</b></span>'+(n("notes")?'<span>Notes <b class="num">'+n("notes")+'</b></span>':'')+'</div>'+
-    '<div class="f"><span class="lbl">Importer dans</span><div class="seg" role="group" aria-label="Destination"><button type="button" data-swidest="new" aria-pressed="'+(w.dest==="new")+'">Une nouvelle analyse</button>'+(cur?'<button type="button" data-swidest="cur" aria-pressed="'+(w.dest==="cur")+'">L\'analyse « '+esc(swCut(swTitle(cur),40))+' »</button>':'')+'</div></div>'+
-    (w.dest==="new"?'<div class="row3"><div class="f"><label class="lbl" for="swiE">Entreprise</label><input type="text" id="swiE" value="'+esc(w.entite)+'" placeholder="Nom de l\'entreprise, de la filiale ou de la région" autocomplete="off"></div>'+
-      '<div class="f"><label class="lbl" for="swiT">Titre <span class="sub">(facultatif)</span></label><input type="text" id="swiT" value="'+esc(w.titre)+'" placeholder="'+esc((w.entite||"Entreprise")+(w.periode?" "+w.periode:""))+'" autocomplete="off"></div>'+
-      '<div class="f"><label class="lbl" for="swiP">Période</label><input type="text" id="swiP" value="'+esc(w.periode)+'" autocomplete="off"></div></div>'
-      :'<p class="hint">Les lignes s\'ajoutent à celles de l\'analyse ; une ligne déjà présente dans la même rubrique n\'est pas reprise.</p>')+
-    '<div class="swi-list">'+SWI_CATS.map(([k])=>grp(k)).join("")+grp("")+'</div></div>'+
-    '<div class="df"><button class="btn ghost" type="button" data-swiback="1">Autre fichier ou texte</button><span class="grow"></span><button class="btn" type="button" data-act="mclose">Annuler</button><button class="btn primary" type="button" data-swigo="1" id="swiGo">'+swiGoLbl(tot)+'</button></div>',"swi");
-  modalBig()}
-const swiGoLbl=n=>n?"Importer "+pl(n,"ligne"):"Rien à importer";
+  let h=mHead(st?"Importer des stratégies":"Importer un SWOT",esc(w.src||"Texte collé"))+'<div class="db">';
+  if(st){
+    if(!w.nX&&!w.tows)h+='<div class="notice warn">Aucun titre de stratégie trouvé (Offensive, Réorientation, Défensive, Repli, S × O…) : choisissez la stratégie de chaque ligne, ou classez-les toutes d\'un coup.</div>';
+    h+='<div class="swi-sum">'+SWI_SX.map(k=>'<span>'+swTag(k)+' '+esc(swXL(k))+' <b class="num">'+n(k)+'</b></span>').join("")+'</div>';
+    if(w.tows)h+='<p class="hint">Matrice TOWS reconnue : chaque case est classée d\'après sa colonne et sa ligne.</p>';
+    if(w.skip)h+='<p class="hint">'+pl(w.skip,"ligne")+' de forces, faiblesses, opportunités, menaces ou notes '+(w.skip>1?"ne sont pas reprises":"n'est pas reprise")+' ici : pour le SWOT complet, utilisez « Importer » en haut de la page.</p>';
+    h+='<p class="hint">Les axes s\'ajoutent à ceux de l\'analyse « '+esc(swCut(cur?swTitle(cur):"",50))+' » ; un axe déjà présent dans la même stratégie n\'est pas repris. « → PAC » les envoie ensuite dans le plan d\'action.</p>'}
+  else{
+    h+=(w.nH?'':'<div class="notice warn">Aucun titre Forces, Faiblesses, Opportunités ou Menaces trouvé : choisissez la rubrique de chaque ligne.</div>')+
+      '<div class="swi-sum">'+SWQ.map(([q,l])=>'<span><i class="sw-dot q-'+q+'"></i>'+esc(l)+' <b class="num">'+n(q)+'</b></span>').join("")+'<span>Axes <b class="num">'+SWI_SX.reduce((s,k)=>s+n(k),0)+'</b></span>'+(n("notes")?'<span>Notes <b class="num">'+n("notes")+'</b></span>':'')+'</div>'+
+      (w.tows?'<p class="hint">Matrice TOWS reconnue : les cases du croisement sont classées dans les stratégies.</p>':'')+
+      '<div class="f"><span class="lbl">Importer dans</span><div class="seg" role="group" aria-label="Destination"><button type="button" data-swidest="new" aria-pressed="'+(w.dest==="new")+'">Une nouvelle analyse</button>'+(cur?'<button type="button" data-swidest="cur" aria-pressed="'+(w.dest==="cur")+'">L\'analyse « '+esc(swCut(swTitle(cur),40))+' »</button>':'')+'</div></div>'+
+      (w.dest==="new"?'<div class="row3"><div class="f"><label class="lbl" for="swiE">Entreprise</label><input type="text" id="swiE" value="'+esc(w.entite)+'" placeholder="Nom de l\'entreprise, de la filiale ou de la région" autocomplete="off"></div>'+
+        '<div class="f"><label class="lbl" for="swiT">Titre <span class="sub">(facultatif)</span></label><input type="text" id="swiT" value="'+esc(w.titre)+'" placeholder="'+esc((w.entite||"Entreprise")+(w.periode?" "+w.periode:""))+'" autocomplete="off"></div>'+
+        '<div class="f"><label class="lbl" for="swiP">Période</label><input type="text" id="swiP" value="'+esc(w.periode)+'" autocomplete="off"></div></div>'
+        :'<p class="hint">Les lignes s\'ajoutent à celles de l\'analyse ; une ligne déjà présente dans la même rubrique n\'est pas reprise.</p>')}
+  h+='<div class="swi-list">'+C.map(([k])=>grp(k)).join("")+bulk+grp("")+'</div></div>'+
+    '<div class="df"><button class="btn ghost" type="button" data-swiback="1">Autre fichier ou texte</button><span class="grow"></span><button class="btn" type="button" data-act="mclose">Annuler</button><button class="btn primary" type="button" data-swigo="1" id="swiGo">'+swiGoLbl(tot)+'</button></div>';
+  showModal(h,"swi");modalBig()}
+const swiGoLbl=n=>n?"Importer "+(SWI&&SWI.mode==="strat"?pl(n,"axe"):pl(n,"ligne")):"Rien à importer";
 function swiReadForm(){const w=SWI;if(!w)return;
   document.querySelectorAll("#modal [data-switx]").forEach(i=>{const r=w.rows[+i.dataset.switx];if(r)r.t=i.value});
   document.querySelectorAll("#modal [data-swion]").forEach(i=>{const r=w.rows[+i.dataset.swion];if(r)r.on=i.checked});
   [["swiE","entite"],["swiT","titre"],["swiP","periode"]].forEach(([id,f])=>{const e=$("#"+id);if(e)w[f]=e.value})}
-function swiGo(){swiReadForm();const w=SWI,R=w.rows.filter(r=>r.on&&r.cat&&r.t.trim());if(!R.length){toast("Cochez au moins une ligne classée.");return}
+function swiGo(){swiReadForm();const w=SWI,st=w.mode==="strat",R=w.rows.filter(r=>r.on&&r.cat&&r.t.trim()&&(!st||SWI_SX.includes(r.cat)));
+  if(!R.length){toast("Cochez au moins une ligne classée.");return}
   let a=w.dest==="cur"?S.swot.find(x=>x.id===w.curId):null,isNew=false;
+  if(st&&!a){toast("L'analyse SWOT n'existe plus : ouvrez-en une, puis recommencez.");return}
   if(!a){a=swnorm({id:uid(),creeLe:now(),majLe:now(),portee:"activite",entite:w.entite.trim(),titre:w.titre.trim(),periode:w.periode.trim()});if(a.entite)S.settings.swEntite=a.entite;S.swot.push(a);isNew=true}
   let n=0,dup=0;const has=(L,k,f,t)=>L.some(x=>x[k]===f&&nh(x.txt)===nh(t));
   R.forEach(r=>{const t=r.t.trim();
@@ -188,20 +251,26 @@ function swiGo(){swiReadForm();const w=SWI,R=w.rows.filter(r=>r.on&&r.cat&&r.t.t
     else if(SWX.some(x=>x[0]===r.cat)){if(has(a.axes,"st",r.cat,t)){dup++;return}a.axes.push(swAxe({st:r.cat,txt:t}));n++}
     else if(r.cat==="notes"){a.notes=[a.notes,t].filter(Boolean).join("\n");n++}});
   bump();SWU.cur=a.id;SWUNDO=null;swuSave();swTouch(a);SWI=null;closeModal();
-  if(S.tab!=="swot")showTab("swot");else{renderSwot();window.scrollTo(0,0)}
-  toast(pl(n,"ligne importée","lignes importées")+(isNew?" dans une nouvelle analyse":"")+(dup?" · "+pl(dup,"doublon ignoré","doublons ignorés"):""))}
+  if(S.tab!=="swot")showTab("swot");else renderSwot();
+  if(st){const p=$("#view-swot .sw-strat");if(p)p.scrollIntoView({block:"start",behavior:"smooth"})}else if(S.tab==="swot")window.scrollTo(0,0);
+  const D=dup?" · "+pl(dup,"doublon ignoré","doublons ignorés"):"";
+  toast(st?(n?pl(n,"axe importé","axes importés")+" dans « "+swCut(swTitle(a),40)+" »":"Aucun nouvel axe")+D
+    :pl(n,"ligne importée","lignes importées")+(isNew?" dans une nouvelle analyse":"")+D)}
 
 /* ---------- Événements ---------- */
 document.addEventListener("click",async e=>{const t=e.target.closest&&e.target.closest("button");if(!t)return;const d=t.dataset;
-  if(d.swimport){swiOpen();return}
+  if(d.swimport){swiOpen("swot");return}
+  if(d.swximport){swiOpen("strat");return}
   if(MODAL!=="swi")return;
   if(d.swifile){swiPick();return}
-  if(d.switxt){const v=($("#swiTxt")||{}).value||"";if(!v.trim()){toast("Collez d'abord le texte du SWOT.");return}swiShow(swiParse(swiTextBlocks(v)),"");return}
+  if(d.switxt){const v=($("#swiTxt")||{}).value||"";if(!v.trim()){toast("Collez d'abord le texte "+swiWhat()+".");return}swiShow(swiParse(swiTextBlocks(v)),"");return}
   if(d.swiback){swiOpen();return}
   if(d.swidest&&SWI){swiReadForm();SWI.dest=d.swidest;swiDraw();return}
   if(d.swigo&&SWI){swiGo();return}});
 document.addEventListener("change",e=>{const t=e.target;if(!t||MODAL!=="swi"||!SWI)return;
-  if(t.dataset.swic!=null){swiReadForm();const r=SWI.rows[+t.dataset.swic];if(r){r.cat=t.value;r.on=!!t.value}const sy=($("#modal .db")||{}).scrollTop||0;swiDraw();const db=$("#modal .db");if(db)db.scrollTop=sy;return}
+  const keep=f=>{const sy=($("#modal .db")||{}).scrollTop||0;f();swiDraw();const db=$("#modal .db");if(db)db.scrollTop=sy};
+  if(t.dataset.swic!=null){keep(()=>{swiReadForm();const r=SWI.rows[+t.dataset.swic];if(r){r.cat=t.value;r.on=!!t.value}});return}
+  if(t.dataset.swiall!=null){if(!t.value)return;keep(()=>{swiReadForm();SWI.rows.forEach(r=>{if(!r.cat){r.cat=t.value;r.on=true}})});return}
   if(t.dataset.swion!=null){swiReadForm();const b=$("#swiGo");if(b)b.textContent=swiGoLbl(SWI.rows.filter(r=>r.on&&r.cat).length)}});
 /* Fichier déposé sur la fenêtre d'import */
 document.addEventListener("dragover",e=>{if(MODAL==="swi"&&e.dataTransfer&&[...(e.dataTransfer.types||[])].includes("Files"))e.preventDefault()});

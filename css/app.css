@@ -1384,3 +1384,8 @@ details.swi-g>summary{cursor:pointer;list-style:none}
 details.swi-g>summary::-webkit-details-marker{display:none}
 details.swi-g>summary::before{content:"▸";margin-right:4px}
 details.swi-g[open]>summary::before{content:"▾"}
+/* V3.51 · Import des stratégies seules (bouton du panneau Stratégies) */
+.sw-strat .ph .sw-ximp{padding:4px 11px;font-size:12.5px}
+.swi-sum .sw-tag{margin-right:2px}
+.swi-bulk{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap;padding:6px 0 2px}
+.swi-bulk select{width:auto;min-width:240px;max-width:100%;padding:5px 7px}

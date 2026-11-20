@@ -1,5 +1,5 @@
 /* Registre · CSC — Analyse SWOT : forces, faiblesses, opportunités, menaces, sur l'entreprise (nom saisi), un compte, un secteur ou une campagne.
-   Stratégies croisées (S×O, W×O, S×T, W×T) envoyées dans le plan d'action (PAC) ; analyse jointe au PAC ; impression ;
+   Stratégies croisées (S×O, W×O, S×T, W×T) envoyées dans le plan d'action (PAC), importables seules (25) ; analyse jointe au PAC ; impression ;
    recherche globale ; bouton SWOT de la fiche compte.
    Chargé avant 18-demarrage.js (toujours en dernier) : partage les déclarations des fichiers précédents. */
 "use strict";
@@ -86,7 +86,8 @@ function swStrat(a){const nP=a.axes.filter(swPacOf).length;
   const cell=st=>{const L=a.axes.filter(x=>x.st===st),nm=swXL(st);
     return '<div class="sw-sc"><div class="sw-sch">'+swTag(st)+'<b>'+esc(nm)+'</b><span class="sub num">'+(L.length||"")+'</span></div><p class="hint">'+esc(SWXD[st][1])+'</p>'+
      '<div class="sw-list">'+L.map(swAxHTML).join("")+'</div><input type="text" class="sw-add" data-swaddx="'+st+'" placeholder="Ajouter un axe… (Entrée)" aria-label="Ajouter un axe, stratégie '+esc(nm.toLowerCase())+'" autocomplete="off"></div>'};
-  return '<div class="panel sw-strat"><div class="ph"><h2>Stratégies · croisement SWOT</h2>'+(a.axes.length?'<span class="sub">'+pl(a.axes.length,"axe")+(nP?" · "+nP+" dans le PAC":"")+'</span>':'')+'</div>'+
+  return '<div class="panel sw-strat"><div class="ph"><h2>Stratégies · croisement SWOT</h2>'+(a.axes.length?'<span class="sub">'+pl(a.axes.length,"axe")+(nP?" · "+nP+" dans le PAC":"")+'</span>':'')+
+     '<button class="btn ghost sw-ximp" type="button" data-swximport="1" title="Importer des axes stratégiques : Excel, Word, PowerPoint, PDF, texte ou texte collé (titres Offensive, Réorientation, Défensive, Repli, S × O…, ou matrice TOWS)">Importer</button></div>'+
    '<p class="hint">Croisez vos constats pour décider quoi faire. « → PAC » crée une ligne dans le plan d\'action en cours (« '+esc(curPlan().nom)+' ») pour la piloter.</p>'+
    '<div class="sw-st">'+cell("so")+cell("wo")+cell("st")+cell("wt")+'</div></div>'}
 function renderSwot(){const el=$("#view-swot");if(!el)return;
