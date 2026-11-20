@@ -48,7 +48,7 @@ function pacHead(titre,per,lines,tools){
 function pacPrintURL(){
   const lines=pacView().map(p=>Object.assign(clone(p),{_st:pacStats(p)}));
   const sw=pacSwot(curPlan());
-  return location.href.split("#")[0]+"#pacprint="+b64enc(JSON.stringify({t:pacTitre(),p:pacPeriode(),lines,sw:sw?swPrintData(sw):null}));
+  return location.href.split("#")[0]+"#pacprint="+b64enc(JSON.stringify({t:pacTitre(),p:pacPeriode(),lines,sw:sw?swPrintData(sw):null,n:curPlan().notes||[]}));
 }
 function openPac(id){
   const src=id?S.pac.find(p=>p.id===id):null;pIsNew=!src;
@@ -103,61 +103,7 @@ async function pacFromCamps(){
   for(const c of free){const p=Object.assign(pblank(),{id:uid(),creeLe:new Date().toISOString(),ordre:++o,element:c.replace(/^PAC IDF – /,""),campagnes:[c]});if(await savePac(p))n++;else break}
   if(n)toast(n+" ligne"+(n>1?"s":"")+" créée"+(n>1?"s":"")+" : complétez objectifs et actions");
 }
-/* Import d'un PAC Excel (formats « Vierge » et « Feuil1 » du PAC France) */
-const PAC_COLS=[[/^priorite|^prio/,"prio"],[/^plan d action$/,"pa"],[/^elements?$/,"el"],[/^objectifs?$/,"objectif"],[/^descriptif/,"descriptif"],[/^actions?$/,"actions"],
-  [/^(trimestre|t) ?1$/,"t1"],[/^(trimestre|t) ?2$/,"t2"],[/^(trimestre|t) ?3$/,"t3"],[/^(trimestre|t) ?4$/,"t4"],
-  [/^qui/,"qui"],[/^quand/,"quand"],[/indicateur|kpi/,"kpi"],[/^resultats? attendus?/,"attendus"],[/^resultats?( obtenus?)?$/,"obtenus"],
-  [/^continuer$/,"d:Continuer"],[/^modifier$/,"d:Modifier"],[/^reporter$/,"d:Reporter"],[/^arreter$/,"d:Arrêter"]];
-const pacCol=n=>{const h=PAC_COLS.find(([re])=>re.test(n));return h?h[1]:null};
-async function parsePacFile(file){
-  await loadExcel();const wb=new ExcelJS.Workbook();await wb.xlsx.load(await file.arrayBuffer());
-  const sheets=[];
-  wb.worksheets.forEach(ws=>{if(ws.state==="hidden")return;
-    const txt=(r,c)=>{const v=cellVal(ws.getRow(r).getCell(c).value);return v instanceof Date?fdate(toISO(v)):String(v==null?"":v).trim()};
-    const maxC=Math.min(ws.columnCount||0,40),maxR=ws.rowCount||0;let hr=0;
-    for(let r=1;r<=Math.min(maxR,15)&&!hr;r++)for(let c=1;c<=maxC;c++){if(/^objectifs?$/.test(nh(txt(r,c)))){hr=r;break}}
-    if(!hr)return;
-    const subRow=r=>{let k=0;for(let c=1;c<=maxC;c++){const f=pacCol(nh(txt(r,c)));if(f&&/^(t\d|qui|quand|kpi|d:|attendus)/.test(f))k++}return k>=2};
-    const sub=hr<maxR&&subRow(hr+1)?hr+1:0;
-    const map={};for(let c=1;c<=maxC;c++){const a=nh(txt(hr,c)),b=sub?nh(txt(sub,c)):"";const f=(b&&b!==a&&pacCol(b))||pacCol(a);if(f&&!Object.values(map).includes(f))map[c]=f}
-    const recs=[];
-    for(let r=(sub||hr)+1;r<=maxR;r++){const o={};let any=false;
-      Object.entries(map).forEach(([c,f])=>{const v=txt(r,+c);if(!v)return;any=true;if(f.startsWith("d:"))o.decision=f.slice(2);else o[f]=v});
-      if(!any)continue;
-      const p=pblank();
-      if(o.pa&&o.el){p.element=o.pa;p.objectif=o.el;p.descriptif=[o.objectif,o.descriptif].filter(Boolean).join("\n")}
-      else{p.element=o.pa||o.el||"";p.objectif=o.objectif||"";p.descriptif=o.descriptif||""}
-      ["actions","t1","t2","t3","t4","qui","quand","kpi","attendus","obtenus","decision"].forEach(k=>{if(o[k])p[k]=o[k]});if(o.prio)p.prio=toPrio(o.prio);
-      if(!p.element&&!p.objectif)continue;if(!p.element){p.element=p.objectif;p.objectif=""}
-      recs.push(p)}
-    if(recs.length)sheets.push({name:ws.name,recs,filled:recs.reduce((s,p)=>s+["objectif","descriptif","actions","t1","t2","t3","t4","qui","quand","kpi","attendus"].filter(k=>p[k]).length,0)});
-  });
-  if(!sheets.length)throw new Error("none");
-  sheets.sort((a,b)=>b.filled-a.filled);return {sheets,pick:0};
-}
-function pacImportMenu(){
-  PIMP=null;const d=$("#drawer");
-  d.innerHTML='<div class="dh"><div class="grow"><span class="lbl">PAC</span><h2 id="dTitle">Importer un PAC Excel</h2></div><button class="btn ghost" type="button" data-act="close">Fermer</button></div><div class="db">'+
-  '<p class="hint">Format du PAC France : une ligne d\'en-tête « Élément · Objectif · Descriptif de l\'action · Actions (ou Trimestre 1 à 4) · Qui ? · Quand ? · Indicateurs clés · Résultats · Continuer / Modifier / Reporter / Arrêter ». Les lignes trouvées s\'ajoutent à la suite du plan affiché.</p>'+
-  '<div class="f"><label class="lbl" for="pimpF">Fichier Excel</label><input type="file" id="pimpF" accept=".xlsx"></div><div id="pimpOut"></div></div>'+
-  '<div class="df"><span class="grow"></span><button class="btn" type="button" data-act="close">Annuler</button><button class="btn primary" type="button" data-act="pimpgo" id="pimpGo" disabled>Importer</button></div>';
-  $("#scrim").hidden=false;d.hidden=false;
-  $("#pimpF").addEventListener("change",async e=>{const f=e.target.files[0];if(!f)return;$("#pimpOut").innerHTML='<p class="hint">Lecture du fichier…</p>';$("#pimpGo").disabled=true;
-    try{PIMP=await parsePacFile(f);drawPacImport()}
-    catch(err){PIMP=null;$("#pimpOut").innerHTML='<p class="hint">Aucun tableau de PAC reconnu dans ce fichier : il faut une ligne d\'en-tête contenant au moins « Objectif » (classeur .xlsx).</p>'}});
-}
-function drawPacImport(){
-  const s=PIMP.sheets[PIMP.pick],n=s.recs.length;
-  $("#pimpOut").innerHTML=(PIMP.sheets.length>1?'<div class="f"><label class="lbl" for="pimpS">Onglet à importer</label><select id="pimpS">'+PIMP.sheets.map((x,i)=>'<option value="'+i+'"'+(i===PIMP.pick?' selected':'')+'>'+esc(x.name)+' · '+x.recs.length+' ligne'+(x.recs.length>1?'s':'')+'</option>').join("")+'</select></div>':'')+
-   '<div class="f"><span class="lbl">'+n+' ligne'+(n>1?'s':'')+' trouvée'+(n>1?'s':'')+' · onglet « '+esc(s.name)+' »</span><ol class="pimp">'+s.recs.map(p=>'<li><b>'+esc(p.element)+'</b>'+(p.objectif?' — '+esc(p.objectif):'')+'</li>').join("")+'</ol></div>';
-  const g=$("#pimpGo");g.disabled=false;g.textContent="Ajouter "+n+" ligne"+(n>1?"s":"");
-  const sel=$("#pimpS");if(sel)sel.addEventListener("change",()=>{PIMP.pick=+sel.value;drawPacImport()});
-}
-async function pacImportGo(){
-  if(!PIMP)return;const s=PIMP.sheets[PIMP.pick];let o=pacNextOrdre()-1,n=0;
-  for(const r of s.recs){const p=Object.assign(clone(r),{id:uid(),creeLe:new Date().toISOString(),ordre:++o});if(await savePac(p))n++;else break}
-  PIMP=null;closeDrawer();if(n)toast(n+" ligne"+(n>1?"s":"")+" importée"+(n>1?"s":"")+" dans le PAC");
-}
+/* Import d'un PAC Excel : voir 26-pac-import.js */
 function pacPrint(){
   document.body.classList.add("print-pac");
   const off=()=>{document.body.classList.remove("print-pac");window.removeEventListener("afterprint",off)};
@@ -285,8 +231,10 @@ function renderPac(){
     h+='<div class="pac-filt"><div class="chips grow" aria-label="Filtrer par priorité">'+[["","Toutes"],["1","P1 · haute"],["2","P2 · moyenne"],["3","P3 · basse"],["0","Sans priorité"]].filter(([k])=>!k||nP(k)||PUI.f===k).map(([k,l])=>'<button type="button" class="chip" data-pf="'+k+'" aria-pressed="'+(PUI.f===k)+'">'+l+'<span class="n num">'+nP(k)+'</span></button>').join("")+'</div>'+
       '<div class="ps"><label for="pSort">Trier</label><select id="pSort"><option value="prio"'+(PUI.sort==="prio"?' selected':'')+'>Par priorité</option><option value="manuel"'+(PUI.sort==="manuel"?' selected':'')+'>Ordre manuel</option></select></div></div>';
     h+=V.length?'<div class="pac-wrap">'+pacTable(V,p=>pacStats(p),false)+'</div>':'<div class="list-wrap"><div class="empty"><h3>Aucune ligne pour ce filtre</h3><p>Choisissez « Toutes » pour revoir l\'ensemble du plan.</p></div></div>';
-    h+='<p class="hint pac-note">Cliquez sur une ligne pour la modifier ; la priorité (pastille) et la décision corrective se changent directement dans le tableau. Résultats calculés à partir des cibles des campagnes et des secteurs reliés. Trimestre en cours surligné.</p>';
+    h+=pacNotesHTML(plan.notes);
+    h+='<p class="hint pac-note">Cliquez sur une ligne pour la modifier ; la priorité (pastille) et la décision corrective se changent directement dans le tableau. Résultats calculés à partir des cibles des campagnes et des secteurs reliés. Trimestre en cours surligné.'+((plan.notes||[]).length?' Compléments sous le tableau : « Paramètres du plan ».':'')+'</p>';
   }
+  if(!lines.length)h+=pacNotesHTML(plan.notes);
   el.innerHTML=h;
   const so=$("#pSort");if(so)so.addEventListener("change",()=>{PUI.sort=so.value;puiSave();renderPac()});
 }
@@ -307,10 +255,13 @@ function planMenu(isNewPlan){const p=isNewPlan?{nom:"",axe:"secteur",titre:"",pe
     '<label><input type="radio" name="plStart" value="modeles"> Les lignes types (Industrie, Prescripteurs, Promoteurs, Foncières, Voirie)</label>'+
     '<label><input type="radio" name="plStart" value="copie"> Une copie du plan « '+esc(curPlan().nom)+' »</label></div></div>'+
     '<div class="f"><span class="lbl">Secteurs</span><div class="checks" id="plSecs">'+secs.map(s=>'<label><input type="checkbox" data-plsec value="'+esc(s)+'">'+esc(s)+'</label>').join("")+'</div></div>'
-   :'<p class="hint">Le titre et la période sont repris à l\'impression et dans l\'export Excel.</p>')+
+   :'<p class="hint">Le titre et la période sont repris à l\'impression et dans l\'export Excel.</p>'+
+    '<div class="f"><label class="lbl" for="pl-n">Compléments sous le tableau</label><textarea id="pl-n" rows="'+Math.min(14,Math.max(4,(p.notes||[]).length+1))+'" placeholder="Budget 2027 (k€) | 7 500">'+esc(pxNotesTxt(p.notes))+'</textarea>'+
+    '<p class="hint">Budget, répartition, arbitrages… affichés sous le tableau, imprimés et exportés avec le plan. Une rangée par ligne, cellules séparées par « | » ; une seule cellule fait un titre ; une ligne vide sépare deux blocs.</p></div>')+
   '</div><div class="df">'+(isNewPlan?'':'<button class="btn danger" type="button" data-act="pplandel">Supprimer ce plan</button><button class="btn ghost" type="button" data-plm="arch" data-id="'+esc(p.id)+'">'+(p.archive?'Réactiver':'Archiver')+'</button><button class="btn ghost" type="button" data-act="pplandup">Dupliquer</button>')+'<span class="grow"></span><button class="btn" type="button" data-act="close">Annuler</button><button class="btn primary" type="button" data-act="'+(isNewPlan?'pplancreate':'pplansave')+'">'+(isNewPlan?'Créer le plan':'Enregistrer')+'</button></div>';
   $("#scrim").hidden=false;d.hidden=false;setTimeout(()=>$("#pl-nom").focus({preventScroll:true}),30)}
-function planRead(){const axe=(document.querySelector('input[name="plAxe"]:checked')||{}).value||"theme";return {nom:vOf("pl-nom"),axe,famille:axe==="famille"?$("#pl-fam").value:"",titre:vOf("pl-t"),periode:vOf("pl-p")}}
+function planRead(){const axe=(document.querySelector('input[name="plAxe"]:checked')||{}).value||"theme";const v={nom:vOf("pl-nom"),axe,famille:axe==="famille"?$("#pl-fam").value:"",titre:vOf("pl-t"),periode:vOf("pl-p")};
+  const n=$("#pl-n");if(n)v.notes=pxNotesRead(n.value);return v}
 function lineForSecteur(s,pid,o){return Object.assign(pblank(),{id:uid(),creeLe:now(),planId:pid,ordre:o,element:s,secteurs:[s],objectif:"",qui:"CSC + chefs d'agence"})}
 async function planCreate(){const v=planRead();if(!v.nom){toast("Donnez un nom au plan.");$("#pl-nom").focus({preventScroll:true});return}
   const start=(document.querySelector('input[name="plStart"]:checked')||{}).value||"vide",src=curPlan();

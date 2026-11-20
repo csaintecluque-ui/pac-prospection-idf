@@ -13,7 +13,7 @@ Les données restent dans le navigateur (IndexedDB) : faire régulièrement une 
   - `02-interface.js` : navigation, fenêtres, actions, contacts, comptes
   - `03-agenda-tableau-de-bord.js` : calendrier, tableau de bord, agenda
   - `04-comptes-cibles.js` : liste des comptes, fiche compte, cibles et campagnes, sélection multiple des cibles (cases à cocher : classer sans suite, retirer de la campagne, supprimer, avec annulation), gestion des campagnes (renommer, fusionner, supprimer)
-  - `05-pac.js` : plan d'action commercial
+  - `05-pac.js` : plan d'action commercial ; compléments du plan (budget, arbitrages…) sous le tableau, modifiables dans « Paramètres du plan »
   - `06-sauvegarde-doublons.js` : export, sauvegarde, restauration, copie de cibles, doublons
   - `07-mailing.js` : mailing
   - `08-excel.js` : export et import Excel
@@ -33,6 +33,7 @@ Les données restent dans le navigateur (IndexedDB) : faire régulièrement une 
   - `23-comptes-contacts.js` : import « Comptes et contacts » (Comptes › Importer) : une base de contacts sans cible ni campagne ; comptes créés ou complétés (champs vides seulement), tous les contacts ajoutés sans doublon, annulation tant que le panneau reste ouvert
   - `24-swot.js` : analyses SWOT (forces, faiblesses, opportunités, menaces) sur l'entreprise (nom saisi), un compte (bouton SWOT de la fiche), un secteur ou une campagne, lignes à glisser d'un quadrant à l'autre, importance, stratégies croisées (S×O, W×O, S×T, W×T) envoyées dans le PAC, duplication pour la période suivante, impression, recherche globale ; analyse jointe à un plan du PAC (choisie dans la page du plan, sinon celle dont des axes sont dans le plan) : imprimée en première page du PAC et exportée dans un onglet « SWOT » après celui du plan
   - `25-swot-import.js` : import d'une analyse SWOT (Excel, Word, PowerPoint, PDF, .txt, .csv ou texte collé) : lignes classées d'après les titres Forces, Faiblesses, Opportunités, Menaces et les stratégies (et leur position sur la page), matrice TOWS reconnue (cases du croisement classées dans leur stratégie), aperçu corrigible (lignes non classées classables d'un coup), import dans une nouvelle analyse ou dans l'analyse affichée ; import des stratégies seules (bouton « Importer » du panneau Stratégies) : axes Offensive, Réorientation, Défensive, Repli ajoutés à l'analyse affichée, sans doublon
+  - `26-pac-import.js` : import d'un PAC Excel (format PAC France ou export Registre retouché dans Excel) : priorité « P1 · » de l'élément, colonnes Attendus / Obtenus, cellules fusionnées, chiffres calculés de la colonne Obtenus ignorés (objectifs chiffrés, campagnes et secteurs reliés repris) ; le tableau s'arrête à la première ligne vide, la suite devient les compléments du plan ; mise à jour d'un plan (lignes reconnues par leur élément, liens et objectifs conservés), ajout à la suite ou nouveau plan ; annulation tant que le panneau reste ouvert
   - `18-demarrage.js` : événements et démarrage (toujours en dernier)
 
 ## Nouvelle version

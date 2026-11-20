@@ -153,6 +153,7 @@ document.addEventListener("click",async e=>{
   if(d.act==="pmgo"){const sel=[...document.querySelectorAll("#drawer input[data-pm]:checked")].map(i=>PAC_MODELES[+i.dataset.pm]);
     if(!sel.length){toast("Cochez au moins une ligne.");return}const n=await pacAddModeles(sel);closeDrawer();toast(n?n+" ligne"+(n>1?"s":"")+" ajoutée"+(n>1?"s":"")+" au plan":"Ces lignes sont déjà dans le plan");return}
   if(d.act==="pimpgo"){await pacImportGo();return}
+  if(d.act==="pimpundo"){pacImportUndo();return}
   if(P){
     if(d.ppr){pReadForm();P.prio=P.prio===d.ppr?"":d.ppr;drawPac();return}
     if(d.pdec){pReadForm();P.decision=P.decision===d.pdec?"":d.pdec;drawPac();return}

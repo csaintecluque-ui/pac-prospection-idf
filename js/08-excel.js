@@ -109,6 +109,21 @@ function addPacSheet(wb,name,plan,pac,cibles){
     const est=vals.map((v,c)=>{const w=c===3&&!anyT?W[3]*4:W[c];return String(v||"").split("\n").reduce((s,l)=>s+Math.max(1,Math.ceil(l.length/(w*1.05))),0)});
     row.height=Math.min(409,Math.max(30,Math.max(...est)*13.5+6));
   });
+  /* Compléments du plan sous le tableau (budget, arbitrages…) : une cellule = titre ou note sur toute la largeur, deux = libellé et texte, trois et plus = tableau */
+  let r=4+pac.length+1;
+  pxBlocks(plan.notes).forEach(b=>{let th=true;
+    b.forEach((cells,i)=>{const row=wp.getRow(++r);
+      if(cells.length===1){wp.mergeCells("A"+r+":P"+r);const c=row.getCell(1);c.value=cells[0];
+        c.font=i===0?{name:"Calibri",size:12,bold:true,color:{argb:INK}}:{name:"Calibri",size:9.5,italic:true,color:{argb:GREYTXT}};c.alignment={vertical:"top",wrapText:true};
+        row.height=i===0?22:Math.max(15,Math.ceil(cells[0].length/300)*13.5+3);th=true;return}
+      if(cells.length===2){wp.mergeCells("B"+r+":P"+r);const a=row.getCell(1),v=row.getCell(2),x=pxXlVal(cells[1]);a.value=cells[0];v.value=x.v;if(x.f){v.numFmt=x.f;v.alignment={horizontal:"left"}}
+        a.font={name:"Calibri",size:10,bold:true};v.font={name:"Calibri",size:10};[a,v].forEach(c=>{c.alignment={vertical:"top",wrapText:true,horizontal:"left"};c.border={bottom:{style:"thin",color:{argb:LINE}}}});
+        row.height=Math.max(Math.ceil(cells[0].length/W[0])*13.5+3,Math.ceil(cells[1].length/320)*13.5+3,16);th=true;return}
+      cells.forEach((v,k)=>{const c=row.getCell(k+1),x=th?{v:v||null}:pxXlVal(v);c.value=x.v;if(x.f)c.numFmt=x.f;c.font={name:"Calibri",size:10,bold:th||/^total/i.test(cells[0])};
+        c.alignment={vertical:"top",horizontal:k?"right":"left",wrapText:true};c.border={bottom:{style:th?"medium":"thin",color:{argb:th?COPPER:LINE}}};
+        if(th)c.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FFEFEEEB"}}});
+      row.height=Math.max(16,...cells.map((v,k)=>Math.ceil(String(v||"").length/(W[k]||11))*13.5+3));th=false});
+    r++});
   wp.pageSetup={orientation:"landscape",paperSize:9,fitToPage:true,fitToWidth:1,fitToHeight:0,margins:{left:.3,right:.3,top:.5,bottom:.5,header:.25,footer:.25},printTitlesRow:"3:4"};
   wp.headerFooter={oddFooter:"&LRegistre · CSC&RPage &P / &N"};
 }
@@ -288,7 +303,7 @@ async function handoffMode(){
       const z={n:0,visites:0,opps:0,devis:0,ca:0};
       $("#app").innerHTML='<section id="view-pac" style="display:flex;flex-direction:column;gap:14px">'+
         (d.sw?'<div class="pac-swot swp">'+swBlockHTML(d.sw)+'</div>':'')+pacHead(d.t||PAC_TITRE_DEF,d.p||String(new Date().getFullYear()),lines,'<div class="bar pac-tools"><button class="btn primary" type="button" onclick="window.print()">Imprimer / PDF</button></div>')+
-        '<div class="pac-wrap">'+pacTable(lines,p=>p._st||z,true)+'</div><p class="hint pac-note">Choisissez « Enregistrer au format PDF » comme imprimante pour obtenir un PDF. Rien n\'est enregistré dans cet onglet.</p></section>';
+        '<div class="pac-wrap">'+pacTable(lines,p=>p._st||z,true)+'</div>'+pacNotesHTML(d.n)+'<p class="hint pac-note">Choisissez « Enregistrer au format PDF » comme imprimante pour obtenir un PDF. Rien n\'est enregistré dans cet onglet.</p></section>';
       setTimeout(()=>window.print(),600)}
     catch(e){$("#app").innerHTML='<div class="empty" style="padding:60px 20px"><h3>Impression impossible</h3><p>Le lien est incomplet. Revenez dans Notion et cliquez à nouveau sur Imprimer.</p></div>'}
     return true}
