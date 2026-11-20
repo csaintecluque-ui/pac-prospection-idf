@@ -47,7 +47,8 @@ function pacHead(titre,per,lines,tools){
 }
 function pacPrintURL(){
   const lines=pacView().map(p=>Object.assign(clone(p),{_st:pacStats(p)}));
-  return location.href.split("#")[0]+"#pacprint="+b64enc(JSON.stringify({t:pacTitre(),p:pacPeriode(),lines}));
+  const sw=pacSwot(curPlan());
+  return location.href.split("#")[0]+"#pacprint="+b64enc(JSON.stringify({t:pacTitre(),p:pacPeriode(),lines,sw:sw?swPrintData(sw):null}));
 }
 function openPac(id){
   const src=id?S.pac.find(p=>p.id===id):null;pIsNew=!src;
@@ -271,7 +272,7 @@ function renderPac(){
   const tools='<div class="bar pac-tools"><button class="btn ghost" type="button" data-act="phead">Paramètres du plan</button><button class="btn ghost" type="button" data-act="pmod">Lignes types</button><button class="btn ghost" type="button" data-act="psecteurs">Une ligne par secteur</button><button class="btn ghost" type="button" data-act="pimport">Importer un PAC Excel</button>'+
     (lines.length?(IN_FRAME?'<a class="btn ghost" href="'+pacPrintURL()+'" target="_blank" rel="noopener" title="S\'ouvre dans un onglet pour imprimer ou enregistrer en PDF">Imprimer</a>':'<button class="btn ghost" type="button" data-act="pprint">Imprimer</button>'):'')+
     '<button class="btn ghost" type="button" data-act="pexport">Exporter / Excel</button><button class="btn primary" type="button" data-act="pnew">'+I_PLUS+'Nouvelle ligne</button></div>';
-  h+=pacHead(pacTitre(),pacPeriode(),lines,tools);
+  h+=pacSwotPrint(plan)+pacHead(pacTitre(),pacPeriode(),lines,tools)+pacSwotBar(plan);
   if(plan.famille)h+=famPanel(plan.famille);
   if(!lines.length){
     h+='<div class="list-wrap"><div class="empty"><h3>Ce plan est vide</h3><p>Chaque ligne est un axe : objectif, actions par trimestre, qui, quand, indicateurs, résultats et décision corrective. Reliez une ligne à des campagnes ou à des secteurs : ses résultats se calculent à partir de vos cibles.</p>'+

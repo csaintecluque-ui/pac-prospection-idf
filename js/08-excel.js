@@ -113,7 +113,7 @@ function addPacSheet(wb,name,plan,pac,cibles){
   wp.headerFooter={oddFooter:"&LRegistre · CSC&RPage &P / &N"};
 }
 /* Sections du classeur : cochées dans « Exporter » (toutes par défaut) ; « depuis le » limite les actions et les devis */
-const XL_SEC=[["pac","Plan d'action (PAC)"],["syn","Synthèse des indicateurs"],["cib","Cibles et campagnes"],["act","Actions (RDV, appels, mails, rappels)"],["cpt","Comptes"],["ctc","Contacts"],["dev","Devis (une ligne par prestation)"],["dva","Analyse des devis (mois par mois)"],["mai","Mailing"]];
+const XL_SEC=[["pac","Plan d'action (PAC) et son analyse SWOT"],["syn","Synthèse des indicateurs"],["cib","Cibles et campagnes"],["act","Actions (RDV, appels, mails, rappels)"],["cpt","Comptes"],["ctc","Contacts"],["dev","Devis (une ligne par prestation)"],["dva","Analyse des devis (mois par mois)"],["mai","Mailing"]];
 const xlSecs=st=>new Set(Array.isArray(st&&st.xlSec)?st.xlSec:XL_SEC.map(x=>x[0]));
 function xlSecHTML(){const S0=xlSecs(S.settings),dep=S.settings.xlDepuis||"";
   return '<div class="xl-sec"><span class="sub">Onglets à inclure :</span><div class="xl-ck">'+XL_SEC.map(([k,l])=>'<label class="toggle"><input type="checkbox" data-xls="'+k+'"'+(S0.has(k)?' checked':'')+'> '+esc(l)+'</label>').join("")+'</div>'+
@@ -133,7 +133,10 @@ async function buildXlsx(cibles,settings,pac,mailing){mailing=mailing||[];settin
   const wb=new ExcelJS.Workbook();wb.creator="Registre · CSC";wb.created=new Date();
   /* ---- PAC : un onglet par plan ---- */
   const plans=S.plans.filter(p=>pac.some(l=>l.planId===p.id)),used=new Set();
-  if(X("pac"))plans.forEach(p=>{let nm=plans.length>1?("PAC – "+p.nom).replace(/[\[\]:*?\/\\]/g," ").slice(0,31):"PAC";while(used.has(nm))nm=nm.slice(0,28)+" "+used.size;used.add(nm);addPacSheet(wb,nm,p,pac.filter(l=>l.planId===p.id),cibles)});
+  /* Analyse SWOT jointe au plan : un onglet juste après celui du plan (une seule fois si plusieurs plans partagent la même) */
+  const swDone=new Set();
+  if(X("pac"))plans.forEach(p=>{let nm=plans.length>1?("PAC – "+p.nom).replace(/[\[\]:*?\/\\]/g," ").slice(0,31):"PAC";while(used.has(nm))nm=nm.slice(0,28)+" "+used.size;used.add(nm);addPacSheet(wb,nm,p,pac.filter(l=>l.planId===p.id),cibles);
+    const sw=pacSwot(p);if(sw&&!swDone.has(sw.id)){swDone.add(sw.id);let sn=(plans.length>1?"SWOT – "+p.nom:"SWOT").replace(/[\[\]:*?\/\\]/g," ").slice(0,31);while(used.has(sn))sn=sn.slice(0,28)+" "+used.size;used.add(sn);addSwotSheet(wb,sn,sw,p)}});
   const order=cibles.slice().sort((a,b)=>{const na=nextFor(a),nb=nextFor(b);return (a.priorite||"Z").localeCompare(b.priorite||"Z")||SIDX[a.etape]-SIDX[b.etape]||((na&&na.date)||"9999").localeCompare((nb&&nb.date)||"9999")||a.compte.localeCompare(b.compte,"fr")});
   const sy=X("syn")?wb.addWorksheet("Synthèse",{properties:{tabColor:{argb:COPPER}},views:[{showGridLines:false}]}):null;
   /* ---- Cibles ---- */
@@ -284,7 +287,7 @@ async function handoffMode(){
     try{const d=JSON.parse(b64dec(raw));const lines=(d.lines||[]).map(x=>Object.assign(pnorm(x),{_st:x._st}));
       const z={n:0,visites:0,opps:0,devis:0,ca:0};
       $("#app").innerHTML='<section id="view-pac" style="display:flex;flex-direction:column;gap:14px">'+
-        pacHead(d.t||PAC_TITRE_DEF,d.p||String(new Date().getFullYear()),lines,'<div class="bar pac-tools"><button class="btn primary" type="button" onclick="window.print()">Imprimer / PDF</button></div>')+
+        (d.sw?'<div class="pac-swot swp">'+swBlockHTML(d.sw)+'</div>':'')+pacHead(d.t||PAC_TITRE_DEF,d.p||String(new Date().getFullYear()),lines,'<div class="bar pac-tools"><button class="btn primary" type="button" onclick="window.print()">Imprimer / PDF</button></div>')+
         '<div class="pac-wrap">'+pacTable(lines,p=>p._st||z,true)+'</div><p class="hint pac-note">Choisissez « Enregistrer au format PDF » comme imprimante pour obtenir un PDF. Rien n\'est enregistré dans cet onglet.</p></section>';
       setTimeout(()=>window.print(),600)}
     catch(e){$("#app").innerHTML='<div class="empty" style="padding:60px 20px"><h3>Impression impossible</h3><p>Le lien est incomplet. Revenez dans Notion et cliquez à nouveau sur Imprimer.</p></div>'}
@@ -304,7 +307,7 @@ async function handoffMode(){
   const raw=location.hash.slice(6);history.replaceState(null,"",location.pathname+location.search);bare();
   $("#app").innerHTML='<div class="empty" style="padding:60px 20px"><h3 id="hoT">Préparation du fichier Excel…</h3><p id="hoP">Le téléchargement démarre dans un instant.</p><button class="btn primary" type="button" id="hoBtn" hidden>Télécharger à nouveau</button></div>';
   try{const d=await unpackData(raw);
-    S.cibles=(d.cibles||[]).map(norm);S.comptes=(d.comptes||[]).map(knorm);S.contacts=(d.contacts||[]).map(ctnorm);S.actions=(d.actions||[]).map(anorm);S.plans=d.plans||[];S.pac=(d.pac||[]).map(pnorm);S.mailing=(d.mailing||[]).map(mnorm);S.devis=(d.devis||[]).map(dvnorm);S.settings=Object.assign({objectif:8},d.settings||{});bump();ensurePlans();
+    S.cibles=(d.cibles||[]).map(norm);S.comptes=(d.comptes||[]).map(knorm);S.contacts=(d.contacts||[]).map(ctnorm);S.actions=(d.actions||[]).map(anorm);S.plans=d.plans||[];S.pac=(d.pac||[]).map(pnorm);S.mailing=(d.mailing||[]).map(mnorm);S.devis=(d.devis||[]).map(dvnorm);S.swot=(d.swot||[]).map(swnorm);S.settings=Object.assign({objectif:8},d.settings||{});bump();ensurePlans();
     const blob=await buildXlsx(S.cibles,S.settings,S.pac,S.mailing);const go=()=>saveBlob(blob,xlName());go();
     $("#hoT").textContent="Fichier Excel téléchargé";
     $("#hoP").textContent=pl(S.cibles.length,"cible")+", "+pl(S.comptes.length,"compte")+" et "+pl(S.actions.length,"action")+" exportés. Vous pouvez fermer cet onglet et revenir dans Notion. Rien n'a été enregistré ici.";
