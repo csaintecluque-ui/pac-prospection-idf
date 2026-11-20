@@ -1,6 +1,6 @@
 # Registre
 
-Application personnelle de suivi commercial (comptes, contacts, actions, campagnes, mailing, plan d'action, devis, analyse, bilan), utilisable partout en France.
+Application personnelle de suivi commercial (comptes, contacts, actions, campagnes, mailing, analyse SWOT, plan d'action, devis, analyse, bilan), utilisable partout en France.
 L'adresse du dépôt et le nom interne des données (`pac-idf`) restent inchangés : rien à migrer.
 Les données restent dans le navigateur (IndexedDB) : faire régulièrement une sauvegarde complète (Exporter / sauvegarder).
 
@@ -31,6 +31,7 @@ Les données restent dans le navigateur (IndexedDB) : faire régulièrement une 
   - `21-fichiers.js` : fichiers reliés (réunions, comptes rendus et actions, fiches compte, cibles) : un lien vers le fichier du PC, rien n'est copié ; l'accès reste dans le navigateur, le nom et la taille suivent la sauvegarde. Chrome ou Edge, en pleine page
   - `22-selection-contacts.js` : sélection de contacts pour un mailing (typologie, sous-typologie, famille, type, département, agence, fonction) ; copie des adresses ou création d'une liste dans le Mailing
   - `23-comptes-contacts.js` : import « Comptes et contacts » (Comptes › Importer) : une base de contacts sans cible ni campagne ; comptes créés ou complétés (champs vides seulement), tous les contacts ajoutés sans doublon, annulation tant que le panneau reste ouvert
+  - `24-swot.js` : analyses SWOT (forces, faiblesses, opportunités, menaces) sur l'activité, un compte (bouton SWOT de la fiche), un secteur ou une campagne ; repères chiffrés du registre ajoutés en un clic (S, W, O, T), lignes à glisser d'un quadrant à l'autre, importance, stratégies croisées (S×O, W×O, S×T, W×T) envoyées dans le PAC, duplication pour la période suivante, impression, recherche globale
   - `18-demarrage.js` : événements et démarrage (toujours en dernier)
 
 ## Nouvelle version

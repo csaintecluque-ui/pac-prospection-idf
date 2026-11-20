@@ -244,7 +244,7 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 const persistReq=()=>{try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}};
 function applyState(r){
   S.cibles=(r.cibles||[]).map(norm);S.comptes=(r.comptes||[]).map(knorm);S.contacts=(r.contacts||[]).map(ctnorm);S.actions=(r.actions||[]).map(anorm);
-  S.plans=Array.isArray(r.plans)?r.plans:[];S.pac=(r.pac||[]).map(pnorm);S.mailing=(r.mailing||[]).map(mnorm);S.devis=(r.devis||[]).map(dvnorm);S.reunions=(r.reunions||[]).map(rsnorm);S.liens=(r.liens||[]).map(lnorm);S.settings=Object.assign({objectif:8},r.settings||{});bump()}
+  S.plans=Array.isArray(r.plans)?r.plans:[];S.pac=(r.pac||[]).map(pnorm);S.mailing=(r.mailing||[]).map(mnorm);S.devis=(r.devis||[]).map(dvnorm);S.reunions=(r.reunions||[]).map(rsnorm);S.liens=(r.liens||[]).map(lnorm);S.swot=(r.swot||[]).map(swnorm);S.settings=Object.assign({objectif:8},r.settings||{});bump()}
 async function loadState(){
   let idbOK=true,st;
   try{st=await appGet("state")}catch(e){idbOK=false}

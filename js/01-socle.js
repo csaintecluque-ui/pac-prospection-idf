@@ -44,8 +44,8 @@ function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTi
 /* ================= V3 · État, modèle Comptes / Contacts / Actions, migration ================= */
 const nh=x=>String(x==null?"":x).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
 const now=()=>new Date().toISOString();
-const S={open:new Set(),mode:"wait",cibles:[],comptes:[],contacts:[],actions:[],plans:[],pac:[],mailing:[],devis:[],reunions:[],liens:[],settings:{objectif:8},writable:true,view:"actives",tab:"tdb",kid:"",db:null,downloads:null,ver:0};
-const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.46";
+const S={open:new Set(),mode:"wait",cibles:[],comptes:[],contacts:[],actions:[],plans:[],pac:[],mailing:[],devis:[],reunions:[],liens:[],swot:[],settings:{objectif:8},writable:true,view:"actives",tab:"tdb",kid:"",db:null,downloads:null,ver:0};
+const LS_KEY="pac-idf-v1",BK_KEY="pac-idf-copie-v2",SCHEMA=3,VERSION="V3.47";
 let STORE="ls"; /* "idb" dès que les données sont dans la base du navigateur */
 const IN_FRAME=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 const TYPE_RANK={"Client existant":3,"Prescripteur":2,"Prospect":1};
@@ -80,6 +80,15 @@ const rsblank=()=>({id:"",creeLe:"",majLe:"",type:"cafe",statut:"fait",date:"",h
 const lnorm=x=>Object.assign({id:"",owner:"",ownerId:"",nom:"",type:"",taille:0,modifLe:"",ajouteLe:""},x||{});
 const isRs=x=>!!x&&Array.isArray(x.affaires)&&RTYPES.some(t=>t[0]===x.type);
 const rsnorm=x=>{const o=Object.assign(rsblank(),x||{});if(!RTYPES.some(t=>t[0]===o.type))o.type="interne";if(!["afaire","fait","annule"].includes(o.statut))o.statut="fait";o.affaires=(Array.isArray(o.affaires)?o.affaires:[]).map(rsAff);return o};
+/* Analyses SWOT (24) : forces et faiblesses (interne), opportunités et menaces (externe), sur l'activité, un compte, un secteur ou une campagne ;
+   axes stratégiques croisés (S×O, W×O, S×T, W×T), chacun pouvant devenir une ligne du PAC (pacId). src : repère chiffré d'origine */
+const SWQ=[["s","Forces"],["w","Faiblesses"],["o","Opportunités"],["t","Menaces"]];
+const SWX=[["so","Offensive"],["wo","Réorientation"],["st","Défensive"],["wt","Repli"]];
+const SWPORT=[["activite","Mon activité"],["compte","Un compte"],["secteur","Un secteur"],["campagne","Une campagne"],["libre","Autre sujet"]];
+const swItem=x=>{const o=Object.assign({id:"",q:"s",txt:"",imp:2,src:""},x||{});if(!SWQ.some(q=>q[0]===o.q))o.q="s";o.imp=[1,2,3].includes(+o.imp)?+o.imp:2;o.txt=String(o.txt||"");if(!o.id)o.id=uid();return o};
+const swAxe=x=>{const o=Object.assign({id:"",st:"so",txt:"",pacId:""},x||{});if(!SWX.some(s=>s[0]===o.st))o.st="so";o.txt=String(o.txt||"");if(!o.id)o.id=uid();return o};
+const swnorm=x=>{const o=Object.assign({id:"",titre:"",portee:"activite",compteId:"",secteur:"",campagne:"",periode:"",notes:"",items:[],axes:[],creeLe:"",majLe:""},x||{});
+  if(!SWPORT.some(p=>p[0]===o.portee))o.portee="activite";o.items=(Array.isArray(o.items)?o.items:[]).map(swItem);o.axes=(Array.isArray(o.axes)?o.axes:[]).map(swAxe);return o};
 
 /* Index recalculés à chaque modification */
 let IXC=null,IXV=-1;
@@ -210,7 +219,7 @@ function repairLinks(){
 
 /* ---------- Persistance (navigateur) ---------- */
 function setSync(mode,txt){S.mode=mode;const a=$("#sync"),b=$("#syncTxt");if(a)a.dataset.s=mode;if(b)b.textContent=txt}
-const snapshot=()=>({schema:SCHEMA,cibles:S.cibles,comptes:S.comptes,contacts:S.contacts,actions:S.actions,plans:S.plans,pac:S.pac,mailing:S.mailing,devis:S.devis,reunions:S.reunions,liens:S.liens,settings:S.settings});
+const snapshot=()=>({schema:SCHEMA,cibles:S.cibles,comptes:S.comptes,contacts:S.contacts,actions:S.actions,plans:S.plans,pac:S.pac,mailing:S.mailing,devis:S.devis,reunions:S.reunions,liens:S.liens,swot:S.swot,settings:S.settings});
 let saveWarned=false;
 function lsSave(){bump();
   if(STORE==="idb"){idbQueue();return true}
@@ -241,7 +250,7 @@ function lsLoad(){
   if(r&&r.storage==="idb"){ensurePlans();return {lost:true}}
   if(r&&r.schema===SCHEMA){
     S.cibles=(r.cibles||[]).map(norm);S.comptes=(r.comptes||[]).map(knorm);S.contacts=(r.contacts||[]).map(ctnorm);S.actions=(r.actions||[]).map(anorm);
-    S.plans=Array.isArray(r.plans)?r.plans:[];S.pac=(r.pac||[]).map(pnorm);S.mailing=(r.mailing||[]).map(mnorm);S.devis=(r.devis||[]).map(dvnorm);S.reunions=(r.reunions||[]).map(rsnorm);S.liens=(r.liens||[]).map(lnorm);S.settings=Object.assign({objectif:8},r.settings||{});
+    S.plans=Array.isArray(r.plans)?r.plans:[];S.pac=(r.pac||[]).map(pnorm);S.mailing=(r.mailing||[]).map(mnorm);S.devis=(r.devis||[]).map(dvnorm);S.reunions=(r.reunions||[]).map(rsnorm);S.liens=(r.liens||[]).map(lnorm);S.swot=(r.swot||[]).map(swnorm);S.settings=Object.assign({objectif:8},r.settings||{});
     bump();ensurePlans();repairLinks();if(upgrade31())lsSave();return {}}
   /* Données de la V2 : copie de sécurité conservée telle quelle, puis conversion */
   let copie=false;try{if(!localStorage.getItem(BK_KEY))localStorage.setItem(BK_KEY,raw);copie=true}catch(e){}
